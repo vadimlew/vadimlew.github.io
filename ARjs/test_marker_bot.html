@@ -6,7 +6,7 @@
 
   <body style="margin : 0px; overflow: hidden;">
     <a-scene embedded arjs renderer="antialias: true; logarithmicDepthBuffer: true;" vr-mode-ui="enabled: false;">
-      <a-marker type="pattern" url="https://vadimlew.github.io/ARjs/marker/pattern-marker.patt" size="0.06">     
+      <a-marker type="pattern" url="https://vadimlew.github.io/ARjs/marker/pattern-marker.patt">     
         <a-entity          
           scale=".004 .004 .004"
           rotation="90 0 0"
@@ -17,7 +17,7 @@
         <a-entity id="light" light="type: ambient; color: #fff"></a-entity>
         <a-entity id="light" light="type: point; color: #fff" position="-2 5 0"></a-entity>
         <!-- <a-entity id="light" light="type: point; color: #fff" position="1 6 0"></a-entity>  -->
-        <a-box position='0 0 0' material='opacity: 0.75;' color='green'></a-box>
+        <a-box position='0 0 0' material='opacity: 0.75;' color='red'></a-box>
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
