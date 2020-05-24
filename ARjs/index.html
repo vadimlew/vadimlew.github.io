@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DynoAR</title>
+	<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
+    <script type="text/javascript">
+    	window.onload = function() {
+    		var div = document.getElementById('press layer');
+    		var dyno = document.getElementById('dynosaur');
+    		var camera = document.getElementById('camera');
+    		var prevX = 0;
+    		var prevY = 0;
+    		document.addEventListener('click', screenClickHandler);
+	    	function screenClickHandler(e) {
+	    		div.remove();
+	    		dyno.setAttribute("visible", "true");
+	    		var vec = new THREE.Vector3( 0, 0, -200 );
+				vec.applyQuaternion(camera.object3D.quaternion);
+				dyno.object3D.position.copy(vec);	    		
+	    		//document.removeEventListener('click', screenClickHandler); 		
+	    		e.touches[0].clientX
+	    	}
+	    	document.addEventListener('touchstart', touchStartHandler, false);  
+	    	document.addEventListener('touchmove', touchmoveHandler);
+
+	    	function touchStartHandler(e) {
+				prevX = e.touches[0].clientX;
+				prevY = e.touches[0].clientY;
+	    	}
+
+	    	function touchmoveHandler(e) {	    		
+	    		var dx = e.touches[0].clientX - prevX; 
+	    		prevX = e.touches[0].clientX;
+	    		dyno.object3D.rotation.y += dx/100;  
+
+	    		/*var dy = e.touches[0].clientY - prevY; 
+	    		prevY = e.touches[0].clientY; 
+	    		dyno.object3D.position.x -= dy/10;  */
+	    	}
+    	}	
+    	
+    </script>
+</head>
+<body style='margin: 0; overflow: hidden;'>  
+  <div id='press layer' style='position: absolute; top: 50%; left: 50%; color: white; font-family: system-ui; font-size:25pt; transform: translate(-50%, -50%); margin: 0'>press screen</div>
+    <a-scene light="defaultLightsEnabled: false" embedded renderer="antialias: true; logarithmicDepthBuffer: true;" vr-mode-ui="enabled: false;">
+    	<a-entity light="type: ambient; color: #BBB"></a-entity>
+    	<a-entity light="type: directional; color: #FFF; intensity: 0.6" position="0.5 0 1" target="#dynosaur"></a-entity>
+        <a-entity  
+          id="dynosaur"        
+          scale="10 10 10"
+          rotation="0 40 0"
+          position="0 -10 0"
+          gltf-model="./model/raptor/scene.gltf"
+          animation-mixer=""   
+          visible="false"    
+        ></a-entity>
+        <!-- <a-box color="tomato" depth="1" height="1" width="1"></a-box> -->
+        <a-camera id="camera" rotation-reader position="0 0 0" look-controls="touchEnabled: false"></a-camera>
+	</a-scene>
+  
+</body>
+</html>
