@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Получение ключа доступа</title>
+	<script>
+		function onPressGetCode() {			
+			var getCodeURL = 'https://oauth.vk.com/authorize?'
+			+'client_id=' +7514347
+			+'&display=' +'page'
+			+'&redirect_uri=' +'http://vadimlew.github.io/tnt/getUserToken.html'
+			+'&scope=' +'offline,wall,photos,audio,friends,video'
+			+'&response_type=' +'code'
+			+'&v=' +'5.69'
+			+'&state=' +'tnt'
+			window.open(getCodeURL);
+		}
+
+		function checkGetCode() {			
+			var code = getQueryParams('code');	
+			if (code == null) return;		
+			var getTokenURL = 'https://oauth.vk.com/access_token?'
+			+'client_id=' +7514347
+			+'&client_secret=' +'YJYuUBVbiWM0H50nt2JW'			
+			+'&redirect_uri=' +'http://vadimlew.github.io/tnt/getUserToken.html'			
+			+'&code=' + code			
+			window.open(getTokenURL);
+		}
+
+		function getQueryParams(name, url) {
+		    if (!url) url = location.href;
+		    name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+		    var regexS = "[\\?&]"+name+"=([^&#]*)";
+		    var regex = new RegExp( regexS );
+		    var results = regex.exec( url );
+		    return results == null ? null : results[1];
+		}
+	</script>
+</head>
+<body onload="checkGetCode()">
+	<button onclick="onPressGetCode()"> Получить Token </button>	
+</body>
+</html>>
