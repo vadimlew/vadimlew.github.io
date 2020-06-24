@@ -21,7 +21,7 @@
 	top:0;bottom:0;
   }
 </style>
-<script src="libs/createjs-2015.11.26.min.js"></script>
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 <script src="IdleFarm_420x740.js"></script>
 <script>
 var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
@@ -29,7 +29,7 @@ function init() {
 	canvas = document.getElementById("canvas");
 	anim_container = document.getElementById("animation_container");
 	dom_overlay_container = document.getElementById("dom_overlay_container");
-	var comp=AdobeAn.getComposition("CD2EC2FB32104048A4AAA617FC978A35");
+	var comp=AdobeAn.getComposition("AA414CDCC5E11B4C90E6201E6F6F749E");
 	var lib=comp.getLibrary();
 	var loader = new createjs.LoadQueue(false);
 	loader.addEventListener("fileload", function(evt){handleFileLoad(evt,comp)});
@@ -68,8 +68,8 @@ function handleComplete(evt,comp) {
 <!-- write your code here -->
 </head>
 <body onload="init();" style="margin:0px;">
-	<div id="animation_container" style="background-color:rgba(255, 255, 255, 1.00); width:420px; height:740px">
-		<canvas id="canvas" width="420" height="740" style="position: absolute; display: block; background-color:rgba(255, 255, 255, 1.00);"></canvas>
+	<div id="animation_container" style="background-color:rgba(102, 102, 102, 1.00); width:420px; height:740px">
+		<canvas id="canvas" width="420" height="740" style="position: absolute; display: block; background-color:rgba(102, 102, 102, 1.00);"></canvas>
 		<div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:420px; height:740px; position: absolute; left: 0px; top: 0px; display: block;">
 		</div>
 	</div>
