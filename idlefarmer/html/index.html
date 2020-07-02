@@ -5776,6 +5776,7 @@ var createjs, AdobeAn;
 <script>
 var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
 window.onload = function() {	
+	console.log('test log', mraid.getState());
 	if (mraid.getState() === ‘loading’) {
 		mraid.addEventListener(‘ready’, onSdkReady);
 	} else {
@@ -5783,8 +5784,8 @@ window.onload = function() {
 	}
 
 	function onSdkReady() {
-		mraid.removeEventListener(‘ready’, onSdkReady);
 		init();
+		mraid.removeEventListener(‘ready’, onSdkReady);		
 	}	
 }
 function init() {
