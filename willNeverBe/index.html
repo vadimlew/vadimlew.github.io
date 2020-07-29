@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>    
+     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.0.3/pixi.min.js"></script>    -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.0/pixi.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/pixi-filters@2.6.1/dist/pixi-filters.js"></script>
+     <script src="js/libs/utills.js"></script>
+     <script src="js/libs/js.js"></script>
+     <script src="js/game/Main.js"></script>
+     <script>
+        var game = new Game(window.innerWidth, window.innerHeight);
+       
+        function init() {          
+           game.init(); 
+           //js.include('unittests.TestManager');
+           //TestManager();
+        }          
+     </script>  
+</head>
+<body onload='init()'>
+    <div id="game-div"></div>
+</body>
+</html>
