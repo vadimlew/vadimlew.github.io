@@ -29,21 +29,9 @@ if (!window.requestAnimationFrame) {
     })()
 }
 
-function init() {
-	console.log(isPalindrome('Do geese >*see God?'));
+function init() {	
 	initCanvas();
 	initAssets();
-}
-
-function isPalindrome(str) {
-    str = str.replace(/\s+|[1234567890.,?<>*-+=!]+/g, '');    
-    var len = parseInt(str.length/2);
-    for (let i=0; i < len; i++) {
-        var l1 = str[i].toUpperCase();       
-        var l2 = str[str.length-i-1].toUpperCase();
-        if (l1 != l2) return false;
-    }
-    return true;
 }
 
 function initCanvas() {
@@ -320,7 +308,3 @@ function drawFlovers()
 	
 	context.shadowColor = 'transparent';
 }
-
-
-
-
