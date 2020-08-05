@@ -265,7 +265,7 @@ Factory.module.Enemy = function (factory, entityManager) {
 					bulletProps.vx = bulletSpeed*cos;
 					bulletProps.vy = bulletSpeed*sin;				
 
-					var bullet = game.factory.weapon.bullet(bulletProps);			
+					//var bullet = game.factory.weapon.bullet(bulletProps);			
 			}
 
 			this.exit = function() {
