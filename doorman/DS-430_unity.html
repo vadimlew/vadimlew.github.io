@@ -548,7 +548,11 @@
             let firstclick = false;
             let firstmove = true;            
 
-            var music;
+	        var music = new Howl({
+				src: [music_src],
+				autoplay: false,
+				loop: true
+			});
 
             stage.addEventListener('click', () => {                
                 ctw.get(button.cont, {useTicks: true, override: true})
@@ -567,12 +571,31 @@
                     dtimer = 0;
                 
                 if(!firstclick) {
-                    musicReady = true;
-                    music = new Howl({
-				        src: [music_src],
-				        autoplay: true,
-				        loop: true
-				    });
+                	var isMusicPlay = false;
+                	if (mraid.getState() === 'loading') {
+						mraid.addEventListener('ready', onSdkReady);
+					} else {
+						onSdkReady();
+					}		
+
+					function onSdkReady() {						
+						mraid.addEventListener('viewableChange', viewableChangeHandler);
+						if (mraid.isViewable()) {
+							isMusicPlay = true;
+							music.play();
+						}
+					}  
+
+					function viewableChangeHandler(viewable) {			
+						if(!isMusicPlay && viewable) {
+							isMusicPlay = true;
+							music.play();
+						} 
+						if(isMusicPlay && !viewable) {
+							isMusicPlay = false;
+							music.pause();
+						}
+					}                             
                     firstclick = true;
                 }
             })
@@ -876,28 +899,11 @@
             min = Math.ceil(min);
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min + 1)) + min; //Максимум и минимум включаются
-        }       
+        }    
       
-        let musicReady = false; 
+        
 
-       	// Wait for the SDK to become ready
-		if (mraid.getState() === 'loading') {
-			mraid.addEventListener('ready', onSdkReady);
-		} else {
-			onSdkReady();
-		}		
-
-		function onSdkReady() {
-			mraid.addEventListener('viewableChange', viewableChangeHandler);			
-		}  
-
-		function viewableChangeHandler(viewable) {			
-			if(viewable) {
-				music.play();
-			} else {
-				music.pause();
-			}
-		}          
+       	// Wait for the SDK to become ready	
     </script>
 </head>
 
