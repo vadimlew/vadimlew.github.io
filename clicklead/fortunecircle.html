@@ -100,7 +100,7 @@
 			gsap.to(ring1, {y:-20, duration:3, delay:1, yoyo:true, repeat:-1, ease:'quad.inOut'});
 			gsap.to(ring2, {y:-20, duration:3, yoyo:true, repeat:-1, ease:'quad.inOut'});
 
-			var blast = createAnimSprite('blast', {row:4,col:4,w:512,h:512}, {anchor:0.5, loop:false, visible:false, add:chest1});
+			var blast = createAnimSprite('blast', {row:4,col:4,w:512,h:512}, {anchor:0.5, loop:false, visible:false, add:chest_cnt, animationSpeed:0.75});
 
 			function shake(sprite, x=0, y=0, duration=0.25+0.25*Math.random()) {
 				var rand1 = Math.random();
