@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Turn Ball</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.0/gsap.min.js" integrity="sha512-1dalHDkG9EtcOmCnoCjiwQ/HEB5SDNqw8d4G2MKoNwjiwMNeBAkudsBCmSlMnXdsH8Bm0mOd3tl/6nL5y0bMaQ==" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+(function() {
+	'use strict'
+	window.onload = function init() {		
+		//PIXI.settings.TARGET_FPMS = 0.025;
+		const app_width = 640;
+		const app_height = 1080;
+		const app = new PIXI.Application({
+			width: app_width, 
+			height: app_height, 
+			backgroundColor: 0x222222,			
+			antialias: true
+			//resolution: window.devicePixelRatio || 1
+		});		
+		
+		document.body.appendChild(app.view);
+		app.view.style.position = 'absolute';
+		app.view.style.display = 'block';
+		app.view.style.top = "50%";
+		app.view.style.left = "50%";
+		app.view.style.transform = "translate(-50%, -50%)";
+
+		var brightness = new PIXI.filters.ColorMatrixFilter();
+		brightness.saturate(1);
+
+		var stage = app.stage;
+		stage.interactive = true;
+		
+		var game = {
+			cell: 50,			
+			isStart: false,
+			isClick: false,
+			players: {blue:[], red:[]}
+		}		
+
+		function drawTable(col,row) {
+			var d = game.cell;
+			var shape = new PIXI.Graphics();
+			shape.lineStyle(1, 0xeeeeee);
+
+			shape.beginFill(0x333333);
+			shape.drawRect(0,0,col*d,row*d);
+			shape.endFill();
+
+			for (let i=0; i<=col; i++) {				
+				shape.moveTo(i*d, 0);
+				shape.lineTo(i*d, row*d);
+			}
+
+			for (let i=0; i<=row; i++) {
+				shape.moveTo(0, i*d);
+				shape.lineTo(col*d, i*d);
+			}
+
+			shape.beginFill(0xeeeeee);
+			shape.drawRect(0.5*col*d-1.5*d, 0, 3*d, -d);
+			shape.drawRect(0.5*col*d-1.5*d, row*d+d, 3*d, -d);
+			shape.endFill();
+
+			stage.addChild(shape);
+			return shape;
+		}		
+			
+		function createPlayerShape(x,y,color=0x00aa00) {
+			var shape = new PIXI.Graphics();
+			shape.lineStyle(3, 0x333333);
+			shape.beginFill(color);
+			shape.drawCircle(0,0,20);
+			stage.addChild(shape);
+			shape.position.set(table.x+x,table.y+y);			
+			return shape;
+		}
+
+		function createBall(x,y) {
+			var shape = new PIXI.Graphics();
+			shape.lineStyle(2, 0);
+			shape.beginFill(0xffffff);
+			shape.drawCircle(0,0,12);
+			shape.beginFill(0);
+			//shape.drawPolygon([-2.5,-2.5, 2.5,-2.5, 5.5,2.5, 0.5,6.5, -4.5,2.5]);			
+			shape.angle = 45;
+			stage.addChild(shape);
+			shape.position.set(table.x+x,table.y+y);			
+			return shape;
+		}
+
+		function makeInteractive(sprite) {			
+			sprite.interactive = true;
+			sprite.on('click', clickHandler);
+			sprite.on('tap', clickHandler);
+
+			function clickHandler() {
+				if (game.isClick) return;
+				game.isClick = true;		
+				sprite.filters = [brightness];
+				table.on('click', tableClickHandler);
+				table.on('tap', tableClickHandler);
+			}
+
+			function tableClickHandler(e) {				
+				game.isClick = false;
+				sprite.filters = null;
+				table.off('click', tableClickHandler);
+				table.off('tap', tableClickHandler);	
+				var dx = e.data.global.x/stage.scale.x - table.x;
+				var dy = e.data.global.y/stage.scale.y - table.y;				
+				var x = table.x + game.cell/2 + dx - dx%game.cell;
+				var y = table.y + game.cell/2 + dy - dy%game.cell;
+				gsap.to(sprite, {x,y,duration:0.5});
+			}			 
+		}
+
+		function startPlace() {			
+			var count = 0;
+			table.on('click', tableClickHandler);
+			table.on('tap', tableClickHandler);
+
+			function tableClickHandler(e) {	
+				var isBlue = count < game.players.blue.length;
+				var player = isBlue? game.players.blue[count] : game.players.red[count-game.players.blue.length];
+
+				var dx = e.data.global.x/stage.scale.x - table.x;
+				var dy = e.data.global.y/stage.scale.y - table.y;
+				if (isBlue && dy < table.getBounds().height/2) return;				
+				if (!isBlue && dy > table.getBounds().height/2) return;				
+				var x = table.x + game.cell/2 + dx - dx%game.cell;
+				var y = table.y + game.cell/2 + dy - dy%game.cell;
+				gsap.to(player, {x,y,duration:0.5});
+
+				count++;				
+				if (count > game.players.blue.length + game.players.red.length) {
+					table.off('click', tableClickHandler);
+					table.off('tap', tableClickHandler);	
+				}
+			}			
+		}
+
+		var table = drawTable(11,11);
+		table.interactive = true;
+		table.position.set(45,200);
+
+		for (let i=2; i<=9; i++)
+			game.players.blue.push( createPlayerShape(game.cell*i,game.cell*13,0x0055dd) );
+
+		for (let i=2; i<=9; i++)
+			game.players.red.push( createPlayerShape(game.cell*i,game.cell*-2,0xdd0044) );
+		
+		createBall(275,275);
+
+		startPlace();
+		
+		function update() {
+			requestAnimationFrame(update);
+		}
+		update();
+
+		startResize();
+		/**************************************
+		* LEVjs
+		**************************************/
+		
+		function createSprite(texture_name, transform) {
+			if (arguments.length == 1 && typeof(arguments[0]) == 'object') {
+				transform = arguments[0];
+				var sprite = new PIXI.Container();
+			} else {
+				var texture = app.loader.resources[texture_name].texture;
+				var sprite = new PIXI.Sprite(texture);
+			}
+			if (transform) setTransform(sprite, transform);
+			return sprite;
+		}	
+
+		function createAnimSprite(texture_name, sheet_data, transform) {
+			var sprite;			
+			var texture = app.loader.resources[texture_name].texture.baseTexture;			
+			
+			if (sheet_data.hasOwnProperty('row')) {
+				var col = sheet_data.col;
+				var row = sheet_data.row;				
+				var w = texture.width/col;
+				var h = texture.height/row;
+				var len = col*row;
+				sheet_data = {frames:{}, animations:{anim:[]}, meta:{scale:1}};
+
+				for (let i=0; i < len; i++) {
+					let name = texture_name + '_frame' + i;				
+					let x = w*(i%col);
+					let y = h*parseInt(i/col);
+					sheet_data.frames[name] = {frame:{x,y,w,h}, sourceSize:{w,h}};
+					sheet_data.animations.anim.push(name);
+				}
+			}
+			
+			var sprite_sheet = new PIXI.Spritesheet(texture, sheet_data);
+			sprite_sheet.parse(()=>{sprite = new PIXI.AnimatedSprite(sprite_sheet.animations['anim']);});
+			if (transform) setTransform(sprite, transform);
+			
+			sprite.clone = function() {
+				var clone = new PIXI.AnimatedSprite(sprite_sheet.animations['anim']);
+				if (transform.autoplay) clone.play();
+				if (transform) setTransform(clone, transform);
+				return clone;
+			}
+
+			if (transform.autoplay) sprite.play();
+
+			return sprite;
+		}
+
+		function createMesh(texture, row, col, transform, debug=false) {
+			if (typeof(texture) == 'string') texture = app.loader.resources[texture].texture;			
+		 	var mesh = new PIXI.SimplePlane(texture, row, col);
+		 	if (transform) setTransform(mesh, transform);		 	
+		 	mesh.calculateVertices();
+		 	mesh.calculateUvs();
+
+		 	if (debug) {				
+				var marks = new PIXI.Graphics();				
+		 		stage.addChild(marks);
+
+		 		app.ticker.add(() => {
+				    marks.clear();
+				    marks.beginFill(0x00ffff);
+				    for (let i=0; i<mesh.vertexData.length; i+=2) {
+				    	var x = mesh.vertexData[i]/stage.scale.x;
+				    	var y = mesh.vertexData[i+1]/stage.scale.y;
+						marks.drawRect(x-4, y-0.5, 9, 2);
+						marks.drawRect(x-0.5, y-4, 2, 9);
+				 	}
+				 	marks.endFill();
+				});
+		 	}
+
+		 	return mesh;
+		}
+
+		function loopAnimateMesh(mesh, data, timeOrTween) {
+			var points = []; 
+			var displacies = []; 
+
+			for (var point of data.split(',')) {
+				var parse = point.split('/');
+				var ids = parse[0];				
+				var dx = parse[1]? Number(parse[1].match(/-*\d+/)[0]) : 0;
+				var dy = parse[2]? Number(parse[2].match(/-*\d+/)[0]) : 0;
+
+				if (ids.includes('all')) {
+					var len = mesh.vertexData.length/2;
+					points.push(...Array(len).fill().map((el, i)=>{return i}));
+					displacies.push(...Array(len).fill([dx,dy]));
+				} else if (ids.includes('_')) {
+					ids = ids.split('_').map(Number);	
+					var len = ids[1]-ids[0]+1;					
+			        points.push(...Array(len).fill().map((el,i)=>{return ids[0]+i}));
+			        displacies.push(...Array(len).fill([dx,dy]));
+				} else if (ids.includes(' ')) {
+					ids = ids.match(/\d+/g).map(Number);
+					points.push(...ids);
+					displacies.push(...Array(ids.length).fill([dx,dy]));					
+				} else {					
+					points.push(Number(ids));
+					displacies.push([dx,dy]);					
+				}
+			}
+
+			var prop = {m:0};
+			var prevD = 0;			
+			var tween_prop = {m:1, repeat:-1, yoyo:true, ease:'power1.inOut', onUpdate};
+			if (typeof(timeOrTween) == 'object') {
+				Object.assign(tween_prop, timeOrTween);
+			} else {
+				tween_prop.duration = timeOrTween;
+			}
+			gsap.to(prop, tween_prop);
+			function onUpdate() {
+				var n = prop.m - prevD;
+				prevD = prop.m;
+				for (let i = 0; i < points.length; i++) {
+					var ix = points[i]*2;
+					var iy = points[i]*2+1;
+					mesh.vertexData[ix] += displacies[i][0]*n;
+					mesh.vertexData[iy] += displacies[i][1]*n;
+				}				
+			}						
+		}		
+
+		function setTransform(sprite, transform) {
+			for (var prop in transform) {
+				if (sprite[prop] === void 0) continue;
+				if (typeof transform[prop] == 'number' || typeof transform[prop] == 'boolean') sprite[prop] = transform[prop];
+				if (sprite[prop] instanceof PIXI.ObservablePoint) {
+					if (typeof transform[prop] === 'number') sprite[prop].set(transform[prop]);
+					else if (transform[prop] instanceof Array) sprite[prop].set(...transform[prop]);						
+					else if (transform[prop] instanceof (PIXI.ObservablePoint, PIXI.Point)) sprite[prop].copyFrom(transform[prop]);
+				}
+			}
+			if (transform.add) transform.add.addChild(sprite);
+		}
+
+		function getGlobalPos(sprite) {
+			var p = {x:0, y:0};
+			while(sprite.parent) {	
+				var sx = 1//sprite.parent.scale.x;	
+				var sy = 1//sprite.parent.scale.y;	
+				var cos = Math.cos(sprite.parent.rotation);
+				var sin = Math.sin(sprite.parent.rotation);
+				p.x += sprite.x*sx*cos - sprite.y*sy*sin;
+				p.y += sprite.x*sx*sin + sprite.y*sy*cos;
+				sprite = sprite.parent;
+			}
+			return p;
+		}
+
+		function startResize(resObj) {
+			window.addEventListener('resize', resizeHandler);
+			resizeHandler();
+			function resizeHandler() {
+				var iw = window.innerWidth, ih=window.innerHeight;
+				if (iw < ih) {	           
+		        	var w = app_width, h = app_height; 
+		        	setOrientation('portrait');   	        
+		        } else {
+		        	var h = app_width, w = app_height;
+		        	setOrientation('landscape');   
+		        }
+				var xRatio=iw/w, yRatio=ih/h, sRatio=1;
+				sRatio = Math.min(xRatio, yRatio);				
+				stage.scale.set(sRatio);
+				app.renderer.resize(w*sRatio,h*sRatio);
+			}
+
+			function setOrientation(orient) {
+				if (!resObj) return;
+				for (var item of resObj[orient]) {					
+					item[0].position.set(item[1],item[2]);
+					if (item[3]) item[0].scale.set(item[3]);
+				}
+			}		
+
+			return resObj;
+		}	
+
+		function makeDraggable(sprite) {
+			var dx, dy;
+			sprite.interactive = true;
+			sprite.on('mousedown', mousedown);			
+			sprite.on('mouseup', mouseup);
+			sprite.on('mouseupoutside', mouseup);
+
+			function mousedown(e) {
+				dx = sprite.x - e.data.global.x;
+				dy = sprite.y - e.data.global.y;
+				//console.log(e);
+				sprite.on('mousemove', mousemove);
+			};
+			function mousemove(e) {
+				sprite.x = e.data.global.x + dx;
+				sprite.y = e.data.global.y + dy;
+			};
+			function mouseup() {
+				sprite.off('mousemove', mousemove);
+				//console.log('x:' + sprite.x + ', y:' + sprite.y);
+			};
+		}
+	}
+})()
+</script>
+</head>
+<body style="margin:0px;">	
+</body>
+</html>
