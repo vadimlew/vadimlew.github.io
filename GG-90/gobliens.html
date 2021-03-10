@@ -133,6 +133,7 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 								game.main.setChildIndex(shine, 1);
 								goblins.forEach(el => {lev.resize.remove(el); el.destroy()});
 								merge.visible = false;
+								swoosh_sound.play();
 							}});
 							goblins.forEach(el => el.interactive = false);
 							return;
@@ -216,6 +217,8 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 				build.on('tap', buildClickHandler);				
 
 				function buildClickHandler() {
+					build_sound.play();
+
 					build.destroy();
 					for (var coin of coins) {
 						gsap.getTweensOf(coin).forEach(el=>el.kill());						
@@ -239,23 +242,23 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 					chest3.close = lev.createSprite('woodenChestClosed', {anchor:[0.5,1], visible:false, add:chest3});
 					chest3.open = lev.createSprite('woodenChestOpen', {anchor:[0.5,1], visible:false, add:chest3});					
 
-					gsap.from(chest1.close, {x:250, y:180, onStart:()=>{chest1.close.visible=true}, delay:0.5, ease:'cubic.out', duration:0.5});
-					gsap.from(chest2.close, {x:-270, y:-150, onStart:()=>{chest2.close.visible=true}, delay:0.5, ease:'cubic.out', duration:0.5});
-					gsap.from(chest3.close, {x:200, y:-200, onStart:()=>{chest3.close.visible=true}, delay:0.5, ease:'cubic.out', duration:0.5});
+					gsap.from(chest1.close, {x:250, y:180, onStart:()=>{chest1.close.visible=true}, delay:0.5, ease:'cubic.out', duration:0.4});
+					gsap.from(chest2.close, {x:-270, y:-150, onStart:()=>{chest2.close.visible=true}, delay:0.5, ease:'cubic.out', duration:0.4});
+					gsap.from(chest3.close, {x:200, y:-200, onStart:()=>{chest3.close.visible=true}, delay:0.5, ease:'cubic.out', duration:0.4});
 
-					gsap.to(chest1.close.scale, {x:1.2, y:0.7, delay:0.7, ease:'cubic.out', duration:0.5});
-					gsap.to(chest2.close.scale, {x:1.2, y:0.7, delay:0.7, ease:'cubic.out', duration:0.5});
-					gsap.to(chest3.close.scale, {x:1.2, y:0.7, delay:0.7, ease:'cubic.out', duration:0.5});
+					gsap.to(chest1.close.scale, {x:1.2, y:0.7, delay:0.6, ease:'cubic.out', duration:0.5});
+					gsap.to(chest2.close.scale, {x:1.2, y:0.7, delay:0.6, ease:'cubic.out', duration:0.5});
+					gsap.to(chest3.close.scale, {x:1.2, y:0.7, delay:0.6, ease:'cubic.out', duration:0.5});
 
-					gsap.to(chest1.close.scale, {x:1, y:1, delay:0.9, ease:'cubic.in', duration:0.2, onComplete:()=>{
+					gsap.to(chest1.close.scale, {x:1, y:1, delay:1, ease:'cubic.in', duration:0.2, onComplete:()=>{
 						chest1.close.visible = false;
 						chest1.open.visible = true;
 					}});
-					gsap.to(chest2.close.scale, {x:1, y:1, delay:0.9, ease:'cubic.in', duration:0.2, onComplete:()=>{
+					gsap.to(chest2.close.scale, {x:1, y:1, delay:1, ease:'cubic.in', duration:0.2, onComplete:()=>{
 						chest2.close.visible = false;
 						chest2.open.visible = true;
 					}});
-					gsap.to(chest3.close.scale, {x:1, y:1, delay:0.9, ease:'cubic.in', duration:0.2, onComplete:()=>{
+					gsap.to(chest3.close.scale, {x:1, y:1, delay:1, ease:'cubic.in', duration:0.2, onComplete:()=>{
 						chest3.close.visible = false;
 						chest3.open.visible = true;
 					}});
@@ -272,10 +275,10 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 						jack4.stop();
 					}
 
-					gsap.from(jack1, {x:0, y:0, delay:0.75, ease:'cubic.out', duration:0.75, onStart:()=>{jack1.visible=true}});
-					gsap.from(jack2, {x:0, y:0, delay:0.75, ease:'cubic.out', duration:0.75, onStart:()=>{jack2.visible=true}});
-					gsap.from(jack3, {x:0, y:0, delay:0.75, ease:'cubic.out', duration:0.75, onStart:()=>{jack3.visible=true}});
-					gsap.from(jack4, {x:0, y:0, delay:0.75, ease:'cubic.out', duration:0.75, onStart:()=>{jack4.visible=true}});
+					gsap.from(jack1, {x:0, y:0, delay:0.6, ease:'cubic.out', duration:0.6, onStart:()=>{jack1.visible=true}});
+					gsap.from(jack2, {x:0, y:0, delay:0.6, ease:'cubic.out', duration:0.6, onStart:()=>{jack2.visible=true}});
+					gsap.from(jack3, {x:0, y:0, delay:0.6, ease:'cubic.out', duration:0.6, onStart:()=>{jack3.visible=true}});
+					gsap.from(jack4, {x:0, y:0, delay:0.6, ease:'cubic.out', duration:0.6, onStart:()=>{jack4.visible=true}});
 
 					lev.resize.add(chest1, [-175,-220], [-320,-120]);
 					lev.resize.add(chest2, [250,310], [320,80]);
@@ -285,7 +288,7 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 					lev.resize.add(jack3, [40,370,-1,1], [350,220,-1,1]);
 					lev.resize.add(jack4, [-100,510], [0,300]);
 
-					gsap.delayedCall(1.2, ()=>{
+					gsap.delayedCall(1, ()=>{
 						addCoinEmmit('coin', chest1, money, 4, addMoney);
 						addCoinEmmit('coin', chest2, money, 4, addMoney);
 						addCoinEmmit('coin', chest3, money, 4, addMoney);
@@ -436,6 +439,24 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 			function adClickHandler() {
 				
 			}
+
+			var build_sound = new Howl({
+			    src: ['assets/build2.mp3'],
+			    autoplay: false,
+			    loop: false
+			});
+
+			var swoosh_sound = new Howl({
+			    src: ['assets/swoosh.mp3'],
+			    autoplay: false,
+			    loop: false
+			});
+
+			var music = new Howl({
+			    src: ['assets/music.mp3'],
+			    autoplay: true,
+			    loop: true
+			});
 		}	
 	}
 })()
