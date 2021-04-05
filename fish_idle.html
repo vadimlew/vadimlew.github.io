@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fish Idle</title>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+<script type="text/javascript">
+function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor:0,antialias:!0}),r=a.stage;function n(e,t){for(var a in t)void 0!==e[a]&&("number"!=typeof t[a]&&"boolean"!=typeof t[a]||(e[a]=t[a]),e[a]instanceof PIXI.ObservablePoint&&("number"==typeof t[a]?e[a].set(t[a]):t[a]instanceof Array?e[a].set(...t[a]):t[a]instanceof(PIXI.ObservablePoint,PIXI.Point)&&e[a].copyFrom(t[a])));t.add&&t.add.addChild(e)}this.app=a,this.createSprite=function(e,t){if(1==arguments.length&&"object"==typeof arguments[0]){t=arguments[0];var r=new PIXI.Container}else if(e instanceof PIXI.Texture)var r=new PIXI.Sprite(e);else var i=a.loader.resources[e].texture,r=new PIXI.Sprite(i);t&&n(r,t);return r},this.createAnimSprite=function(e,t,r){var i,o=a.loader.resources[e].texture.baseTexture;if(t.hasOwnProperty("row")){var s=t.col,l=t.row,p=o.width/s,u=o.height/l,c=s*l;t={frames:{},animations:{anim:[]},meta:{scale:1}};for(let a=0;a<c;a++){let r=e+"_frame"+a,n=p*(a%s),i=u*parseInt(a/s);t.frames[r]={frame:{x:n,y:i,w:p,h:u},sourceSize:{w:p,h:u}},t.animations.anim.push(r)}}var f=new PIXI.Spritesheet(o,t);f.parse(()=>{i=new PIXI.AnimatedSprite(f.animations.anim)}),r&&n(i,r);i.clone=function(){var e=new PIXI.AnimatedSprite(f.animations.anim);return r.autoplay&&e.play(),r&&n(e,r),e},r.autoplay&&i.play();return i},this.createAnimSpriteFromJSON=function(e,t,r){var i=a.loader.resources[e].spritesheet,o=new PIXI.AnimatedSprite(i.animations[t]);r&&n(o,r);r.autoplay&&o.play();return o},this.createMesh=function(e,t,i,o,s=!1){"string"==typeof e&&(e=a.loader.resources[e].texture);var l=new PIXI.SimplePlane(e,t,i);o&&n(l,o);if(l.calculateVertices(),l.calculateUvs(),s){var p=new PIXI.Graphics;r.addChild(p),a.ticker.add(()=>{p.clear(),p.beginFill(65535);for(let a=0;a<l.vertexData.length;a+=2){var e=l.vertexData[a]/r.scale.x,t=l.vertexData[a+1]/r.scale.y;p.drawRect(e-4,t-.5,9,2),p.drawRect(e-.5,t-4,2,9)}p.endFill()})}return l},this.loopAnimateMesh=function(e,t,a){var r=[],n=[];for(var i of t.split(",")){var o=i.split("/"),s=o[0],l=o[1]?Number(o[1].match(/-*\d+/)[0]):0,p=o[2]?Number(o[2].match(/-*\d+/)[0]):0;if(s.includes("all")){var u=e.vertexData.length/2;r.push(...Array(u).fill().map((e,t)=>t)),n.push(...Array(u).fill([l,p]))}else if(s.includes("_")){var u=(s=s.split("_").map(Number))[1]-s[0]+1;r.push(...Array(u).fill().map((e,t)=>s[0]+t)),n.push(...Array(u).fill([l,p]))}else s.includes(" ")?(s=s.match(/\d+/g).map(Number),r.push(...s),n.push(...Array(s.length).fill([l,p]))):(r.push(Number(s)),n.push([l,p]))}var c={m:0},f=0,h={m:1,repeat:-1,yoyo:!0,ease:"power1.inOut",onUpdate:function(){var t=c.m-f;f=c.m;for(let o=0;o<r.length;o++){var a=2*r[o],i=2*r[o]+1;e.vertexData[a]+=n[o][0]*t,e.vertexData[i]+=n[o][1]*t}}};"object"==typeof a?Object.assign(h,a):h.duration=a;gsap.to(c,h)},this.setTransform=n,this.getGlobalPos=function(e){var t={x:0,y:0};for(;e.parent;){var a=Math.cos(e.parent.rotation),r=Math.sin(e.parent.rotation);t.x+=1*e.x*a-1*e.y*r,t.y+=1*e.x*r+1*e.y*a,e=e.parent}return t},this.makeDraggable=function(e){var t,a;function r(r){e.x=r.data.global.x+t,e.y=r.data.global.y+a}function n(){e.off("mousemove",r)}e.interactive=!0,e.on("mousedown",function(n){t=e.x-n.data.global.x,a=e.y-n.data.global.y,e.on("mousemove",r)}),e.on("mouseup",n),e.on("mouseupoutside",n)},this.createShapeRect=function(e,t,a){var r=new PIXI.Graphics;r.beginFill(e),r.drawRect(...t),a&&n(r,a);return r},this.resize=new function(){var n=!1,i={portrait:[],landscape:[]};this.data=i;function o(e){if(i[e])for(var t of i[e])t[0].position.set(t[1],t[2]),t[3]&&t[0].scale.set(t[3],t[4]||t[3])}function s(){var n=window.innerWidth,i=window.innerHeight;if(n<i){var s=e,l=t;o("portrait")}else{var l=e,s=t;o("landscape")}var p=n/s,u=i/l,c=1;c=Math.min(p,u),r.scale.set(c),a.renderer.resize(s*c,l*c)}this.start=function(e){n||(n=!0,a.view.style.position="absolute",a.view.style.display="block",a.view.style.top="50%",a.view.style.left="50%",a.view.style.transform="translate(-50%, -50%)",window.addEventListener("resize",s),e?this.add(e):s())},this.add=function(){if(1==arguments.length){var e=arguments[0];i.portrait.push(...e.portrait),i.landscape.push(...e.landscape)}if(3==arguments.length){var t=arguments[0],a=arguments[1],r=arguments[2];i.portrait.push([t,...a]),i.landscape.push([t,...r])}s()},this.remove=function(obj){var portrait=i.portrait.find(el=>el[0]==obj);var landscape=i.landscape.find(el=>el[0]==obj);i.portrait.splice(i.portrait.indexOf(portrait),1);i.landscape.splice(i.landscape.indexOf(landscape),1);}},this.mouse=a.renderer.plugins.interaction.mouse}
+</script>
+
+<script type="text/javascript">
+(function() {
+	'use strict'
+	window.onload = async function init() {
+		await document.fonts.ready;
+
+		var lev = new LEV(540, 960);		
+		document.body.appendChild(lev.app.view);
+
+		var stage = lev.app.stage;
+		stage.interactive = true;
+		
+		var game = {			
+			back: lev.createSprite({add:stage}),		
+			main: lev.createSprite({add:stage}),		
+			ui: lev.createSprite({add:stage}),		
+			ps: lev.createSprite({add:stage})
+		};		
+
+		lev.app.loader		
+		.add('sea', 'assets/sea.jpg')		
+		.add('earth', 'assets/earth.png')		
+		.add('boat', 'assets/boat.png')		
+		.add('fish_blue', 'assets/fish_blue.png')		
+		.add('fish_yellow', 'assets/fish_yellow.png')		
+		.add('fish_green', 'assets/fish_green.png')		
+		.add('progress_bar', 'assets/progress_bar.png')		
+		.add('progress_line', 'assets/progress_line.png')		
+		.add('packshot', 'assets/packshot.jpg')	
+		.add('hand', 'assets/hand.jpg')	
+		.add('trail', 'assets/trail.jpg')
+		.add('bubbles', 'assets/bubbles.json')
+		.load(startGame)
+		
+		function startGame() {	
+			var fish_count = 0;
+			var max_fish = 50;		
+			var isPackshot = false;
+			var sea = lev.createSprite('sea', {anchor:0.5, scale:1.5, add:game.back});	
+			var fish_layer = lev.createSprite({interactive:true, add:game.back});	
+			var earth = lev.createSprite('earth', {anchor:0.5, scale:1.5, add:game.back});
+			var boat = lev.createSprite('boat', {anchor:0.5, scale:1.5, add:game.main});						
+			
+			var bubbles = lev.createSprite({add:boat});	
+			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles});
+			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(20);
+			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(30);
+			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(40);
+
+			gsap.from(sea, {y:-500, duration:2, ease:'quad.out'});
+			gsap.from(earth, {y:-500, duration:2, ease:'quad.out'});
+			gsap.to(bubbles, {delay:1, alpha:0, duration:1, onComplete:()=>{
+				for (var b of bubbles.children) b.stop();
+				makeFish();
+			}});	
+
+			var progress_bar = lev.createSprite({alpha:0, add:game.ui});	
+			lev.createSprite('progress_bar', {add:progress_bar});
+			var progress_line = lev.createSprite('progress_line', {x:-420, y:2, add:progress_bar});	
+			progress_line.mask = lev.createSprite('progress_bar', {add:progress_bar});
+			gsap.to(progress_bar, {alpha:1, delay:2, duration:1});
+
+			function makeFish() {
+				for (var i=0; i<10; i++) new Fish(50,100,250,'fish_blue');		
+				for (var i=0; i<10; i++) new Fish(50,-200,250,'fish_blue');		
+				for (var i=0; i<20; i++) new Fish(50,-500,250,'fish_blue');	
+				for (var i=0; i<10; i++) new Fish(-250,-200,250,'fish_blue');
+				for (var i=0; i<10; i++) new Fish(350,-200,250,'fish_blue');				
+				for (var i=0; i<5; i++) new Fish(50,-200,400,'fish_yellow');
+				for (var i=0; i<10; i++) new Fish(50,-200,400,'fish_green');			
+			}
+
+			function Fish(x,y,radius,type='fish_blue') {					
+				var sprite = lev.createSprite(type, {x:x-radius+2*radius*Math.random(), y:y-radius+2*radius*Math.random(), alpha:0, anchor:0.5, add:fish_layer});
+				sprite.interactive = true;
+				sprite.hitArea = new PIXI.Rectangle(-23, -12, 46, 23);
+				gsap.to(sprite, {alpha:1, duration:0.5});
+				toNewPos();
+
+				function toNewPos() {
+					var toX = x - radius + 2*radius*Math.random();
+					var toY = y - radius + 2*radius*Math.random();
+					var time = 4 + 4*Math.random();	
+					gsap.to(sprite, {x:toX, y:toY, duration:time, onUpdate, onComplete:toNewPos});	
+
+					function onUpdate() {
+						var dx = toX - sprite.x;
+						var dy = toY - sprite.y;							
+						sprite.scale.y = dx > 0? -1 : 1;
+						sprite.rotation += (Math.atan2(-dy,-dx) - sprite.rotation)/8;
+					}
+				}	
+
+				sprite.reset = function() {
+					fish_layer.addChild(sprite);
+					sprite.x = x-radius+2*radius*Math.random();
+					sprite.y = y-radius+2*radius*Math.random();
+					gsap.to(sprite, {alpha:1, duration:0.5});
+					sprite.interactive = true;
+					toNewPos();
+				}													
+			}
+
+			fish_layer.on('touchmove', catchFish);
+			function catchFish(e) {	
+				if (e.target && e.target != fish_layer) {	
+					let fish = e.target;
+					fish.interactive = false;											
+					gsap.killTweensOf(fish);					
+					game.main.addChild(fish);
+					fish.x += game.back.x - game.main.x;
+					fish.y += game.back.y - game.main.y;
+					gsap.to(fish, {x:0, y:0, angle:360, duration:1, ease:'power1.inOut'});
+					gsap.to(fish.scale, {x:2, y:fish.scale.y*2, duration:0.5, yoyo:true, repeat:1, onComplete:()=>{
+						fish.alpha = 0;
+						fish.reset();
+						fish_count++;
+						setProgress();		
+					}});
+				}
+			}	
+
+			function setProgress() {
+				var progress = fish_count / max_fish;
+				if (progress > 1) progress = 1;
+				gsap.killTweensOf(progress_line);	
+				gsap.to(progress_line, {x:-420+424*progress, duration:0.25});
+				if (fish_count >= max_fish) showPackshot();
+			}
+			
+			lev.resize.start({
+				portrait: [
+					[game.main,270,480],
+					[game.back,230,700],
+					[game.ps,270,480],
+					[progress_bar,56,20],
+				],
+				landscape: [
+					[game.main,480,270],
+					[game.back,480,500],
+					[game.ps,480,270],
+					[progress_bar,266,20],
+				]
+			});			
+
+			function showPackshot() {
+				fish_layer.off('touchmove', catchFish);
+				if (isPackshot) return;
+				isPackshot = true;
+
+				var ps = lev.createSprite('packshot', {anchor:0.5, alpha:0, add:game.ps});
+				gsap.to(ps, {alpha:1, duration:1});
+
+				stage.on('click', adClickHandler);
+				stage.on('tap', adClickHandler);
+			}	
+
+			function adClickHandler() {
+				
+				
+			}
+		}	
+	}
+})()
+</script>
+</head>
+<body style="margin:0px;">	
+</body>
+</html>
