@@ -5,8 +5,9 @@
 <title>Fish Idle</title>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/MotionPathPlugin.min.js"></script>
 <script type="text/javascript">
-function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor:0,antialias:!0}),r=a.stage;function n(e,t){for(var a in t)void 0!==e[a]&&("number"!=typeof t[a]&&"boolean"!=typeof t[a]||(e[a]=t[a]),e[a]instanceof PIXI.ObservablePoint&&("number"==typeof t[a]?e[a].set(t[a]):t[a]instanceof Array?e[a].set(...t[a]):t[a]instanceof(PIXI.ObservablePoint,PIXI.Point)&&e[a].copyFrom(t[a])));t.add&&t.add.addChild(e)}this.app=a,this.createSprite=function(e,t){if(1==arguments.length&&"object"==typeof arguments[0]){t=arguments[0];var r=new PIXI.Container}else if(e instanceof PIXI.Texture)var r=new PIXI.Sprite(e);else var i=a.loader.resources[e].texture,r=new PIXI.Sprite(i);t&&n(r,t);return r},this.createAnimSprite=function(e,t,r){var i,o=a.loader.resources[e].texture.baseTexture;if(t.hasOwnProperty("row")){var s=t.col,l=t.row,p=o.width/s,u=o.height/l,c=s*l;t={frames:{},animations:{anim:[]},meta:{scale:1}};for(let a=0;a<c;a++){let r=e+"_frame"+a,n=p*(a%s),i=u*parseInt(a/s);t.frames[r]={frame:{x:n,y:i,w:p,h:u},sourceSize:{w:p,h:u}},t.animations.anim.push(r)}}var f=new PIXI.Spritesheet(o,t);f.parse(()=>{i=new PIXI.AnimatedSprite(f.animations.anim)}),r&&n(i,r);i.clone=function(){var e=new PIXI.AnimatedSprite(f.animations.anim);return r.autoplay&&e.play(),r&&n(e,r),e},r.autoplay&&i.play();return i},this.createAnimSpriteFromJSON=function(e,t,r){var i=a.loader.resources[e].spritesheet,o=new PIXI.AnimatedSprite(i.animations[t]);r&&n(o,r);r.autoplay&&o.play();return o},this.createMesh=function(e,t,i,o,s=!1){"string"==typeof e&&(e=a.loader.resources[e].texture);var l=new PIXI.SimplePlane(e,t,i);o&&n(l,o);if(l.calculateVertices(),l.calculateUvs(),s){var p=new PIXI.Graphics;r.addChild(p),a.ticker.add(()=>{p.clear(),p.beginFill(65535);for(let a=0;a<l.vertexData.length;a+=2){var e=l.vertexData[a]/r.scale.x,t=l.vertexData[a+1]/r.scale.y;p.drawRect(e-4,t-.5,9,2),p.drawRect(e-.5,t-4,2,9)}p.endFill()})}return l},this.loopAnimateMesh=function(e,t,a){var r=[],n=[];for(var i of t.split(",")){var o=i.split("/"),s=o[0],l=o[1]?Number(o[1].match(/-*\d+/)[0]):0,p=o[2]?Number(o[2].match(/-*\d+/)[0]):0;if(s.includes("all")){var u=e.vertexData.length/2;r.push(...Array(u).fill().map((e,t)=>t)),n.push(...Array(u).fill([l,p]))}else if(s.includes("_")){var u=(s=s.split("_").map(Number))[1]-s[0]+1;r.push(...Array(u).fill().map((e,t)=>s[0]+t)),n.push(...Array(u).fill([l,p]))}else s.includes(" ")?(s=s.match(/\d+/g).map(Number),r.push(...s),n.push(...Array(s.length).fill([l,p]))):(r.push(Number(s)),n.push([l,p]))}var c={m:0},f=0,h={m:1,repeat:-1,yoyo:!0,ease:"power1.inOut",onUpdate:function(){var t=c.m-f;f=c.m;for(let o=0;o<r.length;o++){var a=2*r[o],i=2*r[o]+1;e.vertexData[a]+=n[o][0]*t,e.vertexData[i]+=n[o][1]*t}}};"object"==typeof a?Object.assign(h,a):h.duration=a;gsap.to(c,h)},this.setTransform=n,this.getGlobalPos=function(e){var t={x:0,y:0};for(;e.parent;){var a=Math.cos(e.parent.rotation),r=Math.sin(e.parent.rotation);t.x+=1*e.x*a-1*e.y*r,t.y+=1*e.x*r+1*e.y*a,e=e.parent}return t},this.makeDraggable=function(e){var t,a;function r(r){e.x=r.data.global.x+t,e.y=r.data.global.y+a}function n(){e.off("mousemove",r)}e.interactive=!0,e.on("mousedown",function(n){t=e.x-n.data.global.x,a=e.y-n.data.global.y,e.on("mousemove",r)}),e.on("mouseup",n),e.on("mouseupoutside",n)},this.createShapeRect=function(e,t,a){var r=new PIXI.Graphics;r.beginFill(e),r.drawRect(...t),a&&n(r,a);return r},this.resize=new function(){var n=!1,i={portrait:[],landscape:[]};this.data=i;function o(e){if(i[e])for(var t of i[e])t[0].position.set(t[1],t[2]),t[3]&&t[0].scale.set(t[3],t[4]||t[3])}function s(){var n=window.innerWidth,i=window.innerHeight;if(n<i){var s=e,l=t;o("portrait")}else{var l=e,s=t;o("landscape")}var p=n/s,u=i/l,c=1;c=Math.min(p,u),r.scale.set(c),a.renderer.resize(s*c,l*c)}this.start=function(e){n||(n=!0,a.view.style.position="absolute",a.view.style.display="block",a.view.style.top="50%",a.view.style.left="50%",a.view.style.transform="translate(-50%, -50%)",window.addEventListener("resize",s),e?this.add(e):s())},this.add=function(){if(1==arguments.length){var e=arguments[0];i.portrait.push(...e.portrait),i.landscape.push(...e.landscape)}if(3==arguments.length){var t=arguments[0],a=arguments[1],r=arguments[2];i.portrait.push([t,...a]),i.landscape.push([t,...r])}s()},this.remove=function(obj){var portrait=i.portrait.find(el=>el[0]==obj);var landscape=i.landscape.find(el=>el[0]==obj);i.portrait.splice(i.portrait.indexOf(portrait),1);i.landscape.splice(i.landscape.indexOf(landscape),1);}},this.mouse=a.renderer.plugins.interaction.mouse}
+	function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor:0,antialias:!0});document.body?document.body.appendChild(a.view):document.onload=(()=>{document.body.appendChild(a.view)});const n=a.stage;function r(e,t){for(var a in t)void 0!==e[a]&&("number"!=typeof t[a]&&"boolean"!=typeof t[a]&&"string"!=typeof t[a]||(e[a]=t[a]),"object"!=typeof t[a]||"object"!=typeof e[a]||Array.isArray(t[a])||Array.isArray(e[a])||r(e[a],t[a]),e[a]instanceof PIXI.ObservablePoint&&("number"==typeof t[a]?e[a].set(t[a]):t[a]instanceof Array?e[a].set(...t[a]):t[a]instanceof(PIXI.ObservablePoint,PIXI.Point)&&e[a].copyFrom(t[a])));t.add&&t.add.addChild(e)}this.app=a,this.mesh=function(e,t,i,o,s=!1){"string"==typeof e&&(e=a.loader.resources[e].texture);var l=new PIXI.SimplePlane(e,t,i);o&&r(l,o);if(l.calculateVertices(),l.calculateUvs(),s){var c=new PIXI.Graphics;n.addChild(c),a.ticker.add(()=>{c.clear(),c.beginFill(65535);for(let a=0;a<l.vertexData.length;a+=2){var e=l.vertexData[a]/n.scale.x,t=l.vertexData[a+1]/n.scale.y;c.drawRect(e-4,t-.5,9,2),c.drawRect(e-.5,t-4,2,9)}c.endFill()})}return l},this.text=function(e,t){var a=new PIXI.Text(e);t&&r(a,t);return a},this.sprite=function(e,t){if(e instanceof PIXI.Texture)var n=new PIXI.Sprite(e);else var i=a.loader.resources[e].texture,n=new PIXI.Sprite(i);t&&r(n,t);return n},this.container=function(e){var t=new PIXI.Container;e&&r(t,e);return t},this.animation=function(e,t,n){var i,o=a.loader.resources[e].texture.baseTexture;if(t.hasOwnProperty("row")){var s=t.col,l=t.row,c=o.width/s,u=o.height/l,p=s*l;t={frames:{},animations:{anim:[]},meta:{scale:1}};for(let a=0;a<p;a++){let n=e+"_frame"+a,r=c*(a%s),i=u*parseInt(a/s);t.frames[n]={frame:{x:r,y:i,w:c,h:u},sourceSize:{w:c,h:u}},t.animations.anim.push(n)}}var d=new PIXI.Spritesheet(o,t);d.parse(()=>{i=new PIXI.AnimatedSprite(d.animations.anim)}),n&&r(i,n);i.clone=function(){var e=new PIXI.AnimatedSprite(d.animations.anim);return n.autoplay&&e.play(),n&&r(e,n),e},n.autoplay&&i.play();return i},this.animationJSON=function(e,t,n){var i=a.loader.resources[e].spritesheet,o=new PIXI.AnimatedSprite(i.animations[t]);n&&r(o,n);n.autoplay&&o.play();return o},this.loopAnimateMesh=function(e,t,a){var n=[],r=[];for(var i of t.split(",")){var o=i.split("/"),s=o[0],l=o[1]?Number(o[1].match(/-*\d+/)[0]):0,c=o[2]?Number(o[2].match(/-*\d+/)[0]):0;if(s.includes("all")){var u=e.vertexData.length/2;n.push(...Array(u).fill().map((e,t)=>t)),r.push(...Array(u).fill([l,c]))}else if(s.includes("_")){var u=(s=s.split("_").map(Number))[1]-s[0]+1;n.push(...Array(u).fill().map((e,t)=>s[0]+t)),r.push(...Array(u).fill([l,c]))}else s.includes(" ")?(s=s.match(/\d+/g).map(Number),n.push(...s),r.push(...Array(s.length).fill([l,c]))):(n.push(Number(s)),r.push([l,c]))}var p={m:0},d=0,f={m:1,repeat:-1,yoyo:!0,ease:"power1.inOut",onUpdate:function(){var t=p.m-d;d=p.m;for(let o=0;o<n.length;o++){var a=2*n[o],i=2*n[o]+1;e.vertexData[a]+=r[o][0]*t,e.vertexData[i]+=r[o][1]*t}}};"object"==typeof a?Object.assign(f,a):f.duration=a;gsap.to(p,f)},this.setTransform=r,this.globalPosOf=function(e){var t={x:0,y:0};for(;e.parent;){var a=Math.cos(e.parent.rotation),n=Math.sin(e.parent.rotation);t.x+=1*e.x*a-1*e.y*n,t.y+=1*e.x*n+1*e.y*a,e=e.parent}return t},this.makeDraggable=function(e){var t,a;function n(n){t=e.x-n.data.global.x,a=e.y-n.data.global.y,e.on("mousemove",r),e.on("touchmove",r),window.addEventListener("keydown",o)}function r(n){e.x=n.data.global.x+t,e.y=n.data.global.y+a}function i(){e.off("mousemove",r),e.off("touchmove",r),window.removeEventListener("keydown",o),console.log("x:"+e.x+", y:"+e.y,"scale.x "+e.scale.x)}function o(t){" "==t.key&&(e.scale.x*=-1)}e.interactive=!0,e.on("mousedown",n),e.on("mouseup",i),e.on("mouseupoutside",i),e.on("touchstart",n),e.on("touchend",i),e.on("touchendoutside",i)},this.shapeRect=function(e,t,a){var n=new PIXI.Graphics;n.beginFill(e),n.drawRect(...t),a&&r(n,a);return n},this.resize=new function(){var i=!1,o={portrait:[],landscape:[]};function s(e){for(var t of o[e])r(t[0],t[1])}function l(){var r=e,i=t,l=window.innerWidth,c=window.innerHeight;o.portrait.length&&l<c&&s("portrait"),o.landscape.length&&l>c&&(i=e,r=t,s("landscape"));var u=l/r,p=c/i,d=1;d=Math.min(u,p),n.scale.set(d),a.renderer.resize(r*d,i*d)}this.start=function(e){i||(i=!0,a.view.style.position="absolute",a.view.style.display="block",a.view.style.top="50%",a.view.style.left="50%",a.view.style.transform="translate(-50%, -50%)",window.addEventListener("resize",l),e?this.add(e):l())},this.add=function(){if(1==arguments.length){var e=arguments[0];o.portrait.push(...e.portrait),o.landscape.push(...e.landscape)}if(3==arguments.length){var t=arguments[0],a=arguments[1],n=arguments[2];o.portrait.push([t,a]),o.landscape.push([t,n])}l()},this.find=function(e){var t=o.portrait.find(t=>t[0]==e),a=o.landscape.find(t=>t[0]==e);return[t[1],a[1]]},this.remove=function(e){var t=o.portrait.find(t=>t[0]==e),a=o.landscape.find(t=>t[0]==e);t&&o.portrait.splice(o.portrait.indexOf(t),1),a&&o.landscape.splice(o.landscape.indexOf(a),1)}},this.mouse=a.renderer.plugins.interaction.mouse}
 </script>
 
 <style>
@@ -21,6 +22,9 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 	'use strict'
 	window.onload = async function init() {
 		await document.fonts.ready;
+		await document.fonts.load('50px Oswald');
+
+		gsap.registerPlugin(MotionPathPlugin);
 
 		var lev = new LEV(540, 960);		
 		document.body.appendChild(lev.app.view);
@@ -29,10 +33,11 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 		stage.interactive = true;
 		
 		var game = {			
-			back: lev.createSprite({interactive:true, add:stage}),		
-			main: lev.createSprite({add:stage}),		
-			ui: lev.createSprite({add:stage}),		
-			ps: lev.createSprite({add:stage})
+			back: lev.container({interactive:true, add:stage}),		
+			main: lev.container({add:stage}),		
+			ui: lev.container({add:stage}),		
+			hint: lev.container({add:stage}),
+			ps: lev.container({add:stage})
 		};		
 
 		lev.app.loader		
@@ -43,8 +48,8 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 		.add('fish_yellow', 'assets/fish_yellow.png')		
 		.add('fish_green', 'assets/fish_green.png')		
 		.add('progress_bar', 'assets/progress_bar.png')		
-		.add('progress_line', 'assets/progress_line.png')		
-		.add('hand', 'assets/hand.png')	
+		.add('progress_line', 'assets/progress_line.png')
+		.add('hand', 'assets/hand.png')
 		.add('trail', 'assets/trail.png')
 		.add('big_logo', 'assets/big_logo.png')
 		.add('you_earned', 'assets/you_earned.png')
@@ -59,32 +64,31 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 			var max_fish = 30;
 			var isPackshot = false;
 			var money = 0;
-			var sea = lev.createSprite('sea', {anchor:0.5, scale:1.5, add:game.back});	
-			var fish_layer = lev.createSprite({interactive:true, add:game.back});	
-			var earth = lev.createSprite('earth', {anchor:0.5, scale:1.5, add:game.back});
-			var boat = lev.createSprite('boat', {anchor:0.5, add:game.main});	
+			var sea = lev.sprite('sea', {anchor:0.5, scale:1.5, add:game.back});	
+			var fish_layer = lev.container({interactive:true, add:game.back});	
+			var earth = lev.sprite('earth', {anchor:0.5, scale:1.5, add:game.back});
+			var boat = lev.sprite('boat', {anchor:0.5, add:game.main});	
 			var boatPos = new PIXI.Sprite();					
 			
-			var bubbles = lev.createSprite({add:boat, scale:1.5});	
-			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles});
-			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(20);
-			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(30);
-			lev.createAnimSpriteFromJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(40);
+			var bubbles = lev.container({add:boat, scale:1.5});	
+			lev.animationJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles});
+			lev.animationJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(20);
+			lev.animationJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(30);
+			lev.animationJSON('bubbles', 'boat', {anchor:0.5, y:40, autoplay:true, add:bubbles}).gotoAndPlay(40);
 
 			gsap.from(sea, {y:-500, duration:1.5, ease:'quad.out'});
 			gsap.from(earth, {y:-500, duration:1.5, ease:'quad.out'});
-			gsap.to(bubbles, {delay:1, alpha:0, duration:0.5, onComplete:()=>{
-				//for (var b of bubbles.children) b.stop();
+			gsap.to(bubbles, {delay:1, alpha:0, duration:0.5, onComplete:()=>{				
 				gsap.ticker.add(boatSwimUpdate);
 				gsap.to(time_counter, {delay:1, onUpdate:onTimerUpdate, onComplete:onTimerComplete, duration:20});
 				makeFish();
 				createHint();
 			}});
 
-			var progress_bar = lev.createSprite({alpha:0, add:game.ui});	
-			lev.createSprite('progress_bar', {add:progress_bar});
-			var progress_line = lev.createSprite('progress_line', {x:-420, y:2, add:progress_bar});	
-			progress_line.mask = lev.createSprite('progress_bar', {add:progress_bar});
+			var progress_bar = lev.container({alpha:0, add:game.ui});	
+			lev.sprite('progress_bar', {add:progress_bar});
+			var progress_line = lev.sprite('progress_line', {x:-420, y:2, add:progress_bar});	
+			progress_line.mask = lev.sprite('progress_bar', {add:progress_bar});
 			gsap.to(progress_bar, {alpha:1, delay:2, duration:1});			
 			
 			var money_counter = new PIXI.Text(0+'$', {fontFamily:"Oswald", fontSize:36, fill:0xff3500, stroke:'white', strokeThickness:4});
@@ -116,17 +120,22 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 			}
 
 			function createHint() {
-				var timeline = gsap.timeline({repeat:-1, repeatDelay:1});										
-				var trail = lev.createSprite('trail', {x:-150, y:-150, angle:33, scale:0, alpha:0, add:game.main});	
-				var hand = lev.createSprite('hand', {alpha:0, add:game.main});
+				var timeline = gsap.timeline({repeat:-1, repeatDelay:1});											
+				//var trail = lev.createSprite('trail', {x:-150, y:-150, angle:33, scale:0, alpha:0, add:game.main});	
+				var r = 150;
+				var hand = lev.sprite('hand', {x:0, y:-r-r/2, anchor:[0.5,0.2], alpha:0, add:game.hint});
 
-				timeline.to(hand, {alpha:1, duration:0.5});				
-				timeline.fromTo(hand, {x:-200, y:-150}, {x:150, y:75, duration:1, ease:'quad.inOut'});
-				timeline.fromTo(trail.scale, {x:0, y:0}, {x:1.2, y:0.75, delay:-1, duration:1, ease:'quad.inOut'});
-				timeline.to(trail, {alpha:0.5, delay:-2, duration:0.5});
+				var motionPath = {
+					path:[{x:r, y:-r/2}, {x:-r, y:r/2}, {x:0, y:r+r/2}, {x:r, y:r/2}, {x:-r, y:-r/2}, {x:0, y:-r-r/2}],
+					type:'quad'
+				};
+
+				lev.resize.add(game.hint, {angle:0}, {angle:-90});
+				lev.resize.add(hand, {angle:0}, {angle:90});				
+					
+				timeline.to(hand, {alpha:1, duration:0.5});
+				timeline.to(hand, {motionPath, duration:3, ease:'linear.inOut'});
 				timeline.to(hand, {alpha:0, duration:0.5});
-				timeline.to(trail, {alpha:0, delay:-0.5, duration:0.5});
-				timeline.seek(0);
 
 				stage.on('touchstart', tapHandler);
 				stage.on('mousedown', tapHandler);
@@ -139,7 +148,7 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 			}
 
 			function Fish(x,y,radius,type='fish_blue') {					
-				var sprite = lev.createSprite(type, {x:x-radius+2*radius*Math.random(), y:y-radius+2*radius*Math.random(), alpha:0, anchor:0.5, add:fish_layer});
+				var sprite = lev.sprite(type, {x:x-radius+2*radius*Math.random(), y:y-radius+2*radius*Math.random(), alpha:0, anchor:0.5, add:fish_layer});
 				sprite.name = 'fish';
 				sprite.type = type;
 				sprite.interactive = true;
@@ -248,18 +257,20 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 			
 			lev.resize.start({
 				portrait: [
-					[game.main,270,480],
-					[game.back,230,700],
-					[game.ps,270,480],
-					[boatPos,0,-1],
-					[progress_bar,56-20,20],
+					[game.main, {x:270, y:480}],
+					[game.hint, {x:270, y:480}],
+					[game.back, {x:230, y:700}],
+					[game.ps, {x:270, y:480}],
+					[boatPos, {x:0, y:-1}],
+					[progress_bar, {x:56-20, y:20}],
 				],
 				landscape: [
-					[game.main,480,270],
-					[game.back,480,500],
-					[game.ps,480,270],
-					[boatPos,0,-1],
-					[progress_bar,266-20,20],
+					[game.main, {x:480, y:270}],
+					[game.hint, {x:480, y:270}],
+					[game.back, {x:480, y:500}],
+					[game.ps, {x:480, y:270}],
+					[boatPos, {x:0, y:-1}],
+					[progress_bar, {x:266-20, y:20}],
 				]
 			});			
 
@@ -270,11 +281,11 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 				isPackshot = true;
 
 				game.ps.alpha = 0;
-				lev.createSprite('ps_back', {anchor:0.5, add:game.ps});
-				var big_logo = lev.createSprite('big_logo', {anchor:0.5, add:game.ps});
-				var hook = lev.createSprite('hook', {anchor:0.5, alpha:0, add:game.ps});
-				var you_earned = lev.createSprite('you_earned', {anchor:0.5, add:game.ps});
-				var next_level = lev.createSprite('next_level', {anchor:0.5, add:game.ps});
+				lev.sprite('ps_back', {anchor:0.5, add:game.ps});
+				var big_logo = lev.sprite('big_logo', {anchor:0.5, add:game.ps});
+				var hook = lev.sprite('hook', {anchor:0.5, alpha:0, add:game.ps});
+				var you_earned = lev.sprite('you_earned', {anchor:0.5, add:game.ps});
+				var next_level = lev.sprite('next_level', {anchor:0.5, add:game.ps});
 				var earned = new PIXI.Text('', {fontFamily:"Oswald", fontSize:100, fill: "white", align: 'center'});
 				earned.anchor.set(0.5);
 				game.ps.addChild(earned);
@@ -283,18 +294,18 @@ function LEV(e,t){const a=new PIXI.Application({width:e,height:t,backgroundColor
 
 				lev.resize.add({
 					portrait: [
-						[big_logo,18,-190,1],
-						[hook,-175,135],
-						[you_earned,0,0,1],
-						[next_level,0,380,1],
-						[earned,0,200,1]
+						[big_logo, {x:18, y:-190, scale:1}],
+						[hook, {x:-175, y:135}],
+						[you_earned, {x:0, y:0, scale:1}],
+						[next_level, {x:0, y:380, scale:1}],
+						[earned, {x:0, y:200, scale:1}]
 					],
 					landscape: [
-						[big_logo,18,-105,0.5],
-						[hook,-195,115],
-						[you_earned,0,0,0.75],
-						[next_level,0,210,0.75],
-						[earned,0,110,0.75]						
+						[big_logo, {x:18, y:-105, scale:0.5}],
+						[hook, {x:-195, y:115}],
+						[you_earned, {x:0, y:0, scale:0.75}],
+						[next_level, {x:0, y:210, scale:0.75}],
+						[earned, {x:0, y:110, scale:0.75}]						
 					]
 				});	
 
