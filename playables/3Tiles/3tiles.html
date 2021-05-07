@@ -54,6 +54,7 @@
 			var chips = [[],[],[],[]];
 			var chain = [];
 			var age = 100;
+			var hintCounter = 0;
 			
 			var chip_names = ['avokado','cat','cup','donut','drink','guitar','hog','hotdog','icecream','owl','strawberry'];
 			var back_layer = lev.container({add:stage});
@@ -157,6 +158,8 @@
 				}				
 				gsap.delayedCall(0.3, ()=>{
 					board.interactiveChildren = true;
+					console.log('hintCounter', hintCounter);
+					if (hintCounter == 1) createHint(3);
 				});
 			}
 
@@ -172,12 +175,15 @@
 					choices[i].y = chain[i].y;
 				}				
 			}
+			
+			function createHint(delay=1) {
+				console.log('createHint');
+				hintCounter++;
 
-			function createHint() {
 				var hand = lev.sprite('hand', {anchor:[0.25, 0.1], x:200, y:800, alpha:0, add:board});
 				var similar = findSimilar();				
 				
-				var timeline = gsap.timeline({repeat:-1, repeatDelay:2, delay:3});
+				var timeline = gsap.timeline({repeat:-1, repeatDelay:2, delay});
 				
 				timeline.to(hand, {alpha:1, duration:0.5})
 				timeline.to(hand, {x:similar[0].x, y:similar[0].y, duration:0.5})
@@ -193,11 +199,14 @@
 					board.off('match', matchChipsHandler);
 					timeline.seek(0);
 					timeline.pause();
+					hand.destroy();					
 				}
 			}
 
 			function findSimilar() {
-				var chip = chips[parseInt(col*Math.random())][parseInt(row*Math.random())];
+				var id1 = parseInt(col*Math.random());
+				var id2 = parseInt(chips[id1].length*Math.random());
+				var chip = chips[id1][id2];
 				var similar = [];
 
 				for (let i=0; i<chips.length; i++) {
