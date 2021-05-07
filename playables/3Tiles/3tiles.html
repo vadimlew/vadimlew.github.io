@@ -175,8 +175,7 @@
 
 			function createHint() {
 				var hand = lev.sprite('hand', {anchor:[0.25, 0.1], x:200, y:800, alpha:0, add:board});
-				var similar = findSimilar();
-				console.log(similar);
+				var similar = findSimilar();				
 				
 				var timeline = gsap.timeline({repeat:-1, repeatDelay:2, delay:3});
 				
