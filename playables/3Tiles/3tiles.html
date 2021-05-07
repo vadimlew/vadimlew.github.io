@@ -135,6 +135,7 @@
 
 				age -= 12;
 				gsap.to(counter, {text:age, roundProps:{text:1}, duration:1});
+				board.emit('match');
 			}
 
 			function deleteChip(chip) {
@@ -177,7 +178,7 @@
 				var similar = findSimilar();
 				console.log(similar);
 				
-				var timeline = gsap.timeline({repeat:-1, repeatDelay:2, delay:4});
+				var timeline = gsap.timeline({repeat:-1, repeatDelay:2, delay:3});
 				
 				timeline.to(hand, {alpha:1, duration:0.5})
 				timeline.to(hand, {x:similar[0].x, y:similar[0].y, duration:0.5})
@@ -187,6 +188,13 @@
 				timeline.to(hand, {x:similar[2].x, y:similar[2].y, duration:0.5})
 				timeline.to(hand.scale, {x:0.9, y:0.9, yoyo:true, repeat:1, duration:0.25})
 				timeline.to(hand, {alpha:0, duration:0.5})
+
+				board.on('match', matchChipsHandler);
+				function matchChipsHandler() {
+					board.off('match', matchChipsHandler);
+					timeline.seek(0);
+					timeline.pause();
+				}
 			}
 
 			function findSimilar() {
