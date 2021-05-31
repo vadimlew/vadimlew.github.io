@@ -102,11 +102,8 @@
 			var pushBtn2d = lev.container({interactive:true, add:game.main});
 			pushBtn2d.hitArea = new PIXI.Rectangle(-100, -100, 200, 200);
 			//var g = lev.shapeRect(0x0000aa, [-100,-100,200,200], {alpha:0.5, add:pushBtn2d});
-			pushBtn2d.on('click', ()=>{
-				button.children[0].position.y -= 0.1;
-				gsap.fromTo(button.children[0].position, {y:0.74}, {y:0.6, yoyo:true, repeat:1, duration:0.1, ease:'cubic.out'});
-				sprayCoins();
-			})
+			pushBtn2d.on('tap', onPushButton);
+			pushBtn2d.on('click', onPushButton);
 
 			var floor = new THREE.Mesh(
 				new THREE.BoxGeometry( 20, 1, 20 ),
@@ -132,6 +129,12 @@
 			pipeHeadBound.position.y = 0.25;
 			//scene3D.add( pipeHeadBound );
 			physics.addMesh( pipeHeadBound );
+
+			function onPushButton() {
+				button.children[0].position.y -= 0.1;
+				gsap.fromTo(button.children[0].position, {y:0.74}, {y:0.6, yoyo:true, repeat:1, duration:0.1, ease:'cubic.out'});
+				sprayCoins();
+			}
 
 			function sprayCoins() {
 				for (let i=0; i<5; i++) {
