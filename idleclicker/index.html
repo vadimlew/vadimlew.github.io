@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>IdleClicker</title>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r125/three.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/zlibjs@0.3.1/bin/zlib.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r117/examples/js/loaders/FBXLoader.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+<script type="text/javascript" src="Ammo.js"></script>
+<script type="text/javascript" src="AmmoPhysics.js"></script>
+<script type="text/javascript" src="LEV.js"></script>
+
+<script type="text/javascript">
+(function() {
+	'use strict'
+	window.onload = async function init() {		
+		var lev = new LEV(640, 960, 0x292929);		
+		document.body.appendChild(lev.app.view);
+
+		var stage = lev.app.stage;
+		stage.interactive = true;			
+		
+		var game = {
+			main: lev.container({add:stage}),
+			ps: lev.container({add:stage})
+		};		
+
+		var render3d = new THREE.WebGLRenderer({alpha:true, antialias:true, shadowMapEnabled:true});
+		render3d.setSize(640, 960);
+		var scene3D = new THREE.Scene();
+		var texture3d = PIXI.Texture.from(render3d.domElement);
+
+		var camera = new THREE.PerspectiveCamera(60, 640/960, 1, 1000);		
+		camera.position.y = 5;		
+		camera.position.x = 12;	
+		camera.lookAt(0,0,0);	
+
+		var ambient_light = new THREE.AmbientLight( 0xc0c0c0 ); 
+		var direct_light = new THREE.DirectionalLight( 0xffffff, 0.3 );
+		direct_light.castShadow = true;
+		direct_light.position.x = 10;
+		direct_light.position.y = 10;
+		direct_light.position.z = -10;
+		scene3D.add(ambient_light, direct_light);		
+
+		function load3dObject(url) {
+			return new Promise((resolve, reject) => {
+				let loaderFBX = new THREE.FBXLoader();
+				loaderFBX.load(url, resolve, null, reject);
+			});			
+		}
+
+		var pipe = await load3dObject('assets/pipes.fbx');
+		//pipe.children[0].scale.z = 0.8;		
+
+		var pipeMat = new THREE.MeshStandardMaterial({color: 0x30ad47});
+		pipe.castShadow = true;
+		pipe.receiveShadow = true;
+		for (let child of pipe.children) {				
+			child.material = pipeMat;
+		}
+
+		var Coin = (await load3dObject('assets/coin.fbx')).children[0];		
+		var button = await load3dObject('assets/button.fbx');	
+		button.children[0].material = new THREE.MeshStandardMaterial();
+		button.children[1].material = new THREE.MeshStandardMaterial({color: 0x524E51});
+		button.position.x = 9;
+		button.position.y = 1;
+
+		button.children[0].material.map = new THREE.TextureLoader().load( "assets/button.png" );
+
+		var physics = await AmmoPhysics();
+
+		startGame();	
+		
+		/*lev.app.loader
+		.add('ground', 'assets/Ground.jpg')
+		.add('duck_farm', 'assets/duck_farm.png')
+		.add('sheep_farm', 'assets/sheep_farm.png')
+		.add('wheat', 'assets/wheat.png')
+		.add('wheat2', 'assets/wheat2.png')
+		.add('ready', 'assets/ready.png')
+		.add('counter', 'assets/number.json')
+		.add('logo_big', 'assets/logo_big.png')
+		.add('play_now_btn', 'assets/play_now_btn.png')
+		.add('player_bar', 'assets/player_bar.png')
+		.add('bar', 'assets/bar.png')
+		.add('sidebar_blue', 'assets/sidebar_blue.png')
+		.add('sidebar_gray', 'assets/sidebar_gray.png')
+		.load(startGame)*/ 		
+
+		//console.log(Coin);
+		
+		function startGame() {	
+			var sprite3d = lev.sprite(texture3d, {anchor:0.5, add:game.main});	
+
+			scene3D.add(pipe);					
+			scene3D.add(button);			
+			var pushBtn2d = lev.container({interactive:true, add:game.main});
+			pushBtn2d.hitArea = new PIXI.Rectangle(-100, -100, 200, 200);
+			//var g = lev.shapeRect(0x0000aa, [-100,-100,200,200], {alpha:0.5, add:pushBtn2d});
+			pushBtn2d.on('click', ()=>{
+				button.children[0].position.y -= 0.1;
+				gsap.fromTo(button.children[0].position, {y:0.74}, {y:0.6, yoyo:true, repeat:1, duration:0.1, ease:'cubic.out'});
+				sprayCoins();
+			})
+
+			var floor = new THREE.Mesh(
+				new THREE.BoxGeometry( 20, 1, 20 ),
+				new THREE.MeshStandardMaterial( { color: 0x292929 } )
+			);
+			floor.position.y = -3;
+			//floor.receiveShadow = true;
+			scene3D.add( floor );
+			physics.addMesh( floor );
+
+			var pipeBound = new THREE.Mesh(
+				new THREE.BoxGeometry( 2.2, 3.6, 2.2 ),
+				new THREE.MeshStandardMaterial( { color: 0x000029 } )
+			);
+			pipeBound.position.y = -0.75;
+			//scene3D.add( pipeBound );
+			physics.addMesh( pipeBound );	
+			
+			var pipeHeadBound = new THREE.Mesh(
+				new THREE.SphereGeometry( 1.2, 8, 8),
+				new THREE.MeshStandardMaterial( { color: 0x000029 } )
+			);
+			pipeHeadBound.position.y = 0.25;
+			//scene3D.add( pipeHeadBound );
+			physics.addMesh( pipeHeadBound );
+
+			function sprayCoins() {
+				for (let i=0; i<5; i++) {
+					var coin = Coin.clone();
+					coin.scale.set(0.7,0.7,0.7);
+					coin.position.x = -0.5 + 1*Math.random();
+					coin.position.y = 0.5+Math.random();
+					coin.position.z = -0.5 + 1*Math.random();
+					coin.rotation.x = Math.random();
+					coin.rotation.y = Math.random();
+					coin.rotation.z = Math.random();
+					coin.name = 'coin';
+					scene3D.add(coin);	
+					physics.addMesh( coin, 1 );
+					physics.setMeshVelocity( coin, -2 + 4*Math.random(), 5 + 5*Math.random(), -2 + 4*Math.random() );
+				}				
+			}
+			
+			lev.resize.start({
+				portrait: [
+					[game.main, {x:320, y:480}],
+					[pushBtn2d, {y:340}],
+					[game.ps, {x:320, y:480}]
+				],
+				landscape: [
+					[game.main, {x:480, y:320}],
+					[pushBtn2d, {y:400}],
+					[game.ps, {x:480, y:320}]				
+				]
+			});
+
+			function animate() {				
+				texture3d.update();
+				render3d.render(scene3D, camera);				
+				requestAnimationFrame(animate);
+			}
+			animate();			
+		}			
+
+		function showPackshot() {
+			stage.on('click', adClickHandler);
+			stage.on('tap', adClickHandler);			
+		}		
+
+		function adClickHandler() {
+			
+		}
+	}
+})()
+</script>
+</head>
+<body style="margin:0px;">	
+</body>
+</html>
