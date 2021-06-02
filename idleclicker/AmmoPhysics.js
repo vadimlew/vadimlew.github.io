@@ -183,11 +183,7 @@ async function AmmoPhysics() {
 		const body = meshMap.get( mesh );
 
 		body.setAngularVelocity( new AmmoLib.btVector3( ax, ay, az ) );
-		body.setLinearVelocity( new AmmoLib.btVector3( vx, vy, vz ) );
-
-		//worldTransform.setIdentity();
-		//worldTransform.setOrigin( new AmmoLib.btVector3( position.x, position.y, position.z ) );
-		//body.setWorldTransform( worldTransform );
+		body.setLinearVelocity( new AmmoLib.btVector3( vx, vy, vz ) );		
     }
 
 	//
@@ -257,9 +253,10 @@ async function AmmoPhysics() {
 
 	// animate
 
-	setInterval( step, 1000 / frameRate );
+	//setInterval( step, 1000 / frameRate );
 
 	return {
+		step,
 		addMesh,
 		setMeshPosition,
 		setMeshVelocity
