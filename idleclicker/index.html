@@ -29,13 +29,13 @@
 		};		
 
 		var render3d = new THREE.WebGLRenderer({alpha:true, antialias:true, shadowMapEnabled:true});
-		render3d.setSize(640, 960);
+		render3d.setSize(960, 960);
 		var scene3D = new THREE.Scene();
 		var texture3d = PIXI.Texture.from(render3d.domElement);
 
-		var camera = new THREE.PerspectiveCamera(60, 640/960, 1, 1000);		
-		camera.position.y = 5;		
+		var camera = new THREE.PerspectiveCamera(60, 960/960, 1, 1000);		
 		camera.position.x = 12;	
+		camera.position.y = 5;		
 		camera.lookAt(0,0,0);	
 
 		var ambient_light = new THREE.AmbientLight( 0xc0c0c0 ); 
@@ -46,16 +46,7 @@
 		direct_light.position.z = -10;
 		scene3D.add(ambient_light, direct_light);		
 
-		function load3dObject(url) {
-			return new Promise((resolve, reject) => {
-				let loaderFBX = new THREE.FBXLoader();
-				loaderFBX.load(url, resolve, null, reject);
-			});			
-		}
-
 		var pipe = await load3dObject('assets/pipes.fbx');
-		//pipe.children[0].scale.z = 0.8;		
-
 		var pipeMat = new THREE.MeshStandardMaterial({color: 0x30ad47});
 		pipe.castShadow = true;
 		pipe.receiveShadow = true;
@@ -74,39 +65,40 @@
 
 		var physics = await AmmoPhysics();
 
-		startGame();	
+		//startGame();	
 		
-		/*lev.app.loader
-		.add('ground', 'assets/Ground.jpg')
-		.add('duck_farm', 'assets/duck_farm.png')
-		.add('sheep_farm', 'assets/sheep_farm.png')
-		.add('wheat', 'assets/wheat.png')
-		.add('wheat2', 'assets/wheat2.png')
-		.add('ready', 'assets/ready.png')
-		.add('counter', 'assets/number.json')
-		.add('logo_big', 'assets/logo_big.png')
-		.add('play_now_btn', 'assets/play_now_btn.png')
-		.add('player_bar', 'assets/player_bar.png')
-		.add('bar', 'assets/bar.png')
-		.add('sidebar_blue', 'assets/sidebar_blue.png')
-		.add('sidebar_gray', 'assets/sidebar_gray.png')
-		.load(startGame)*/ 		
-
-		//console.log(Coin);
+		lev.app.loader
+		.add('hand', 'assets/hand.png')		
+		.add('logo', 'assets/logo.png')		
+		.add('next level', 'assets/next level.png')		
+		.add('earned', 'assets/earned.png')		
+		.load(startGame)	
 		
 		function startGame() {	
+			var counter = 0;
+			var maxCounter = 15;
 			var sprite3d = lev.sprite(texture3d, {anchor:0.5, add:game.main});	
+
+			var progressBar = lev.container({pivot:[270,20], add:game.main});
+			var pBack = new PIXI.Graphics().beginFill(0x292929).drawRoundedRect(0,0,540,40,16);
+			progressBar.addChild(pBack);			
+			var pStrip = new PIXI.Graphics().lineStyle(4, 0xffffff).beginFill(0x669c34).drawRoundedRect(0,0,540,40,16);
+			progressBar.addChild(pStrip);
+			var frame = new PIXI.Graphics().lineStyle(4, 0xffffff).drawRoundedRect(0,0,540,40,16);
+			progressBar.addChild(frame);
+			pStrip.x = -530;
+			pStrip.mask = pBack;
 
 			scene3D.add(pipe);					
 			scene3D.add(button);			
 			var pushBtn2d = lev.container({interactive:true, add:game.main});
 			pushBtn2d.hitArea = new PIXI.Rectangle(-100, -100, 200, 200);
-			//var g = lev.shapeRect(0x0000aa, [-100,-100,200,200], {alpha:0.5, add:pushBtn2d});
+			var g = lev.shapeRect(0x0000aa, [-100,-100,200,200], {alpha:0, add:pushBtn2d});
 			pushBtn2d.on('tap', onPushButton);
 			pushBtn2d.on('click', onPushButton);
 
 			var floor = new THREE.Mesh(
-				new THREE.BoxGeometry( 20, 1, 20 ),
+				new THREE.BoxGeometry( 30, 1, 30 ),
 				new THREE.MeshStandardMaterial( { color: 0x292929 } )
 			);
 			floor.position.y = -3;
@@ -134,10 +126,19 @@
 				button.children[0].position.y -= 0.1;
 				gsap.fromTo(button.children[0].position, {y:0.74}, {y:0.6, yoyo:true, repeat:1, duration:0.1, ease:'cubic.out'});
 				sprayCoins();
+				setProgressBar();
+				if (counter == maxCounter) {
+					gsap.to(progressBar, {delay:1, alpha:0, duration:0.5});
+					pushBtn2d.off('tap', onPushButton);
+					pushBtn2d.off('click', onPushButton);
+					gsap.delayedCall(1, showPackshot);
+				}
 			}
 
+			//gsap.delayedCall(1, showPackshot);
+
 			function sprayCoins() {
-				for (let i=0; i<5; i++) {
+				for (let i=0; i<6; i++) {
 					var coin = Coin.clone();
 					coin.scale.set(0.7,0.7,0.7);
 					coin.position.x = -0.5 + 1*Math.random();
@@ -145,28 +146,53 @@
 					coin.position.z = -0.5 + 1*Math.random();
 					coin.rotation.x = Math.random();
 					coin.rotation.y = Math.random();
-					coin.rotation.z = Math.random();
-					coin.name = 'coin';
+					coin.rotation.z = Math.random();					
 					scene3D.add(coin);	
 					physics.addMesh( coin, 1 );
 					physics.setMeshVelocity( coin, -2 + 4*Math.random(), 5 + 5*Math.random(), -2 + 4*Math.random() );
-				}				
+				}
+				counter++;
 			}
+
+			function testCoins() {
+				for (let i=0; i<3; i++) {
+					var coin = Coin.clone();
+					coin.scale.set(0.7,0.7,0.7);
+					coin.position.x = 100;		
+					coin.position.y = 0.5+Math.random();							
+					scene3D.add(coin);	
+					physics.addMesh( coin, 1 );
+					physics.setMeshVelocity( coin, 1, 1 , 1 );
+				}
+			}
+
+			function setProgressBar() {				
+				gsap.killTweensOf(pStrip);
+				let x = Math.min(-540+counter*(540/maxCounter), 0);
+				gsap.to(pStrip, {x, duration:1, ease:'sine.out'});
+			}
+
+			testCoins();		
 			
 			lev.resize.start({
 				portrait: [
 					[game.main, {x:320, y:480}],
 					[pushBtn2d, {y:340}],
-					[game.ps, {x:320, y:480}]
+					[progressBar, {y:-400}],
+					[game.ps, {x:320, y:480}],
+					[camera.position, {x:12, y:5}]
 				],
 				landscape: [
 					[game.main, {x:480, y:320}],
-					[pushBtn2d, {y:400}],
-					[game.ps, {x:480, y:320}]				
+					[pushBtn2d, {y:280}],
+					[progressBar, {y:-240}],
+					[game.ps, {x:480, y:320}],
+					[camera.position, {x:14, y:6}]			
 				]
 			});
 
-			function animate() {				
+			function animate() {
+				physics.step();			
 				texture3d.update();
 				render3d.render(scene3D, camera);				
 				requestAnimationFrame(animate);
@@ -175,12 +201,36 @@
 		}			
 
 		function showPackshot() {
+			var solid = lev.shapeRect(0x000000, [-480,-480,960,960], {alpha:0, add:game.ps});
+			var logo = lev.sprite('logo', {anchor:0.5, scale:0, add:game.ps});
+			var nextLevel = lev.sprite('next level', {anchor:0.5, scale:0, add:game.ps});
+			var youEarned = lev.container({add:game.ps});
+			var earned = lev.sprite('earned', {anchor:0.5, scale:0, add:youEarned});
+			lev.text(parseInt(5000 + 5000*Math.random())+'$', {anchor:0.5, y:30, add:earned}).style = {fill:0xff2c2d, fontFamily:'Fredoka One', fontSize:60};
+
+			gsap.to(solid, {alpha:0.6, duration:0.5});
+			gsap.to(logo.scale, {x:1, y:1, ease:'back.out', duration:0.5});			
+			gsap.to(earned.scale, {x:1, y:1, delay:0.1, ease:'back.out', duration:0.5});
+			gsap.to(nextLevel.scale, {x:1, y:1, delay:0.2, ease:'back.out', duration:0.5});
+			gsap.to(nextLevel.scale, {x:0.9, y:0.9, delay:0.7, duration:1, repeat:-1, yoyo:true, ease:'quad.inOut'});
+
+			lev.resize.add(logo, {y:-320}, {y:-190});
+			lev.resize.add(youEarned, {y:40, scale:1}, {y:45, scale:0.7});
+			lev.resize.add(nextLevel, {y:360}, {y:230});
+
 			stage.on('click', adClickHandler);
 			stage.on('tap', adClickHandler);			
 		}		
 
 		function adClickHandler() {
 			
+		}
+
+		function load3dObject(url) {
+			return new Promise((resolve, reject) => {
+				let loaderFBX = new THREE.FBXLoader();
+				loaderFBX.load(url, resolve, null, reject);
+			});			
 		}
 	}
 })()

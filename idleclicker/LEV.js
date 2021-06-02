@@ -26,6 +26,7 @@ function LEV(app_width, app_height, backgroundColor=0x000000) {
 	this.globalPosOf = globalPosOf;	
 	this.makeDraggable = makeDraggable;
 	this.shapeRect = createShapeRect;
+	this.shapeRoundRect = createShapeRoundRect;
 	this.resize = new ResizeManager();
 	this.mouse = app.renderer.plugins.interaction.mouse;
 
@@ -184,6 +185,14 @@ function LEV(app_width, app_height, backgroundColor=0x000000) {
 		if (transform) setTransform(shape, transform);
 		return shape;
 	}	
+
+	function createShapeRoundRect(color, size, transform)	{
+		var shape = new PIXI.Graphics();
+		shape.beginFill(color);
+		shape.drawRoundedRect(...size);
+		if (transform) setTransform(shape, transform);
+		return shape;
+	}
 
 	function setTransform(sprite, transform) {
 		for (var prop in transform) {
