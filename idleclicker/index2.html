@@ -74,7 +74,7 @@
 		button.children[0].material.map = new THREE.TextureLoader().load( "assets/button.png" );
 
 		var world = new CANNON.World();
-        world.gravity.set(0,-5,0);
+        world.gravity.set(0,-9.8,0);
 		var timeStep=1/60;
         world.broadphase = new CANNON.NaiveBroadphase();
         world.solver.iterations = 10;		
@@ -166,16 +166,16 @@
 				for (let i=0; i<num; i++) {
 					var coin = Coin.clone();
 					coin.scale.set(0.7,0.7,0.7);
-					coin.position.x = -0.5 + 1*Math.random();
+					coin.position.x = -1 + 2*Math.random();
 					coin.position.y = 1.2+Math.random();
-					coin.position.z = -0.5 + 1*Math.random();
+					coin.position.z = -1 + 2*Math.random();
 					coin.rotation.x = Math.random();
 					coin.rotation.y = Math.random();
 					coin.rotation.z = Math.random();					
 					scene3D.add(coin);	
 
 					createBoxBody(coin, [0.07, 0.6, 0.6], 1);
-					coin.body.velocity.set(-1 + 2*Math.random(), 4 + 3*Math.random(), -1 + 2*Math.random() );					
+					coin.body.velocity.set(-1.5 + 3*Math.random(), 5 + 4*Math.random(), -1.5 + 3*Math.random() );					
 				}
 				counter++;
 			}
@@ -186,6 +186,7 @@
 				var body = new CANNON.Body({shape, material, mass, type});					
 				mesh.body = body;
 				body.position.copy(mesh.position);
+				body.quaternion.copy(mesh.quaternion);
 				world.addBody(body);
 				objects.push(mesh);
 			}			
@@ -224,12 +225,34 @@
 				]
 			});
 
+			var lastCallTime = 0;
+			function updatePhysics(){
+				// Step world
+				var timeStep = 1 / 60;
+
+				var now = Date.now() / 1000;
+
+				if(!lastCallTime){
+					// last call time not saved, cant guess elapsed time. Take a simple step.
+					world.step(timeStep);
+					lastCallTime = now;
+					return;
+				}
+
+				var timeSinceLastCall = now - lastCallTime;
+
+				world.step(timeStep, timeSinceLastCall, 3);
+
+				lastCallTime = now;
+			}
+
 			function animate() {
 				for (var obj of objects) {
 					obj.position.copy(obj.body.position);
 					obj.quaternion.copy(obj.body.quaternion);
 				}
-				world.step(timeStep);
+				//world.step(timeStep);
+				updatePhysics();
 				texture3d.update();
 				render3d.render(scene3D, camera);				
 				requestAnimationFrame(animate);
