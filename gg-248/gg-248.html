@@ -30,16 +30,20 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 		lev.app.loader	
 		.add('bg', 'assets/bg.jpg')		
 		.add('earth', 'assets/earth.jpg')		
-		.add('floor_blue', 'assets/floor_blue.png')		
-		.add('floor_red', 'assets/floor_red.png')		
-		.add('elevator', 'assets/elevator.png')		
+		.add('floor_blue', 'assets/floor_blue.png')
+		.add('floor_red', 'assets/floor_red.png')
+		.add('elevator', 'assets/elevator.png')
 		.add('chain', 'assets/chain.png')		
 		.add('suit', 'assets/suit.png')			
-		.add('girl', 'assets/girl_idle.json')		
-		.add('monster', 'assets/monster_idle.json')
-		.add('gun', 'assets/gun.png')	
-		.add('eggs1', 'assets/eggs1.png')	
-		.add('eggs2', 'assets/eggs2.png')	
+		.add('girl_idle', 'assets/girl_idle.json')		
+		.add('girl_atack', 'assets/girl_atack.json')		
+		.add('monster_idle', 'assets/monster_idle.json')
+		.add('monster_atack', 'assets/monster_atack.json')
+		.add('smoke', 'assets/smoke.json')
+		.add('electro', 'assets/electro.json')
+		.add('gun', 'assets/gun.png')
+		.add('eggs1', 'assets/eggs1.png')
+		.add('eggs2', 'assets/eggs2.png')
 		.load(startGame);
 		
 		function startGame() {
@@ -49,9 +53,10 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 			var earth = lev.sprite('earth', {anchor:[0.5, 1], add:bg});
 			var towers = lev.container({add:stage});
 			var dragLayer = lev.container({add:stage});
+			var smoke = lev.animationJSON('smoke', 'smoke', {anchor:0.5, animationSpeed:0.4, loop:false});
 
 			var playerTower = new PlayerTower(40, 0);
-			var enemyTower1 = new EnemyTower(270, 0, ['monster|9','monster|2','monster|5','monster|3']);
+			var enemyTower1 = new EnemyTower(270, 0, ['monster|9','monster|2','monster|4','monster|3'], true);
 			var enemyTower2 = new EnemyTower(500, 0, ['monster|90','eggs1|65','monster|31','monster|26|14','eggs2|99']);
 			var enemyTower3 = new EnemyTower(730, 0, ['monster|14','monster|56','eggs2|215','monster|31','eggs2|125']);
 
@@ -65,7 +70,22 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 
 				var suit = lev.sprite('suit', {anchor:0.5, x:93, y:62 ,add:floor3});
 				gsap.fromTo(suit, {y:67}, {y:58, duration:1, ease:'quad.inOut', yoyo:true, repeat:-1});				
-				var player = lev.animationJSON('girl', 'idle', {anchor:0.5, x:103, y:68, add:floor2, autoplay:true, animationSpeed:0.4});
+				var player = lev.container({x:103, y:68, add:floor2});
+				player.idle = lev.animationJSON('girl_idle', 'idle', {anchor:0.5, add:player, autoplay:true, animationSpeed:0.4});
+				player.atack = lev.animationJSON('girl_atack', 'atack', {anchor:0.5, visible:false, add:player, loop:false, animationSpeed:0.4});
+				player.floor = floor2;
+
+				floor3.name = 'floor';
+				floor3.interactive = true;
+				floor3.solve = function() {
+					gsap.to(suit, {alpha:0, duration:0.5});
+					var electro = lev.animationJSON('electro', 'electro', {anchor:0.5, x:103, y:68, loop:false, autoplay:true, add:floor3, animationSpeed:0.4});
+					electro.onComplete = electro.destroy;
+					player.level.text = Number(player.level.text)+1;
+					floor3.interactive = false;
+				};
+				floor3.startPos = new PIXI.Point(103, 68);
+
 				DragBehavior.call(player);
 				var gun = lev.sprite('gun', {anchor:0.5, x:93, y:62, add:floor1});
 				lev.sprite('chain', {x:20, y:15, add:floor1});
@@ -79,7 +99,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				return tower;
 			}
 
-			function EnemyTower(x, y, data) {
+			function EnemyTower(x, y, data, interactive=false) {
 				var tower = lev.container({x, y, add:towers});
 				tower.floors = [];
 
@@ -94,7 +114,9 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 
 					switch(type) {
 						case 'monster': 
-							floor.enemy = lev.animationJSON('monster', 'idle', {anchor:0.5, x:120, y:70, add:floor, autoplay:true, animationSpeed:0.4});							
+							floor.enemy = lev.container({x:120, y:70, add:floor});
+							floor.enemy.idle = lev.animationJSON('monster_idle', 'idle', {anchor:0.5, add:floor.enemy, autoplay:true, animationSpeed:0.4});
+							floor.enemy.atack = lev.animationJSON('monster_atack', 'atack', {anchor:0.5, visible:false, add:floor.enemy, loop :false, animationSpeed:0.4});
 						break;
 						case 'eggs1': 
 							floor.enemy = lev.sprite(type, {anchor:0.5, x:95, y:75, add:floor});							
@@ -108,14 +130,18 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 
 					if (t.length == 3) {
 						level = t[2];
-						floor.enemy = lev.animationJSON('monster', 'idle', {anchor:0.5, x:65, y:70, add:floor, autoplay:true, animationSpeed:0.4});
+						floor.enemy = lev.animationJSON('monster_idle', 'idle', {anchor:0.5, x:65, y:70, add:floor, autoplay:true, animationSpeed:0.4});
 						floor.level = lev.text(level, {anchor:0.5, x:-5, y:-50, style:lvlTxtStyle, add:floor.enemy});
 					}
 
-					floor.name = 'floor';
-					floor.interactive = true;
-					floor.solve = solve;
-					floor.startPos = new PIXI.Point(65, 70);			
+					floor.enemy.floor = floor;
+
+					if (interactive) {
+						floor.name = 'floor';
+						floor.interactive = true;
+						floor.solve = solve;
+						floor.startPos = new PIXI.Point(65, 70);
+					}
 					
 					tower.floors.push(floor);
 					py -= 125;
@@ -123,37 +149,107 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 
 				function solve() {								
 					var floor = this;
+					var player = playerTower.player;
+					var enemy = floor.enemy;
 					var playerLvl = Number(playerTower.player.level.text);
 					var enemyLvl = Number(floor.level.text);
 
 					if (playerLvl > enemyLvl) {
-						
+						playerAtack(player, enemy);
+						floor.interactive = false;
+						floor.empty = true;
 					} else {
-
+						enemyAtack(player, enemy);
+						resetGame();
 					}
 				}
 
 				return tower;
 			}
 
+			function playerAtack(player, enemy) {
+				player.idle.visible = false;
+				player.atack.visible = true;
+				player.atack.gotoAndPlay(0);
+				player.atack.onComplete = () => {
+					player.idle.visible = true;
+					player.atack.visible = false;
+					player.idle.gotoAndPlay(0);					
+				}
+
+				gsap.delayedCall(0.5, ()=>{
+					smoke.position.copyFrom(enemy.position);
+					enemy.floor.addChild(smoke);
+					smoke.gotoAndPlay(0);
+					smoke.onComplete = () => {smoke.parent.removeChild(smoke)};
+
+					var playerLvl = Number(player.level.text);
+					var enemyLvl = Number(enemy.floor.level.text);
+
+					player.level.text = playerLvl + enemyLvl;
+
+					shakeLevel();
+				})
+
+				gsap.delayedCall(0.75, ()=>{
+					enemy.destroy();					
+				})
+			}
+
+			function enemyAtack(player, enemy) {
+				enemy.idle.visible = false;
+				enemy.atack.visible = true;
+				enemy.atack.gotoAndPlay(0);
+				enemy.atack.onComplete = () => {
+					enemy.idle.visible = true;
+					enemy.atack.visible = false;	
+					enemy.idle.gotoAndPlay(0);
+				}
+
+				gsap.delayedCall(0.5, ()=>{
+					smoke.position.copyFrom(player.position);
+					enemy.floor.addChild(smoke);
+					smoke.gotoAndPlay(0);
+					smoke.onComplete = () => {smoke.parent.removeChild(smoke)};	
+
+					shakeLevel();				
+				})
+
+				gsap.delayedCall(0.75, ()=>{
+					player.destroy();
+				})
+			}
+
+			function resetGame() {
+
+			}
+
+			function shakeLevel() {
+				gsap.to([towers, earth], {x:'+=6', duration:0.05, yoyo:true, repeat:5, ease:'quad.out'});
+				gsap.to([towers, earth], {y:'+=10', duration:0.1, yoyo:true, repeat:3, ease:'quad.out'});
+			}
+
 			function DragBehavior() {
 				var dragObj = this;
 				dragObj.floor = dragObj.parent;
 				var floorPos = dragObj.position.clone();
-				var startPos = new PIXI.Point();				
+				var startPos = new PIXI.Point();
 				var dx, dy;
 
 				dragObj.interactive = true;
 				dragObj.on('pointerdown', downHandler);
 				dragObj.on('pointerup', upHandler);
-				dragObj.on('pointerupoutside', upHandler);				
+				dragObj.on('pointerupoutside', upHandler);
 
 				function downHandler(e) {
 					dragLayer.addChild(dragObj);
 					dragLayer.toLocal(dragObj.position, dragObj.floor, startPos);
 
-					dx = startPos.x - e.data.global.x;
-					dy = startPos.y - e.data.global.y;
+					let gx = e.data.global.x / stage.scale.x;
+					let gy = e.data.global.y / stage.scale.y;
+
+					dx = startPos.x - gx;
+					dy = startPos.y - gy;
 
 					dragObj.x = startPos.x;
 					dragObj.y = startPos.y;					
@@ -165,9 +261,16 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 					dragObj.interactive = false;
 
 					let hitObj = lev.interact.hitTest(e.data.global);
-					if (hitObj.name == 'floor' && hitObj.parent == enemyTower1) {
+					console.log(hitObj.name);
+					if (hitObj.name == 'floor') {
 						let floor = hitObj;
 						floor.solve(dragObj);
+						if (dragObj.floor && dragObj.floor.empty) {
+							gsap.to(dragObj.floor, {alpha:0, visible:false, delay:0.25, duration:0.5});
+							for (let f of enemyTower1.floors) {								
+								if (f.y < dragObj.floor.y) gsap.to(f, {y:'+=125', delay:0.25, duration:0.5, ease:'quad.out'});
+							}
+						}
 						dragObj.floor = floor;
 						dragLayer.toLocal(floor.startPos, dragObj.floor, startPos);
 						floorPos = floor.startPos;
@@ -183,8 +286,11 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				}
 
 				function moveHandler(e) {
-					dragObj.x = e.data.global.x + dx;
-					dragObj.y = e.data.global.y + dy;
+					let gx = e.data.global.x / stage.scale.x;
+					let gy = e.data.global.y / stage.scale.y;
+
+					dragObj.x = gx + dx;
+					dragObj.y = gy + dy;
 				}				
 			}
 
