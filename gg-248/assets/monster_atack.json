@@ -241,7 +241,7 @@
 	"sourceSize": {"w":139,"h":139}
 }},
 "animations": {
-	"monster_attack": ["monster_attack_00125.png","monster_attack_00126.png","monster_attack_00127.png","monster_attack_00128.png","monster_attack_00129.png","monster_attack_00130.png","monster_attack_00131.png","monster_attack_00132.png","monster_attack_00133.png","monster_attack_00134.png","monster_attack_00135.png","monster_attack_00136.png","monster_attack_00137.png","monster_attack_00138.png","monster_attack_00139.png","monster_attack_00140.png","monster_attack_00141.png","monster_attack_00142.png","monster_attack_00143.png","monster_attack_00144.png","monster_attack_00145.png","monster_attack_00146.png","monster_attack_00147.png","monster_attack_00148.png","monster_attack_00149.png","monster_attack_00150.png","monster_attack_00151.png","monster_attack_00152.png","monster_attack_00153.png","monster_attack_00154.png"]
+	"atack": ["monster_attack_00125.png","monster_attack_00126.png","monster_attack_00127.png","monster_attack_00128.png","monster_attack_00129.png","monster_attack_00130.png","monster_attack_00131.png","monster_attack_00132.png","monster_attack_00133.png","monster_attack_00134.png","monster_attack_00135.png","monster_attack_00136.png","monster_attack_00137.png","monster_attack_00138.png","monster_attack_00139.png","monster_attack_00140.png","monster_attack_00141.png","monster_attack_00142.png","monster_attack_00143.png","monster_attack_00144.png","monster_attack_00145.png","monster_attack_00146.png","monster_attack_00147.png","monster_attack_00148.png","monster_attack_00149.png","monster_attack_00150.png","monster_attack_00151.png","monster_attack_00152.png","monster_attack_00153.png","monster_attack_00154.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
@@ -249,7 +249,7 @@
 	"image": "monster_atack.png",
 	"format": "RGBA8888",
 	"size": {"w":574,"h":574},
-	"scale": "0.26",
+	"scale": "1",
 	"smartupdate": "$TexturePacker:SmartUpdate:e4af05a1536b6a5b01d62e3aa82dbeca:7254b8be2153b84c58ee2b3faecc20df:08ac512cc685506c0400212c9228474b$"
 }
 }
