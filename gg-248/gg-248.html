@@ -45,7 +45,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 		.add('eggs1', 'assets/eggs1.png')
 		.add('eggs2', 'assets/eggs2.png')
 		.add('packshot', 'assets/packshot.png')
-		.add('hand', 'assets/hand.png')
+		//.add('hand', 'assets/hand.png')
 		.load(startGame);
 		
 		function startGame() {
@@ -65,7 +65,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 			enemyTower2.name = 'tower';
 			enemyTower2.interactive = true;
 
-			var hand = lev.sprite('hand', {x:90, y:-200, add:towers});
+			//var hand = lev.sprite('hand', {x:90, y:-200, add:towers});
 			var solid = lev.shapeRect(0xffffff, [0,0,960,960], {add:stage, anchor:0.5, alpha:0});
 
 			var ps = lev.sprite('packshot', {anchor:0.5, alpha:0, add:stage});
