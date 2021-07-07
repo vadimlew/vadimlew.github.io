@@ -44,6 +44,8 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 		.add('gun', 'assets/gun.png')
 		.add('eggs1', 'assets/eggs1.png')
 		.add('eggs2', 'assets/eggs2.png')
+		.add('packshot', 'assets/packshot.png')
+		.add('hand', 'assets/hand.png')
 		.load(startGame);
 		
 		function startGame() {
@@ -59,6 +61,14 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 			var enemyTower1 = new EnemyTower(270, 0, ['monster|9','monster|2','monster|4','monster|3'], true);
 			var enemyTower2 = new EnemyTower(500, 0, ['monster|90','eggs1|65','monster|31','monster|26|14','eggs2|99']);
 			var enemyTower3 = new EnemyTower(730, 0, ['monster|14','monster|56','eggs2|215','monster|31','eggs2|125']);
+
+			enemyTower2.name = 'tower';
+			enemyTower2.interactive = true;
+
+			var hand = lev.sprite('hand', {x:90, y:-200, add:towers});
+			var solid = lev.shapeRect(0xffffff, [0,0,960,960], {add:stage, anchor:0.5, alpha:0});
+
+			var ps = lev.sprite('packshot', {anchor:0.5, alpha:0, add:stage});
 
 			function PlayerTower(x, y) {
 				var tower = lev.container({x, y, add:towers});
@@ -84,6 +94,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 					player.level.text = Number(player.level.text)+1;
 					floor3.interactive = false;
 				};
+				floor2.startPos = new PIXI.Point(103, 68);
 				floor3.startPos = new PIXI.Point(103, 68);
 
 				DragBehavior.call(player);
@@ -96,6 +107,16 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 
 				tower.player = player;
 
+				tower.reset = () => {
+					player.level.text = 2;
+					player.position.set(103, 68);
+					player.floor = floor2;
+					floor2.addChild(player);
+					suit.alpha = 1;
+					floor3.interactive = true;
+					player.visible = true;
+				}
+
 				return tower;
 			}
 
@@ -106,6 +127,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				var py = -125;
 				for (let t of data) {
 					let floor = lev.sprite('floor_red', {y:py, add:tower});
+					floor.homeY = py;
 					t = t.split('|');
 
 					let type = t[0];
@@ -140,11 +162,24 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 						floor.name = 'floor';
 						floor.interactive = true;
 						floor.solve = solve;
-						floor.startPos = new PIXI.Point(65, 70);
+						floor.startPos = new PIXI.Point(65, 70);						
 					}
 					
 					tower.floors.push(floor);
 					py -= 125;
+				}
+
+				if (interactive) {
+					tower.reset = () => {
+						for (let floor of tower.floors) {
+							floor.alpha = 1;
+							floor.visible = true;
+							floor.y = floor.homeY;
+							floor.interactive = true;
+							floor.empty = false;
+							floor.enemy.visible = true;
+						}
+					}
 				}
 
 				function solve() {								
@@ -159,8 +194,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 						floor.interactive = false;
 						floor.empty = true;
 					} else {
-						enemyAtack(player, enemy);
-						resetGame();
+						enemyAtack(player, enemy);						
 					}
 				}
 
@@ -192,7 +226,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				})
 
 				gsap.delayedCall(0.75, ()=>{
-					enemy.destroy();					
+					enemy.visible = false;					
 				})
 			}
 
@@ -216,12 +250,18 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				})
 
 				gsap.delayedCall(0.75, ()=>{
-					player.destroy();
+					player.visible = false;
+					resetGame();
 				})
 			}
 
 			function resetGame() {
+				gsap.to(solid, {alpha:1, duration:1, onComplete:()=>{
+					playerTower.reset();
+					enemyTower1.reset();
+				}});
 
+				gsap.to(solid, {alpha:0, delay:1, duration:1});
 			}
 
 			function shakeLevel() {
@@ -231,8 +271,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 
 			function DragBehavior() {
 				var dragObj = this;
-				dragObj.floor = dragObj.parent;
-				var floorPos = dragObj.position.clone();
+				dragObj.floor = dragObj.parent;				
 				var startPos = new PIXI.Point();
 				var dx, dy;
 
@@ -252,7 +291,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 					dy = startPos.y - gy;
 
 					dragObj.x = startPos.x;
-					dragObj.y = startPos.y;					
+					dragObj.y = startPos.y;
 									
 					stage.on('pointermove', moveHandler);
 				}
@@ -260,8 +299,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				function upHandler(e) {					
 					dragObj.interactive = false;
 
-					let hitObj = lev.interact.hitTest(e.data.global);
-					console.log(hitObj.name);
+					let hitObj = lev.interact.hitTest(e.data.global);					
 					if (hitObj.name == 'floor') {
 						let floor = hitObj;
 						floor.solve(dragObj);
@@ -272,17 +310,21 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 							}
 						}
 						dragObj.floor = floor;
-						dragLayer.toLocal(floor.startPos, dragObj.floor, startPos);
-						floorPos = floor.startPos;
+						dragLayer.toLocal(floor.startPos, dragObj.floor, startPos);						
+					}
+
+					if (hitObj.name == 'tower' && Number(dragObj.level.text) > 12) {
+						ps.interactive = true;
+						gsap.to(ps, {alpha:1});
 					}
 
 					gsap.to(dragObj, {x:startPos.x, y:startPos.y, duration:0.25, ease:'quad.out', onComplete:()=>{
-						dragObj.position.copyFrom(floorPos);
+						dragObj.position.copyFrom(dragObj.floor.startPos);
 						dragObj.floor.addChild(dragObj);	
 						dragObj.interactive = true;
 					}});	
 
-					stage.off('pointermove', moveHandler);				
+					stage.off('pointermove', moveHandler);
 				}
 
 				function moveHandler(e) {
@@ -294,19 +336,24 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				}				
 			}
 
+			function makeHint() {
+
+			}
+
 			lev.resize.start({
 				portrait: [					
 					[bg, {x:270, y:480}],					
 					[earth, {x:0, y:480}],					
 					[towers, {x:0, y:950}],					
+					[ps, {x:270, y:480}]				
 				],
 				landscape: [					
 					[bg, {x:480, y:270}],
 					[earth, {x:0, y:270}],
 					[towers, {x:0, y:530}],
+					[ps, {x:480, y:270}]
 				]
-			});			
-
+			});				
 
 			function adClickHandler() {				
 				var userAgent = navigator.userAgent || navigator.vendor;
