@@ -72,7 +72,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				var player = lev.animationJSON('girl_idle', 'idle', {anchor:0.5, x:142, y:-181, alpha:0, add:towers, autoplay:true, animationSpeed:0.4});
 				var hand = lev.sprite('hand', {x:100, y:-160, angle:-30, alpha:0, add:towers});
 
-				var delayedCall = gsap.delayedCall(10, showPS);				
+				var delayedCall = gsap.delayedCall(15, showPS);				
 
 				var tl = gsap.timeline({repeat:-1, delay:2, repeatDelay:2});
 				tl.to(hand, {alpha:1, duration:0.25});
@@ -374,7 +374,14 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				function upHandler(e) {					
 					dragObj.interactive = false;
 
-					let hitObj = lev.interact.hitTest(e.data.global);					
+					let hitObj = lev.interact.hitTest(e.data.global);	
+
+					if (hitObj.name == 'tower' && Number(dragObj.level.text) > 12) {
+						ps.interactive = true;
+						gsap.to(ps, {alpha:1});
+						return;
+					}
+
 					if (hitObj.name == 'floor') {
 						let floor = hitObj;
 						floor.solve(dragObj);
@@ -386,11 +393,6 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 						}
 						dragObj.floor = floor;
 						dragLayer.toLocal(floor.startPos, dragObj.floor, startPos);						
-					}
-
-					if (hitObj.name == 'tower' && Number(dragObj.level.text) > 12) {
-						ps.interactive = true;
-						gsap.to(ps, {alpha:1});
 					}
 
 					gsap.to(dragObj, {x:startPos.x, y:startPos.y, duration:0.25, ease:'quad.out', onComplete:()=>{
