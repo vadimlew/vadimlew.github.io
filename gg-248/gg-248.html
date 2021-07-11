@@ -45,7 +45,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 		.add('eggs1', 'assets/eggs1.png')
 		.add('eggs2', 'assets/eggs2.png')
 		.add('packshot', 'assets/packshot.png')
-		//.add('hand', 'assets/hand.png')
+		.add('hand', 'assets/hand.png')
 		.load(startGame);
 		
 		function startGame() {
@@ -61,11 +61,80 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 			var enemyTower1 = new EnemyTower(270, 0, ['monster|9','monster|2','monster|4','monster|3'], true);
 			var enemyTower2 = new EnemyTower(500, 0, ['monster|90','eggs1|65','monster|31','monster|26|14','eggs2|99']);
 			var enemyTower3 = new EnemyTower(730, 0, ['monster|14','monster|56','eggs2|215','monster|31','eggs2|125']);
+			var enemyTower4 = new EnemyTower(960, 0, ['monster|47','eggs2|125','monster|156','eggs2|560','monster|124|172']);
 
 			enemyTower2.name = 'tower';
 			enemyTower2.interactive = true;
+			
+			makeHint();
 
-			//var hand = lev.sprite('hand', {x:90, y:-200, add:towers});
+			function makeHint() {				
+				var player = lev.animationJSON('girl_idle', 'idle', {anchor:0.5, x:142, y:-181, alpha:0, add:towers, autoplay:true, animationSpeed:0.4});
+				var hand = lev.sprite('hand', {x:100, y:-160, angle:-30, alpha:0, add:towers});
+
+				var delayedCall = gsap.delayedCall(10, showPS);				
+
+				var tl = gsap.timeline({repeat:-1, delay:2, repeatDelay:2});
+				tl.to(hand, {alpha:1, duration:0.25});
+				tl.to(player, {alpha:0.7, duration:0.25, delay:-0.25});
+				tl.to(hand.scale, {x:0.9, y:0.9, duration:0.25, delay:-0.25});				
+				tl.to(hand, {x:95, y:-295, duration:0.75});
+				tl.to(player, {x:135, y:-315, duration:0.75, delay:-0.75});				
+				tl.to(hand, {alpha:0, duration:0.25});
+				tl.to(player, {alpha:0, duration:0.25, delay:-0.25});
+				tl.to(hand.scale, {x:1, y:1, duration:0.25, delay:-0.25});				
+				tl.play();
+
+				playerTower.player.on('pointerdown', pointerdown);
+
+				function pointerdown() {
+					tl.seek(0);
+					tl.pause();
+					tl.kill();
+					hand.destroy();
+					player.destroy();
+					playerTower.player.off('pointerdown', pointerdown);
+					delayedCall.kill();
+				}	
+
+
+				function showPS() {
+					ps.interactive = true;
+					gsap.to(ps, {alpha:1});
+				}		
+			}
+
+			function makeHint2() {				
+				var player = lev.animationJSON('girl_idle', 'idle', {anchor:0.5, x:142, y:-308, alpha:0, add:towers, autoplay:true, animationSpeed:0.4});
+				var hand = lev.sprite('hand', {x:100, y:-295, angle:-30, alpha:0, add:towers});
+
+				var tl = gsap.timeline({repeat:-1, delay:2, repeatDelay:2});
+				tl.to(hand, {alpha:1, duration:0.25});
+				tl.to(player, {alpha:0.7, duration:0.25, delay:-0.25});
+				tl.to(hand.scale, {x:0.9, y:0.9, duration:0.25, delay:-0.25});				
+				tl.to(hand, {x:300, y:-160, duration:0.75});
+				tl.to(player, {x:340, y:-181, duration:0.75, delay:-0.75});				
+				tl.to(hand, {alpha:0, duration:0.25});
+				tl.to(player, {alpha:0, duration:0.25, delay:-0.25});
+				tl.to(hand.scale, {x:1, y:1, duration:0.25, delay:-0.25});				
+				tl.play();
+
+				playerTower.player.on('pointerdown', pointerdown);
+
+				function pointerdown() {
+					tl.seek(0);
+					tl.pause();
+					tl.kill();
+					hand.destroy();
+					player.destroy();
+					playerTower.player.off('pointerdown', pointerdown);
+				}				
+			}
+
+			function shiftTowers() {
+				gsap.to(towers, {x:-230, duration:1, ease:'quad.inOut'});
+			}
+
 			var solid = lev.shapeRect(0xffffff, [0,0,960,960], {add:stage, anchor:0.5, alpha:0});
 
 			var ps = lev.sprite('packshot', {anchor:0.5, alpha:0, add:stage});
@@ -93,6 +162,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 					electro.onComplete = electro.destroy;
 					player.level.text = Number(player.level.text)+1;
 					floor3.interactive = false;
+					makeHint2();
 				};
 				floor2.startPos = new PIXI.Point(103, 68);
 				floor3.startPos = new PIXI.Point(103, 68);
@@ -115,6 +185,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 					suit.alpha = 1;
 					floor3.interactive = true;
 					player.visible = true;
+					//makeHint();
 				}
 
 				return tower;
@@ -201,6 +272,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				return tower;
 			}
 
+			var attackCount = 0;
 			function playerAtack(player, enemy) {
 				player.idle.visible = false;
 				player.atack.visible = true;
@@ -226,9 +298,12 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				})
 
 				gsap.delayedCall(0.75, ()=>{
-					enemy.visible = false;					
+					enemy.visible = false;	
+					attackCount++;
+					if (attackCount >= 4)
+						shiftTowers();
 				})
-			}
+			}			
 
 			function enemyAtack(player, enemy) {
 				enemy.idle.visible = false;
@@ -334,23 +409,19 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 					dragObj.x = gx + dx;
 					dragObj.y = gy + dy;
 				}				
-			}
-
-			function makeHint() {
-
-			}
+			}			
 
 			lev.resize.start({
 				portrait: [					
 					[bg, {x:270, y:480}],					
 					[earth, {x:0, y:480}],					
-					[towers, {x:0, y:950}],					
+					[towers, {y:950}],					
 					[ps, {x:270, y:480}]				
 				],
 				landscape: [					
 					[bg, {x:480, y:270}],
 					[earth, {x:0, y:270}],
-					[towers, {x:0, y:530}],
+					[towers, {y:530}],
 					[ps, {x:480, y:270}]
 				]
 			});				
