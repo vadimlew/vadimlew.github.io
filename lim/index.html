@@ -48,7 +48,7 @@
 		var abient_light = new THREE.AmbientLight( 0xe0e2aa, 0.8 ); 		
 		scene.add(abient_light);
 
-		scene.fog = new THREE.Fog(0x649745, 100, 400);	
+		//scene.fog = new THREE.Fog(0x649745, 100, 400);	
 
 		var trees = new THREE.Object3D();
 		scene.add(trees);
@@ -62,13 +62,13 @@
 			scene.add(ground);		
 		});	
 
-		loaderFBX.load('assets/fir.fbx', function (object) {	
+		loaderFBX.load('assets/tree.fbx', function (object) {	
 			let fir = object.children[0];			
 			fir.castShadow = true; 
 			//fir.receiveShadow = true;
 
 			for (let i=0; i < 28; i++) {
-				for (let j=0; j < 25; j++) {
+				for (let j=0; j < 10; j++) {
 					let clonedFir = fir.clone();
 					clonedFir.position.x = -5 - j*9;
 					clonedFir.position.z = -5 - i*10;
@@ -98,8 +98,8 @@
 			for (let i=0; i < 15; i++) {
 				for (let j=0; j < 5; j++) {
 					let cloned = tree.clone();
-					cloned.position.x = 28 + j*8;
-					cloned.position.z = -200 + i*16 - 8*(j%2);					
+					cloned.position.x = 28 + j*10;
+					cloned.position.z = -250 + i*22 - 11*(j%2);					
 					cloned.rotation.y = 2*Math.PI*Math.random();
 					var scale = 0.8+0.2*Math.random();
 					cloned.scale.set(scale, scale, scale);
@@ -117,9 +117,9 @@
 			//console.clear();			
 			lev.sprite(texture3d, {anchor:0.5, add:game.main});
 
-			var tl = gsap.timeline({repeat: -1, repeatDelay:1});
-			tl.fromTo(truck.position, {z:0}, {z:-180, duration:2, ease:'quad.inOut'});
-			tl.fromTo(truck.position, {z:100}, {z:0, duration:2, ease:'quad.inOut'});
+			//var tl = gsap.timeline({repeat: -1, repeatDelay:1});
+			//tl.fromTo(truck.position, {z:0}, {z:-180, duration:2, ease:'quad.inOut'});
+			//tl.fromTo(truck.position, {z:100}, {z:0, duration:2, ease:'quad.inOut'});
 			
 			lev.resize.start({
 				portrait: [
