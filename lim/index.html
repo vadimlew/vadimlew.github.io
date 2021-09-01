@@ -35,7 +35,7 @@
 		var texture3d = PIXI.Texture.from(render3d.domElement);
 
 		var camera = new THREE.PerspectiveCamera(65, 1);
-		camera.position.set(60,80,60);
+		camera.position.set(60,100,60);
 		camera.lookAt(0,0,0);
 		scene.add(camera);		
 
@@ -95,11 +95,11 @@
 			tree.children[0].castShadow = true;
 			//tree.children[0].receiveShadow = true;
 
-			for (let i=0; i < 15; i++) {
-				for (let j=0; j < 5; j++) {
+			for (let i=0; i < 10; i++) {
+				for (let j=0; j < 4; j++) {
 					let cloned = tree.clone();
-					cloned.position.x = 28 + j*10;
-					cloned.position.z = -250 + i*22 - 11*(j%2);					
+					cloned.position.x = 28 + j*11;
+					cloned.position.z = -150 + i*22 - 11*(j%2);					
 					cloned.rotation.y = 2*Math.PI*Math.random();
 					var scale = 0.8+0.2*Math.random();
 					cloned.scale.set(scale, scale, scale);
@@ -117,9 +117,9 @@
 			//console.clear();			
 			lev.sprite(texture3d, {anchor:0.5, add:game.main});
 
-			//var tl = gsap.timeline({repeat: -1, repeatDelay:1});
-			//tl.fromTo(truck.position, {z:0}, {z:-180, duration:2, ease:'quad.inOut'});
-			//tl.fromTo(truck.position, {z:100}, {z:0, duration:2, ease:'quad.inOut'});
+			var tl = gsap.timeline({repeat: -1, repeatDelay:1});
+			tl.fromTo(truck.position, {z:0}, {z:-180, duration:2, ease:'quad.inOut'});
+			tl.fromTo(truck.position, {z:100}, {z:0, duration:2, ease:'quad.inOut'});
 			
 			lev.resize.start({
 				portrait: [
@@ -134,13 +134,20 @@
 				]
 			});
 
-			function animate() {				
-				texture3d.update();
+			let elapsed = Date.now();
+
+			function animate() {	
+				var now = Date.now();
+				var dt = (now - elapsed);
+				
+				trees.position.z += 0.01*dt;
 				render3d.render(scene, camera);	
-				trees.position.z += 0.1;			
+				texture3d.update();					
+
+				elapsed = now;		
 				requestAnimationFrame(animate);
 			}
-			animate();			
+			animate();		    	
 		}
 		
 		function showPackshot() {
