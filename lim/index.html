@@ -30,7 +30,7 @@
 		var render3d = new THREE.WebGLRenderer({alpha:true, antialias:true});
 		render3d.shadowMap.enabled = true;
     	render3d.shadowMap.type = THREE.PCFSoftShadowMap;    	
-		render3d.setSize(1080, 1080);
+		render3d.setSize(540, 540);
 		var scene = new THREE.Scene();
 		var texture3d = PIXI.Texture.from(render3d.domElement);
 
@@ -42,7 +42,7 @@
 		var point_light = new THREE.PointLight( 0xe0e2aa, 0.8, 0, 2 );
 	    point_light.position.set( 100, 250, -100 );
 	    point_light.castShadow = true; 
-	    point_light.shadow.mapSize.set(2048, 2048);
+	    point_light.shadow.mapSize.set(1024, 1024);
 	    scene.add(point_light);	    
 
 		var abient_light = new THREE.AmbientLight( 0xe0e2aa, 0.8 ); 		
@@ -64,7 +64,7 @@
 
 		loaderFBX.load('assets/tree.fbx', function (object) {	
 			let fir = object.children[0];			
-			//fir.castShadow = true; 
+			fir.castShadow = true; 
 			//fir.receiveShadow = true;
 
 			for (let i=0; i < 28; i++) {
@@ -92,7 +92,7 @@
 
 		loaderFBX.load('assets/tree2.fbx', function (object) {	
 			let tree = object;		
-			//tree.children[0].castShadow = true;
+			tree.children[0].castShadow = true;
 			//tree.children[0].receiveShadow = true;
 
 			for (let i=0; i < 10; i++) {
@@ -115,7 +115,7 @@
 		
 		function startGame() {	
 			//console.clear();			
-			lev.sprite(texture3d, {anchor:0.5, add:game.main});
+			lev.sprite(texture3d, {anchor:0.5, scale:2, add:game.main});
 
 			var tl = gsap.timeline({repeat: -1, repeatDelay:1});
 			tl.fromTo(truck.position, {z:0}, {z:-180, duration:2, ease:'quad.inOut'});
