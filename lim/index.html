@@ -6,7 +6,7 @@
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r125/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fflate@0.7.1/umd/index.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r132/examples/js/loaders/FBXLoader.js"></script>
+<script type="text/javascript" src="FBXLoader.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"></script>
@@ -36,6 +36,7 @@
 
 		var camera = new THREE.PerspectiveCamera(65, 1);
 		camera.position.set(60,100,60);
+		//camera.position.set(120,200,120);
 		camera.lookAt(0,0,0);
 		scene.add(camera);		
 
@@ -46,80 +47,180 @@
 	    scene.add(point_light);	    
 
 		var abient_light = new THREE.AmbientLight( 0xe0e2aa, 0.8 ); 		
-		scene.add(abient_light);
+		scene.add(abient_light);	
 
-		//scene.fog = new THREE.Fog(0x649745, 100, 400);	
+		var harvester, truck;	
+		var trees = [];			
 
-		var trees = new THREE.Object3D();
-		scene.add(trees);
-		var truck;	
+		loadModels([
+			{url:'assets/ground.fbx', callback:onGroundLoad},
+			{url:'assets/tree.fbx', callback:onTreeLoad},
+			{url:'assets/fir.fbx', callback:onFirLoad},
+			{url:'assets/truck.fbx', callback:onTruckLoad},
+			{url:'assets/harvester.fbx', callback:onHarvesterLoad}
+		], ()=>{
+			//lev.app.loader		
+			//.load(startGame)
+			startGame();
+		})
 
-		var loaderFBX = new THREE.FBXLoader();
+		function loadModels(paths, onLoadComplete) {
+			var loaderFBX = new THREE.FBXLoader();
+			var i=0;
 
-		loaderFBX.load('assets/ground.fbx', function (object) {	
-			let ground = object.children[0];			
-			ground.receiveShadow = true;
-			scene.add(ground);		
-		});	
+			loadNext();
 
-		loaderFBX.load('assets/tree.fbx', function (object) {	
-			let fir = object.children[0];			
-			fir.castShadow = true; 
-			//fir.receiveShadow = true;
-
-			for (let i=0; i < 28; i++) {
-				for (let j=0; j < 10; j++) {
-					let clonedFir = fir.clone();
-					clonedFir.position.x = -5 - j*9;
-					clonedFir.position.z = -5 - i*10;
-					trees.add(clonedFir);
+			function loadNext() {
+				if (i >= paths.length) {
+					onLoadComplete();
+					return;
 				}
-			}
-					
-		});		
-
-		loaderFBX.load('assets/truck.fbx', function (object) {	
-			truck = object;		
-			for (var child of truck.children) {
-				child.castShadow = true;
-				child.receiveShadow = true;
+				loaderFBX.load(paths[i].url, (obj) => {
+					paths[i].callback(obj);
+					i++;
+					loadNext();
+				})
 			}			
-			truck.position.set(8,0,0);
-			scene.add(truck);
+		}
 
-			startGame();		
-		});
+		function onGroundLoad(obj) {
+			let ground = obj.children[0];
+			ground.receiveShadow = true;
+			scene.add(ground);
+		}
 
-		loaderFBX.load('assets/tree2.fbx', function (object) {	
-			let tree = object;		
-			tree.children[0].castShadow = true;
-			//tree.children[0].receiveShadow = true;
+		function onTreeLoad(obj) {			
+			obj.children[0].castShadow = true;			
 
 			for (let i=0; i < 10; i++) {
 				for (let j=0; j < 4; j++) {
-					let cloned = tree.clone();
-					cloned.position.x = 28 + j*11;
-					cloned.position.z = -150 + i*22 - 11*(j%2);					
-					cloned.rotation.y = 2*Math.PI*Math.random();
+					let tree = obj.clone();
+					tree.position.x = 28 + j*11;
+					tree.position.z = -150 + i*22 - 11*(j%2);					
+					tree.rotation.y = 2*Math.PI*Math.random();
+					tree.maxZ = 70;
+					tree.deltaZ = 220;
 					var scale = 0.8+0.2*Math.random();
-					cloned.scale.set(scale, scale, scale);
-					trees.add(cloned);
+					tree.scale.set(scale, scale, scale);
+					trees.push(tree);
+					scene.add(tree);
 				}
+			}
+		}
+
+		function onFirLoad(obj) {
+			let Fir = obj;			
+			Fir.children[0].castShadow = true; 	 	
+			Fir.children[1].castShadow = true;
+
+			let dx = 9.5;
+			let dz = 10;
+
+			for (let i=0; i < 19; i++) {
+				for (let j=0; j < 8; j++) {
+					let fir = Fir.clone();
+					fir.position.x = -52.5 - j*dx;
+					fir.position.z = 65 - i*dz;
+					fir.maxZ = 65;
+					fir.deltaZ = 180;
+					trees.push(fir);
+					scene.add(fir);
+				}
+			}
+
+			for (let i=0; i < 12; i++) {
+				for (let j=0; j < 5; j++) {
+					let fir = Fir.clone();
+					fir.position.x = -5 - j*dx;
+					fir.position.z = -5 - i*dz;
+					fir.maxZ = -7;
+					fir.deltaZ = 120;
+					fir.name = 'fir';
+
+					let tl = gsap.timeline({paused:true});
+					tl.to(fir.position, {x:5+j*1.5, y:5, duration:0.6, ease:'quad.inOut'}, j*0.1);
+					tl.to(fir.rotation, {x:-1.57, duration:0.6, ease:'quad.inOut'}, j*0.1);
+					tl.call(()=>{
+						//fir.getObjectByName('trunk').visible = false;
+						//fir.getObjectByName('foliage').visible = false;
+						fir.position.z -= fir.deltaZ;
+						fir.position.x = -5 - j*dx;
+						fir.position.y = 0;
+						fir.rotation.x = 0;	
+						fir.tween.pause();
+						fir.tween.seek(0);
+					}/*, null, j*0.1+0.3*/)
+
+					fir.tween = tl;
+
+					trees.push(fir);
+					scene.add(fir);
+				}
+			}
+		}
+
+		function onTruckLoad(obj) {
+			truck = obj;		
+			for (var child of truck.children) {
+				child.castShadow = true;
+				child.receiveShadow = true;
 			}	
-		});		
 
-		//lev.app.loader		
-		//.load(startGame)
+			truck.position.set(8,0,60);
+			scene.add(truck);
 
-		//startGame();
+			var tl = gsap.timeline({repeat: -1});
+			tl.fromTo(truck.position, {z:60}, {z:0, duration:1, ease:'quad.inOut'});			
+			tl.to(truck.position, {z:-180, duration:1.5, ease:'quad.inOut'}, 1.4);
+			tl.fromTo(truck.position, {z:100}, {z:60, duration:1, ease:'quad.inOut'});
+
+			truck = truck.clone();
+			truck.position.set(8,0,100);
+			scene.add(truck);
+
+			var tl = gsap.timeline({repeat: -1, delay:1});
+			tl.fromTo(truck.position, {z:60}, {z:0, duration:1, ease:'quad.inOut'});			
+			tl.to(truck.position, {z:-180, duration:1.5, ease:'quad.inOut'}, 1.4);	
+			tl.fromTo(truck.position, {z:100}, {z:60, duration:1, ease:'quad.inOut'});
+
+			truck = truck.clone();
+			truck.position.set(8,0,100);
+			scene.add(truck);
+
+			var tl = gsap.timeline({repeat: -1, delay:2});
+			tl.fromTo(truck.position, {z:60}, {z:0, duration:1, ease:'quad.inOut'});			
+			tl.to(truck.position, {z:-180, duration:1.5, ease:'quad.inOut'}, 1.4);		
+			tl.fromTo(truck.position, {z:100}, {z:60, duration:1, ease:'quad.inOut'});
+		}
+
+		function onHarvesterLoad(obj) {
+			harvester = obj;
+			for (var child of harvester.children) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}	
+
+			harvester.wheels1 = harvester.getObjectByName('wheels1');
+			harvester.wheels2 = harvester.getObjectByName('wheels2');
+			harvester.stick = harvester.getObjectByName('stick');
+			harvester.saw = harvester.getObjectByName('saw');			
+
+			var tl = gsap.timeline({repeat: -1, /*repeatDelay:1*/});
+			tl.to(harvester.stick.position, {x:-20, duration:1, ease:'quad.inOut'}, 0);
+			tl.to(harvester.saw.position, {x:-20, duration:1, ease:'quad.inOut'}, 0);
+			tl.to(harvester.stick.position, {x:17, duration:1, ease:'quad.inOut'}, 1);
+			tl.to(harvester.saw.position, {x:17, duration:1, ease:'quad.inOut'}, 1);
+
+			gsap.to(harvester.saw.rotation, {z:3.14, duration:0.25, repeat:-1, ease:'linear'})
+			
+			harvester.position.set(-23,0,17);
+			scene.add(harvester);
+		}
+		
 		
 		function startGame() {	
 			//console.clear();			
-			lev.sprite(texture3d, {anchor:0.5, scale:2, add:game.main});
-
-			var tl = gsap.timeline({repeat: -1, repeatDelay:1});
-			tl.fromTo(truck.position, {z:0}, {z:-180, duration:2, ease:'quad.inOut'});
-			tl.fromTo(truck.position, {z:100}, {z:0, duration:2, ease:'quad.inOut'});
+			lev.sprite(texture3d, {anchor:0.5, scale:2, add:game.main});			
 			
 			lev.resize.start({
 				portrait: [
@@ -140,7 +241,21 @@
 				var now = Date.now();
 				var dt = (now - elapsed);
 				
-				trees.position.z += 0.01*dt;
+				harvester.wheels1.rotation.x -= 0.005;
+				harvester.wheels2.rotation.x -= 0.005;								
+
+				for (let tree of trees) {
+					tree.position.z += 0.01*dt;
+					if (tree.position.z >= tree.maxZ) {
+						if (tree.name == 'fir') {
+							//tree.tween.seek(0);
+							tree.tween.play();
+						}
+						else 
+							tree.position.z -= tree.deltaZ;
+					}
+				}
+
 				render3d.render(scene, camera);	
 				texture3d.update();					
 
