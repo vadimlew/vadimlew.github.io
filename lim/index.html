@@ -116,25 +116,25 @@
 			let dx = 9.5;
 			let dz = 10;
 
-			for (let i=0; i < 19; i++) {
+			for (let i=0; i < 29; i++) {
 				for (let j=0; j < 8; j++) {
 					let fir = Fir.clone();
 					fir.position.x = -52.5 - j*dx;
 					fir.position.z = 65 - i*dz;
 					fir.maxZ = 65;
-					fir.deltaZ = 180;
+					fir.deltaZ = 180+100;
 					trees.push(fir);
 					scene.add(fir);
 				}
 			}
 
-			for (let i=0; i < 12; i++) {
+			for (let i=0; i < 17; i++) {
 				for (let j=0; j < 5; j++) {
 					let fir = Fir.clone();
 					fir.position.x = -5 - j*dx;
 					fir.position.z = -5 - i*dz;
 					fir.maxZ = -7;
-					fir.deltaZ = 120;
+					fir.deltaZ = 120+50;
 					fir.name = 'fir';
 
 					let tl = gsap.timeline({paused:true});
@@ -245,7 +245,7 @@
 				harvester.wheels2.rotation.x -= 0.005;								
 
 				for (let tree of trees) {
-					tree.position.z += 0.01*dt;
+					tree.position.z += 2/30//*dt;
 					if (tree.position.z >= tree.maxZ) {
 						if (tree.name == 'fir') {
 							//tree.tween.seek(0);
