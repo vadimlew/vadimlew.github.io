@@ -37,6 +37,7 @@
 		var camera = new THREE.PerspectiveCamera(65, 1);
 		camera.position.set(60,100,60);
 		//camera.position.set(120,200,120);
+		//camera.position.set(20,20,30);
 		camera.lookAt(0,0,0);
 		scene.add(camera);		
 
@@ -51,17 +52,21 @@
 
 		var harvester, truck;	
 		var trees = [];			
+		var trucks = [];
+
+		var globalTL = gsap.timeline({repeat:-1, paused:true});
 
 		loadModels([
-			{url:'assets/ground.fbx', callback:onGroundLoad},
-			{url:'assets/tree.fbx', callback:onTreeLoad},
-			{url:'assets/fir.fbx', callback:onFirLoad},
-			{url:'assets/truck.fbx', callback:onTruckLoad},
-			{url:'assets/harvester.fbx', callback:onHarvesterLoad}
+			{url:'assets/ground.fbx', cb:onGroundLoad},
+			{url:'assets/tree.fbx', cb:onTreeLoad},
+			{url:'assets/fir.fbx', cb:onFirLoad},
+			{url:'assets/truck.fbx', cb:onTruckLoad},
+			{url:'assets/harvester.fbx', cb:onHarvesterLoad}
 		], ()=>{
-			//lev.app.loader		
-			//.load(startGame)
-			startGame();
+			lev.app.loader
+			.add('button', 'assets/button.png')		
+			.load(startGame)
+			//startGame();
 		})
 
 		function loadModels(paths, onLoadComplete) {
@@ -76,7 +81,7 @@
 					return;
 				}
 				loaderFBX.load(paths[i].url, (obj) => {
-					paths[i].callback(obj);
+					paths[i].cb(obj);
 					i++;
 					loadNext();
 				})
@@ -90,7 +95,7 @@
 		}
 
 		function onTreeLoad(obj) {			
-			obj.children[0].castShadow = true;			
+			obj.children[0].castShadow = true;
 
 			for (let i=0; i < 10; i++) {
 				for (let j=0; j < 4; j++) {
@@ -103,7 +108,7 @@
 					var scale = 0.8+0.2*Math.random();
 					tree.scale.set(scale, scale, scale);
 					trees.push(tree);
-					scene.add(tree);
+					scene.add(tree);					
 				}
 			}
 		}
@@ -122,11 +127,13 @@
 					fir.position.x = -52.5 - j*dx;
 					fir.position.z = 65 - i*dz;
 					fir.maxZ = 65;
-					fir.deltaZ = 180+100;
-					trees.push(fir);
+					fir.deltaZ = 180+100;					
 					scene.add(fir);
+					globalTL.to(fir.position, {z:'+=10', duration:1, ease:'none', repeat:-1}, 0);
 				}
 			}
+
+			var cutTL = gsap.timeline({repeat:-1, duration:1});
 
 			for (let i=0; i < 17; i++) {
 				for (let j=0; j < 5; j++) {
@@ -134,63 +141,56 @@
 					fir.position.x = -5 - j*dx;
 					fir.position.z = -5 - i*dz;
 					fir.maxZ = -7;
-					fir.deltaZ = 120+50;
+					fir.deltaZ = 170;
 					fir.name = 'fir';
 
-					let tl = gsap.timeline({paused:true});
-					tl.to(fir.position, {x:5+j*1.5, y:5, duration:0.6, ease:'quad.inOut'}, j*0.1);
-					tl.to(fir.rotation, {x:-1.57, duration:0.6, ease:'quad.inOut'}, j*0.1);
-					tl.call(()=>{
-						//fir.getObjectByName('trunk').visible = false;
-						//fir.getObjectByName('foliage').visible = false;
-						fir.position.z -= fir.deltaZ;
-						fir.position.x = -5 - j*dx;
-						fir.position.y = 0;
-						fir.rotation.x = 0;	
-						fir.tween.pause();
-						fir.tween.seek(0);
-					}/*, null, j*0.1+0.3*/)
+					if (i == 0) {	
+						cutTL.call(()=>{fir.getObjectByName('foliage').visible = true;});						
+						cutTL.to(fir.position, {x:5.25+j*1.4, y:3.8, duration:0.6, ease:'quad.inOut'}, j*0.05);
+						cutTL.to(fir.rotation, {x:-1.57, duration:0.6, ease:'quad.inOut'}, j*0.05);
+						cutTL.call(()=>{							
+							fir.getObjectByName('foliage').visible = false;	
+						}, null, j*0.1+0.25);
+											
+					} else {
+						globalTL.to(fir.position, {z:'+=10', duration:1, ease:'none', repeat:-1}, 0);
+					}
 
-					fir.tween = tl;
-
-					trees.push(fir);
 					scene.add(fir);
 				}
 			}
+
+			globalTL.add(cutTL, 0);
 		}
 
 		function onTruckLoad(obj) {
-			truck = obj;		
-			for (var child of truck.children) {
-				child.castShadow = true;
-				child.receiveShadow = true;
+			let truck = obj;
+			for (var child of truck.children) {				
+				child.castShadow = true;				
+				if (child.name != 'trunk') child.receiveShadow = true;
 			}	
 
-			truck.position.set(8,0,60);
+			truck.position.set(8,0,-15);			
 			scene.add(truck);
 
-			var tl = gsap.timeline({repeat: -1});
-			tl.fromTo(truck.position, {z:60}, {z:0, duration:1, ease:'quad.inOut'});			
-			tl.to(truck.position, {z:-180, duration:1.5, ease:'quad.inOut'}, 1.4);
-			tl.fromTo(truck.position, {z:100}, {z:60, duration:1, ease:'quad.inOut'});
+			let truck2 = truck.clone();
+			truck2.position.set(8,0,10);
+			truck2.trunk = truck2.getObjectByName('trunk');			
+			truck2.trunk.visible = false;
+			scene.add(truck2);
 
-			truck = truck.clone();
-			truck.position.set(8,0,100);
-			scene.add(truck);
+			let truck3 = truck.clone();
+			truck3.position.set(8,0,100);
+			truck3.trunk = truck3.getObjectByName('trunk');			
+			truck3.trunk.visible = false;
+			scene.add(truck3);
 
-			var tl = gsap.timeline({repeat: -1, delay:1});
-			tl.fromTo(truck.position, {z:60}, {z:0, duration:1, ease:'quad.inOut'});			
-			tl.to(truck.position, {z:-180, duration:1.5, ease:'quad.inOut'}, 1.4);	
-			tl.fromTo(truck.position, {z:100}, {z:60, duration:1, ease:'quad.inOut'});
+			var truckTL = gsap.timeline({repeat:-1, duration:1});
+			truckTL.to(truck.position, {z:-180, duration:1, ease:'quad.in'}, 0);
+			truckTL.to(truck2.position, {z:-15, duration:0.5, ease:'quad.inOut'}, 0);
+			truckTL.to(truck3.position, {z:10, duration:1, ease:'quad.inOut'}, 0);
 
-			truck = truck.clone();
-			truck.position.set(8,0,100);
-			scene.add(truck);
-
-			var tl = gsap.timeline({repeat: -1, delay:2});
-			tl.fromTo(truck.position, {z:60}, {z:0, duration:1, ease:'quad.inOut'});			
-			tl.to(truck.position, {z:-180, duration:1.5, ease:'quad.inOut'}, 1.4);		
-			tl.fromTo(truck.position, {z:100}, {z:60, duration:1, ease:'quad.inOut'});
+			globalTL.add(truckTL, 0);			
 		}
 
 		function onHarvesterLoad(obj) {
@@ -203,63 +203,68 @@
 			harvester.wheels1 = harvester.getObjectByName('wheels1');
 			harvester.wheels2 = harvester.getObjectByName('wheels2');
 			harvester.stick = harvester.getObjectByName('stick');
-			harvester.saw = harvester.getObjectByName('saw');			
+			harvester.saw = harvester.getObjectByName('saw');
 
-			var tl = gsap.timeline({repeat: -1, /*repeatDelay:1*/});
-			tl.to(harvester.stick.position, {x:-20, duration:1, ease:'quad.inOut'}, 0);
-			tl.to(harvester.saw.position, {x:-20, duration:1, ease:'quad.inOut'}, 0);
-			tl.to(harvester.stick.position, {x:17, duration:1, ease:'quad.inOut'}, 1);
-			tl.to(harvester.saw.position, {x:17, duration:1, ease:'quad.inOut'}, 1);
+			harvester.stick.position.x = 18;	
+			harvester.saw.position.x = 18;	
 
-			gsap.to(harvester.saw.rotation, {z:3.14, duration:0.25, repeat:-1, ease:'linear'})
-			
 			harvester.position.set(-23,0,17);
-			scene.add(harvester);
-		}
+			scene.add(harvester);		
+
+			var tl = gsap.timeline({repeat: -1, duration:2});
+			tl.to(harvester.saw.rotation, {z:3.14*8, duration:2, ease:'linear'}, 0);
+			tl.to(harvester.wheels1.rotation, {z:3.14*2, duration:2, ease:'linear'}, 0);
+			tl.to(harvester.wheels2.rotation, {z:3.14*2, duration:2, ease:'linear'}, 0);
+			tl.to(harvester.stick.position, {x:-20, duration:0.5, ease:'quad.inOut'}, 0.5);
+			tl.to(harvester.saw.position, {x:-20, duration:0.5, ease:'quad.inOut'}, 0.5);
+			tl.to(harvester.stick.position, {x:18, duration:0.5, ease:'quad.inOut'}, 1.5);
+			tl.to(harvester.saw.position, {x:18, duration:0.5, ease:'quad.inOut'}, 1.5);
+
+			globalTL.add(tl, 0);			
+		}		
 		
-		
-		function startGame() {	
-			//console.clear();			
-			lev.sprite(texture3d, {anchor:0.5, scale:2, add:game.main});			
+		function startGame() {			
+			//globalTL.play();			
+
+			lev.sprite(texture3d, {anchor:0.5, scale:2, add:game.main});	
+			var button = lev.sprite('button', {anchor:0.5, alpha:0.75, interactive:true, add:game.main});
+
+			button.on('pointerdown', downHandler);	
+			button.on('pointerup', upHandler);	
 			
 			lev.resize.start({
 				portrait: [
 					[game.main, {x:320, y:540}],
+					[button, {x:0, y:470}],
 					[game.ps, {x:320, y:540}],
 					[camera, {x:320, y:540}]
 				],
 				landscape: [
 					[game.main, {x:540, y:320}],
+					[button, {x:0, y:250}],
 					[game.ps, {x:540, y:320}],
 					[camera, {x:540, y:320}]
 				]
 			});
 
-			let elapsed = Date.now();
+			function downHandler() {				
+				globalTL.play();
+			}
 
-			function animate() {	
-				var now = Date.now();
-				var dt = (now - elapsed);
-				
-				harvester.wheels1.rotation.x -= 0.005;
-				harvester.wheels2.rotation.x -= 0.005;								
+			function upHandler() {				
+				globalTL.pause();		
+			}
 
+			function animate() {
 				for (let tree of trees) {
-					tree.position.z += 2/30//*dt;
-					if (tree.position.z >= tree.maxZ) {
-						if (tree.name == 'fir') {
-							//tree.tween.seek(0);
-							tree.tween.play();
-						}
-						else 
-							tree.position.z -= tree.deltaZ;
+					if (!globalTL.paused()) tree.position.z += 2/30;
+					if (tree.position.z >= tree.maxZ) {						
+						tree.position.z -= tree.deltaZ;						
 					}
 				}
 
 				render3d.render(scene, camera);	
-				texture3d.update();					
-
-				elapsed = now;		
+				texture3d.update();				
 				requestAnimationFrame(animate);
 			}
 			animate();		    	
