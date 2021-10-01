@@ -197,7 +197,8 @@ function LEV(app_width, app_height, backgroundColor=0x000000) {
 	function setTransform(sprite, transform) {
 		for (var prop in transform) {
 			if (sprite[prop] === void 0) continue;
-			if (typeof transform[prop] == 'number' || typeof transform[prop] == 'boolean') sprite[prop] = transform[prop];
+			if (typeof transform[prop] == 'object' && typeof sprite[prop] == 'object') setTransform(sprite[prop], transform[prop]);
+			if (typeof transform[prop] == 'number' || typeof transform[prop] == 'boolean' || typeof transform[prop] == 'string') sprite[prop] = transform[prop];
 			if (sprite[prop] instanceof PIXI.ObservablePoint) {
 				if (typeof transform[prop] === 'number') sprite[prop].set(transform[prop]);
 				else if (transform[prop] instanceof Array) sprite[prop].set(...transform[prop]);						
@@ -205,6 +206,7 @@ function LEV(app_width, app_height, backgroundColor=0x000000) {
 			}
 		}
 		if (transform.add) transform.at? transform.add.addChildAt(sprite, transform.at) : transform.add.addChild(sprite);
+		if (transform.dev) makeDraggable(sprite);
 	}
 
 	function globalPosOf(sprite) {
