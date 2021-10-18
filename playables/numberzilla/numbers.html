@@ -79,13 +79,41 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 			cellBlue.hitArea = new PIXI.Rectangle(105-178, 105-178, 145, 145);	
 			cellPink.hitArea = new PIXI.Rectangle(105-178, 105-178, 145, 145);	
 
-			cellPink.on('pointerdown', ()=>{console.log('down')})	
-
-			let hand = lev.sprite('hand', {alpha:0, in:stage});					
+			let hand = lev.sprite('hand', {alpha:0, pivot:{x:50, y:50}, x:100, y:100, in:cellBlue});								
 
 			function makeHint() {
-				let timeline = gsap.timeline();
-			}
+				let points = [{x:0, y:0}, {x:-6, y:-27}, {x:-6, y:-28}, {x:-3, y:-41}, {x:1, y:-53}, {x:5, y:-66}, {x:9, y:-91}, {x:10, y:-104}, {x:10, y:-117}, {x:10, y:-131}, {x:8, y:-143}, {x:0, y:-155}, {x:-9, y:-164}, {x:-19, y:-173}, {x:-28, y:-181}];
+
+				let rawPath = MotionPathPlugin.arrayToRawPath(points, {curviness:0.2});
+				let path = MotionPathPlugin.rawPathToString(rawPath);
+
+				let sheet = new PIXI.Graphics();			
+				sheet.alpha = 0.6;
+				sheet.position.set(cellBlue.x+5, cellBlue.y-30);
+				sheet.lineStyle (20, 0xffffff, 1);					
+				sheet.moveTo(points[0].x, points[0].y);				
+				for (let i=0; i<points.length; i++) {
+					sheet.lineTo(points[i].x, points[i].y);
+				}							
+				stage.addChildAt(sheet, 2);
+
+				let mask = new PIXI.Graphics();
+				mask.beginFill(0);
+				mask.drawRect(0,0,150,200);
+				mask.x = -75;
+				mask.y = 0;
+				sheet.addChild(mask);
+				sheet.mask = mask;
+
+				let tl = gsap.timeline({repeat:-1});
+				tl.to(hand, {alpha:1, x:0, y:0, duration:0.5}, 2);
+				tl.to(hand, {motionPath:{path}, duration:1}, 2.5);				
+				tl.to(mask, {y:-180, duration:1}, 2.5);				
+				tl.to(sheet, {alpha:0, duration:0.25}, 3.5);				
+				tl.to(hand, {alpha:0, duration:0.25}, 3.5);	
+
+				hand.tl = tl;			
+			}			
 			
 			lev.resize.start({
 				portrait: [					
@@ -115,6 +143,8 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				]
 			});	
 
+			makeHint();
+
 			cellBlue.on('pointerdown', pointerDownHandler);
 			cellPink.on('pointerup', pointerPinkUpHandler);
 			stage.on('pointerup', pointerStageUpHandler);
@@ -135,6 +165,9 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				
 				stage.on('pointermove', pointerMoveHandler);
 				gsap.to(waves, {alpha:0, duration:0.5});
+
+				hand.tl.seek(0);
+				hand.tl.pause();
 			}
 
 			function pointerMoveHandler(e) {
@@ -144,12 +177,12 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				let py = parseInt(e.data.global.y / stage.scale.y);	
 
 				sheet.clear();
-				sheet.lineStyle (15, 0xffffff, 1);					
+				sheet.lineStyle (20, 0xffffff, 1);					
 				sheet.moveTo(points[0].x, points[0].y);
 				for (let i=0; i<points.length; i++) {
 					sheet.lineTo(points[i].x, points[i].y);
 				}			
-				sheet.lineTo(px, py);						
+				sheet.lineTo(px, py);
 
 				if ( dist(point.x, point.y, px, py) > 12 ) {
 					point.x = px;
@@ -169,6 +202,12 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				if (!isStartLine) return;
 				isStartLine = false;
 
+				/*let strPath = '';
+				for (let i=0; i<points.length; i++) {
+					strPath = strPath.concat('{x:'+(points[i].x-cellBlue.x), ', y:'+(points[i].y-cellBlue.y)+'}, ');
+				}
+				console.log(strPath);*/
+
 				points.length = 0;
 				stage.off('pointermove', pointerMoveHandler);
 				cellBlue.interactive = false;
@@ -182,6 +221,8 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				gsap.killTweensOf(waves);
 				waves.anim.seek(0);
 				gsap.to(waves, {alpha:1, delay:0.25, duration:0.5});
+
+				hand.tl.play();
 			}
 
 			function pointerPinkUpHandler() {	
