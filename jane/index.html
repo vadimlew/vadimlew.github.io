@@ -25,9 +25,9 @@
     stage.addChild(logoMesh);    
 
     setTimeout(()=>{     
-      animateColumn(logoMesh, 0, 3, 40, -40, 3.5);   
-      animateColumn(logoMesh, 1, 3, 40, 40, 3.3);  
-      animateColumn(logoMesh, 2, 3, 40, -40, 3.1);
+      animateColumn(logoMesh, 0, 3, 60, -70, 2.5, 1);   
+      animateColumn(logoMesh, 1, 3, -45, 60, 2, 0);  
+      animateColumn(logoMesh, 2, 3, 55, -80, 3, -1);
     }, 10); 
 
     let star1 = PIXI.Sprite.from('star1.png');
@@ -43,7 +43,7 @@
     gsap.from(star2.scale, {x:0.3, y:0.3, duration:3, yoyo:true, repeat:-1, ease:'quad.inOut'});
   })   
 
-  function animateColumn(logoMesh, strtIdx, delta, rangeX, rangeY, duration) {    
+  function animateColumn(logoMesh, strtIdx, delta, rangeX, rangeY, duration, delay) {    
     let tweenData = '';
 
     let len = logoMesh.vertexData.length/2;
@@ -55,7 +55,7 @@
       tweenData = tweenData.concat(i+'/x'+dx*2+'/y'+dy*2+',');
     }  
 
-    createLoopAnimateMesh(logoMesh, tweenData, duration);
+    createLoopAnimateMesh(logoMesh, tweenData, duration, delay);
   }  
 
   function mesh(texture, row, col, debug=false) {
