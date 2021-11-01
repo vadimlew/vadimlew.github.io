@@ -1,0 +1,37 @@
+# Blender MTL File: 'knifeBake.blend'
+# Material Count: 4
+
+newmtl Dark_oak_fine_wood_texture
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Diffuse.png
+map_Ns Roughness.png
+
+newmtl Ebony_dark_wood_fine_texture
+Ns 125.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.100000 Normal.png
+map_Kd texture2.jpg
+map_Ns Roughness.png
+
+newmtl Stainless_Steel_Clean
+Ns 728.999986
+Ka 1.000000 1.000000 1.000000
+Kd 0.353923 0.411391 0.430130
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
