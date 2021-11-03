@@ -129,12 +129,38 @@ window.onload = async function init() {
       envMap.mapping = THREE.EquirectangularReflectionMapping;
       envMap.encoding = THREE.sRGBEncoding;  
 
-      let bumpMap = await loadTexture('assets/obj/SteelRoughness.jpg');
+      /*let bumpMap = await loadTexture('assets/obj/SteelRoughness.jpg');
       bumpMap.mapping = THREE.UVMapping;
-      bumpMap.encoding = THREE.sRGBEncoding;  
+      bumpMap.encoding = THREE.sRGBEncoding;*/  
 
-      let material = new THREE.MeshStandardMaterial({metalness: 1, roughness: 0.25, envMap} ); 
-      knife.children[0].material = material;
+      //let normalMap = await loadTexture('assets/obj/SteelNormal.jpg');
+
+      let material1 = new THREE.MeshStandardMaterial({metalness: 1, roughness: 0.3, envMap} ); 
+      let material2 = new THREE.MeshStandardMaterial({metalness: 0.9, roughness: 0.0, envMap} ); 
+      let material3 = new THREE.MeshStandardMaterial({metalness: 1, roughness: 0.1, envMap} ); 
+
+      /*var material1 = new THREE.MeshPhongMaterial({
+          color: 0xffb54a, // ( use 0xffffff if you do not want gold )
+          specular: 0x111111, // non-metals do not have high specularity
+          //map: THREE.ImageUtils.loadTexture( '173_diffuse.png' ),
+          //specularMap: THREE.ImageUtils.loadTexture( '173_specular.png' ),
+          normalMap: normalMap,
+          envMap: envMap,
+          combine: THREE.AddOperation,
+          reflectivity: 0.2          
+      });*/
+      
+
+      knife.children[0].material[0] = material1;
+      knife.children[0].material[1] = material2;
+      knife.children[0].material[2] = material3;
+
+      knife.children[2].material[1] = material3;
+      knife.children[3].material[1] = material3;
+      knife.children[4].material[1] = material3;
+      knife.children[5].material[1] = material3;
+
+      //console.log(knife.children[0]);
 
       animate();      
     });
