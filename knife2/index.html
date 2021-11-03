@@ -135,7 +135,7 @@ window.onload = async function init() {
 
       //let bumpMap = await loadTexture('assets/obj/SteelRoughness.jpg');
       //bumpMap.mapping = THREE.CubeUVReflectionMapping;
-      let steelTexture = await loadTexture('assets/obj/steelTexture2.png');
+      let steelTexture = await loadTexture('assets/obj/steelTexture2.jpg');
 
       let material1 = new THREE.MeshStandardMaterial({metalness: 1, roughnessMap:steelTexture, envMap} ); 
       let material2 = new THREE.MeshStandardMaterial({metalness: 0.9, roughness: 0.0, envMap} ); 
