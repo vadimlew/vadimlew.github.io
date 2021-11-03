@@ -130,12 +130,14 @@ window.onload = async function init() {
       envMap.encoding = THREE.sRGBEncoding;  
 
       /*let bumpMap = await loadTexture('assets/obj/SteelRoughness.jpg');
-      bumpMap.mapping = THREE.UVMapping;
+      
       bumpMap.encoding = THREE.sRGBEncoding;*/  
 
-      //let normalMap = await loadTexture('assets/obj/SteelNormal.jpg');
+      //let bumpMap = await loadTexture('assets/obj/SteelRoughness.jpg');
+      //bumpMap.mapping = THREE.CubeUVReflectionMapping;
+      let steelTexture = await loadTexture('assets/obj/steelTexture2.png');
 
-      let material1 = new THREE.MeshStandardMaterial({metalness: 1, roughness: 0.3, envMap} ); 
+      let material1 = new THREE.MeshStandardMaterial({metalness: 1, roughnessMap:steelTexture, envMap} ); 
       let material2 = new THREE.MeshStandardMaterial({metalness: 0.9, roughness: 0.0, envMap} ); 
       let material3 = new THREE.MeshStandardMaterial({metalness: 1, roughness: 0.1, envMap} ); 
 
@@ -164,14 +166,12 @@ window.onload = async function init() {
 
       animate();      
     });
-  });
-
-  
+  });  
 
   function loadTexture(url) {
     let textureLoader = new THREE.TextureLoader();
-    return new Promise(resolve => {
-      textureLoader.load('assets/obj/enviroment3.jpg', (texture) => {
+    return new Promise(function(resolve) {
+      textureLoader.load(url, (texture) => {
         resolve(texture);
       })
     })    
