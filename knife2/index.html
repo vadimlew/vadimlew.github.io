@@ -78,6 +78,7 @@
 window.onload = async function init() {
   let canvas = document.getElementById("knife3d");
   let render3d = new THREE.WebGLRenderer({alpha:true, antialias:true, canvas}); 
+  render3d.shadowMapEnabled = true;
   //render3d.physicallyCorrectLights = true;
   render3d.setSize(1024, 1024);
 
@@ -91,23 +92,23 @@ window.onload = async function init() {
   camera.lookAt(0,0,0);
   scene.add(camera);    
 
-  let point_light = new THREE.PointLight(0xffffff, 0.05, 0, 2);
-  point_light.position.set(100, 250, -100);
-  //point_light.castShadow = true; 
+  let point_light = new THREE.PointLight(0xffffff, 0.35, 0, 2);
+  point_light.position.set(-50, 100, 20);
+  point_light.castShadow = true; 
   //point_light.shadow.mapSize.set(2048, 2048);
   scene.add(point_light);  
 
-  let point_light2 = new THREE.PointLight(0xffed83, 0.04, 0, 2);
-  point_light2.position.set(0, 5, -30);
-  //point_light2.castShadow = true; 
+  let point_light2 = new THREE.PointLight(0xffed83, 0.5, 0, 2);
+  point_light2.position.set(0, 5, -20);
+  point_light2.castShadow = true; 
   //point_light2.shadow.mapSize.set(2048, 2048);
   scene.add(point_light2);        
 
   let abient_light = new THREE.AmbientLight(0xffffff);     
   scene.add(abient_light);  
 
-  const pmremGenerator = new THREE.PMREMGenerator( render3d );
-  pmremGenerator.compileEquirectangularShader();
+  //const pmremGenerator = new THREE.PMREMGenerator( render3d );
+  //pmremGenerator.compileEquirectangularShader();
 
   let controls = new THREE.OrbitControls( camera, render3d.domElement );   
 
@@ -138,6 +139,17 @@ window.onload = async function init() {
       knife.children[0].material[1] = material2;
       knife.children[0].material[2] = material3;
 
+      //console.log(knife.children[1].material[1]);
+      
+      knife.children[1].material[1].shininess = 5;
+      knife.children[1].material[1].bumpScale = 0.02;
+      knife.children[1].material[0].bumpScale = 0;
+
+      //console.log(knife.children[1].castShadow=false);
+
+      knife.castShadow = true;
+      knife.receiveShadow = true;
+
       knife.children[2].material[1] = material3;
       knife.children[3].material[1] = material3;
       knife.children[4].material[1] = material3;
@@ -167,8 +179,7 @@ window.onload = async function init() {
   let colorBar = [
     document.getElementById("min_circle1"),
     document.getElementById("min_circle2"),
-    document.getElementById("min_circle3"),
-    document.getElementById("min_circle4"),
+    document.getElementById("min_circle3"),    
     document.getElementById("min_circle5"),
     document.getElementById("min_circle6"),
     document.getElementById("min_circle7"),
@@ -178,8 +189,7 @@ window.onload = async function init() {
   let textureURL = [
     'assets/texture1.jpg',
     'assets/texture2.jpg',
-    'assets/texture3.jpg',
-    'assets/texture4.jpg',
+    'assets/texture3.jpg',    
     'assets/texture5.jpg',
     'assets/texture6.jpg',
     'assets/texture7.jpg',
@@ -189,8 +199,7 @@ window.onload = async function init() {
   let circles = [
     document.getElementById("circle1"),
     document.getElementById("circle2"),
-    document.getElementById("circle3"),
-    document.getElementById("circle4"),
+    document.getElementById("circle3"),    
     document.getElementById("circle5"),
     document.getElementById("circle6"),
     document.getElementById("circle7"),
@@ -198,7 +207,7 @@ window.onload = async function init() {
   ]
 
   let selectCircle = document.getElementById("select_circle"); 
-  selectCircle.style = "transform: translate(-44px, -28px);"
+  selectCircle.style = "transform: translate(-159px, -28px);"
 
   colorBar.forEach(el=>el.onclick = onColorClick);  
 
@@ -237,10 +246,9 @@ window.onload = async function init() {
     }
 
     function elementDrag(e) {
-      e = e || window.event;
-      if (e.preventDefault) e.preventDefault();   
+      e = e || window.event;      
 
-      //console.log(e.clientY);
+      if (!(e instanceof TouchEvent)) e.preventDefault();         
 
       let dy = 219 - (zoom_line.offsetTop - e.clientY)*1.42;
       if (dy < 0) dy = 0;
@@ -288,8 +296,7 @@ window.onload = async function init() {
 <body style="background-color: black;"> 
   <img id="circle1" class="circle" src="assets/circle1.png">
   <img id="circle2" class="circle" src="assets/circle2.png">
-  <img id="circle3" class="circle" src="assets/circle3.png">
-  <img id="circle4" class="circle" src="assets/circle4.png">
+  <img id="circle3" class="circle" src="assets/circle3.png">  
   <img id="circle5" class="circle" src="assets/circle5.png">
   <img id="circle6" class="circle" src="assets/circle6.png">
   <img id="circle7" class="circle" src="assets/circle7.png">
@@ -300,8 +307,7 @@ window.onload = async function init() {
   <div id="color_bar">
     <img id="min_circle1" class="min_circle" src="assets/min_circle1.png">
     <img id="min_circle2" class="min_circle" src="assets/min_circle2.png">
-    <img id="min_circle3" class="min_circle" src="assets/min_circle3.png">     
-    <img id="min_circle4" class="min_circle" src="assets/min_circle4.png">     
+    <img id="min_circle3" class="min_circle" src="assets/min_circle3.png">      
     <img id="min_circle5" class="min_circle" src="assets/min_circle5.png">     
     <img id="min_circle6" class="min_circle" src="assets/min_circle6.png">     
     <img id="min_circle7" class="min_circle" src="assets/min_circle7.png">     
