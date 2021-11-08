@@ -241,21 +241,39 @@ window.onload = async function init() {
     function dragMouseDown() {         
       document.onmouseup = stopDragElement;      
       document.onmousemove = elementDrag;
+      
       document.ontouchend = stopDragElement;
-      document.ontouchmove = elementDrag;
+      document.addEventListener('touchmove', elementDrag, {passive: false});
+      //document.ontouchmove = elementDrag;
     }
 
     function elementDrag(e) {
       e = e || window.event;      
 
-      if (!(e instanceof TouchEvent)) e.preventDefault();
+      if (e instanceof TouchEvent) {
+        e.clientY = e.touches[0].clientY;
+        e.clientX = e.touches[0].clientX;
+      } 
 
-      let dy = 219 - (zoom_line.offsetTop - e.clientY)*1.42;
-      if (dy < 0) dy = 0;
-      if (dy > 433) dy = 433;
+      e.preventDefault();
+      e.stopImmediatePropagation();      
 
-      elmnt.style.top = dy + "px";
-      knifeToScale = 10 - 8*(0.5-dy/433);      
+      if(window.innerHeight > window.innerWidth) {
+        let dx = 219 - (zoom_line.offsetLeft - e.clientX)*1.42;
+        if (dx < 0) dx = 0;
+        if (dx > 433) dx = 433;
+        elmnt.style.top = dx + "px";
+        knifeToScale = 10 - 8*(0.5-dx/433);      
+      } else {
+        let dy = 219 - (zoom_line.offsetTop - e.clientY)*1.42;
+        if (dy < 0) dy = 0;
+        if (dy > 433) dy = 433;
+        elmnt.style.top = dy + "px";
+        knifeToScale = 10 - 8*(0.5-dy/433);      
+      }
+      
+
+      
     }
 
     function stopDragElement() {      
@@ -263,6 +281,7 @@ window.onload = async function init() {
       document.onmousemove = null;
       document.ontouchmove = null;
       document.ontouchend = null;
+      document.removeEventListener('touchmove', elementDrag);
     }
   }
   
@@ -273,7 +292,7 @@ window.onload = async function init() {
       let zoom_line = document.getElementById("zoom_line");
       zoom_line.style.left = '50%';
       zoom_line.style.top = '70%';
-      zoom_line.style.transform = 'rotate(90deg)';
+      zoom_line.style.transform = 'rotate(270deg)';
       let menu = document.getElementById("menu"); 
       menu.style.left = '50%';
       menu.style.top = '5%';
