@@ -98,7 +98,7 @@ window.onload = async function init() {
   //point_light.shadow.mapSize.set(2048, 2048);
   scene.add(point_light);  
 
-  let point_light2 = new THREE.PointLight(0xffed83, 0.5, 0, 2);
+  let point_light2 = new THREE.PointLight(0xffffff, 0.5, 0, 2);
   point_light2.position.set(0, 5, -20);
   point_light2.castShadow = true; 
   //point_light2.shadow.mapSize.set(2048, 2048);
@@ -248,7 +248,7 @@ window.onload = async function init() {
     function elementDrag(e) {
       e = e || window.event;      
 
-      if (!(e instanceof TouchEvent)) e.preventDefault();         
+      if (!(e instanceof TouchEvent)) e.preventDefault();
 
       let dy = 219 - (zoom_line.offsetTop - e.clientY)*1.42;
       if (dy < 0) dy = 0;
