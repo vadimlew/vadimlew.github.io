@@ -24,7 +24,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Bump -bm 0.100000 Normal.png
-map_Kd ..//texture4.jpg
+map_Kd ..//texture1.jpg
 map_Ns Roughness.png
 
 newmtl Stainless_Steel
