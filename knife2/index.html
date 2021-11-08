@@ -23,15 +23,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.6);    
-  }
-
-  #circle1 {
-    opacity: 0;
-  }
-
-  #circle3 {
-    opacity: 0;
-  }
+  } 
 
   #menu {
     position: absolute;
@@ -77,7 +69,7 @@
     position: absolute;
     left: 50%;
     bottom: 5%; 
-    transform: translate(-21px, -27px);
+    transform: translate(-21px, -28px);
     pointer-events: none;
   }
 </style>
@@ -101,9 +93,15 @@ window.onload = async function init() {
 
   let point_light = new THREE.PointLight(0xffffff, 0.05, 0, 2);
   point_light.position.set(100, 250, -100);
-  point_light.castShadow = true; 
-  point_light.shadow.mapSize.set(2048, 2048);
-  scene.add(point_light);     
+  //point_light.castShadow = true; 
+  //point_light.shadow.mapSize.set(2048, 2048);
+  scene.add(point_light);  
+
+  let point_light2 = new THREE.PointLight(0xffed83, 0.04, 0, 2);
+  point_light2.position.set(0, 5, -30);
+  //point_light2.castShadow = true; 
+  //point_light2.shadow.mapSize.set(2048, 2048);
+  scene.add(point_light2);        
 
   let abient_light = new THREE.AmbientLight(0xffffff);     
   scene.add(abient_light);  
@@ -127,31 +125,14 @@ window.onload = async function init() {
 
       let envMap = await loadTexture('assets/obj/enviroment3.jpg');
       envMap.mapping = THREE.EquirectangularReflectionMapping;
-      envMap.encoding = THREE.sRGBEncoding;  
-
-      /*let bumpMap = await loadTexture('assets/obj/SteelRoughness.jpg');
+      envMap.encoding = THREE.sRGBEncoding;
       
-      bumpMap.encoding = THREE.sRGBEncoding;*/  
+      let steelTexture = await loadTexture('assets/obj/steelTexture3.jpg');
+      let steelTexture2 = await loadTexture('assets/obj/steelTexture2.jpg');
 
-      //let bumpMap = await loadTexture('assets/obj/SteelRoughness.jpg');
-      //bumpMap.mapping = THREE.CubeUVReflectionMapping;
-      let steelTexture = await loadTexture('assets/obj/steelTexture2.jpg');
-
-      let material1 = new THREE.MeshStandardMaterial({metalness: 1, roughnessMap:steelTexture, envMap} ); 
+      let material1 = new THREE.MeshStandardMaterial({metalness: 1, roughnessMap:steelTexture2, envMap} ); 
       let material2 = new THREE.MeshStandardMaterial({metalness: 0.9, roughness: 0.0, envMap} ); 
-      let material3 = new THREE.MeshStandardMaterial({metalness: 1, roughness: 0.1, envMap} ); 
-
-      /*var material1 = new THREE.MeshPhongMaterial({
-          color: 0xffb54a, // ( use 0xffffff if you do not want gold )
-          specular: 0x111111, // non-metals do not have high specularity
-          //map: THREE.ImageUtils.loadTexture( '173_diffuse.png' ),
-          //specularMap: THREE.ImageUtils.loadTexture( '173_specular.png' ),
-          normalMap: normalMap,
-          envMap: envMap,
-          combine: THREE.AddOperation,
-          reflectivity: 0.2          
-      });*/
-      
+      let material3 = new THREE.MeshStandardMaterial({metalness: 1, roughness: 0.4, roughnessMap:steelTexture, envMap} ); 
 
       knife.children[0].material[0] = material1;
       knife.children[0].material[1] = material2;
@@ -160,9 +141,7 @@ window.onload = async function init() {
       knife.children[2].material[1] = material3;
       knife.children[3].material[1] = material3;
       knife.children[4].material[1] = material3;
-      knife.children[5].material[1] = material3;
-
-      //console.log(knife.children[0]);
+      knife.children[5].material[1] = material3;      
 
       animate();      
     });
@@ -188,73 +167,80 @@ window.onload = async function init() {
   let colorBar = [
     document.getElementById("min_circle1"),
     document.getElementById("min_circle2"),
-    document.getElementById("min_circle3")
+    document.getElementById("min_circle3"),
+    document.getElementById("min_circle4"),
+    document.getElementById("min_circle5"),
+    document.getElementById("min_circle6"),
+    document.getElementById("min_circle7"),
+    document.getElementById("min_circle8")
+  ]
+
+  let textureURL = [
+    'assets/texture1.jpg',
+    'assets/texture2.jpg',
+    'assets/texture3.jpg',
+    'assets/texture4.jpg',
+    'assets/texture5.jpg',
+    'assets/texture6.jpg',
+    'assets/texture7.jpg',
+    'assets/texture8.jpg'
   ]
 
   let circles = [
     document.getElementById("circle1"),
     document.getElementById("circle2"),
-    document.getElementById("circle3")
+    document.getElementById("circle3"),
+    document.getElementById("circle4"),
+    document.getElementById("circle5"),
+    document.getElementById("circle6"),
+    document.getElementById("circle7"),
+    document.getElementById("circle8")
   ]
 
-  let selectCircle = document.getElementById("select_circle");
-  
-  colorBar[0].onclick = ()=>{    
-    let textureLoader = new THREE.TextureLoader();
-    textureLoader.load('assets/texture4.jpg', (texture)=>{      
-      knife.children[1].material[1].map = texture;
-      hideCircles();
-      circles[0].style.opacity = 1;
-      knifeScale = 0;
-    })
-    selectCircle.style = "transform: translate(-67px, -27px);"
-  }
+  let selectCircle = document.getElementById("select_circle"); 
+  selectCircle.style = "transform: translate(-44px, -28px);"
 
-  colorBar[1].onclick = ()=>{
-    let textureLoader = new THREE.TextureLoader();
-    textureLoader.load('assets/texture2.jpg', (texture)=>{      
-      knife.children[1].material[1].map = texture;
-      hideCircles();
-      circles[1].style.opacity = 1;
-      knifeScale = 0;
-    })
-    selectCircle.style = "transform: translate(-21px, -27px);"
-  }
+  colorBar.forEach(el=>el.onclick = onColorClick);  
 
-  colorBar[2].onclick = ()=>{
-    let textureLoader = new THREE.TextureLoader();
-    textureLoader.load('assets/texture1.jpg', (texture)=>{      
-      knife.children[1].material[1].map = texture;
-      hideCircles();
-      circles[2].style.opacity = 1;
-      knifeScale = 0;
-    })
-    selectCircle.style = "transform: translate(25px, -27px);"
+  async function onColorClick(e) {
+    let idx = colorBar.indexOf(e.target);
+    let url = textureURL[idx];
+    
+    let texture = await loadTexture(url);
+    knife.children[1].material[1].map = texture;
+    hideCircles();
+    circles[idx].style.opacity = 1;
+    knifeScale = 0;
+    selectCircle.style = "transform: translate("+(2-23*colorBar.length+46*idx)+"px, -28px);"
   }
 
   function hideCircles() {
-    circles.forEach(img => img.style.opacity=0);
+    circles.forEach(img => img.style.opacity = 0);
   }
 
   let zoom_line = document.getElementById("zoom_line");
   let pimp = document.getElementById("pimp"); 
 
   dragElement(pimp);
+  hideCircles();
+  circles[3].style.opacity = 1;
 
   function dragElement(elmnt) {    
     elmnt.onmousedown = dragMouseDown;
-    elmnt.touchstart = dragMouseDown;
+    elmnt.ontouchstart = dragMouseDown;
 
     function dragMouseDown() {         
       document.onmouseup = stopDragElement;      
       document.onmousemove = elementDrag;
-      document.touchend = stopDragElement;
-      document.touchmove = elementDrag;
+      document.ontouchend = stopDragElement;
+      document.ontouchmove = elementDrag;
     }
 
     function elementDrag(e) {
       e = e || window.event;
-      e.preventDefault();   
+      if (e.preventDefault) e.preventDefault();   
+
+      //console.log(e.clientY);
 
       let dy = 219 - (zoom_line.offsetTop - e.clientY)*1.42;
       if (dy < 0) dy = 0;
@@ -267,8 +253,8 @@ window.onload = async function init() {
     function stopDragElement() {      
       document.onmouseup = null;
       document.onmousemove = null;
-      document.touchmove = null;
-      document.touchend = null;
+      document.ontouchmove = null;
+      document.ontouchend = null;
     }
   }
   
@@ -303,6 +289,11 @@ window.onload = async function init() {
   <img id="circle1" class="circle" src="assets/circle1.png">
   <img id="circle2" class="circle" src="assets/circle2.png">
   <img id="circle3" class="circle" src="assets/circle3.png">
+  <img id="circle4" class="circle" src="assets/circle4.png">
+  <img id="circle5" class="circle" src="assets/circle5.png">
+  <img id="circle6" class="circle" src="assets/circle6.png">
+  <img id="circle7" class="circle" src="assets/circle7.png">
+  <img id="circle8" class="circle" src="assets/circle8.png">
   <img id="menu" src="assets/menu.png">
    
   <canvas id="knife3d"></canvas>  
@@ -310,6 +301,11 @@ window.onload = async function init() {
     <img id="min_circle1" class="min_circle" src="assets/min_circle1.png">
     <img id="min_circle2" class="min_circle" src="assets/min_circle2.png">
     <img id="min_circle3" class="min_circle" src="assets/min_circle3.png">     
+    <img id="min_circle4" class="min_circle" src="assets/min_circle4.png">     
+    <img id="min_circle5" class="min_circle" src="assets/min_circle5.png">     
+    <img id="min_circle6" class="min_circle" src="assets/min_circle6.png">     
+    <img id="min_circle7" class="min_circle" src="assets/min_circle7.png">     
+    <img id="min_circle8" class="min_circle" src="assets/min_circle8.png">     
   </div>
   <img id="select_circle" src="assets/select_circle.png"> 
    <div id="zoom_line">
