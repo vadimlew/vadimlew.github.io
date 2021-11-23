@@ -43,11 +43,9 @@
 		var texture3d = PIXI.Texture.from(render3d.domElement);
 
 		var camera = new THREE.PerspectiveCamera(65, 1);
-		camera.position.set(60*1.4,100*1.4,60*1.4);
-		//camera.position.set(120,200,120);
-		//camera.position.set(20,20,30);
+		camera.position.set(60*1.4,100*1.4,60*1.4);		
 		camera.lookAt(0,0,0);
-		scene.add(camera);		
+		scene.add(camera);
 
 		var point_light = new THREE.PointLight( 0xe0e2aa, 0.8, 0, 2 );
 	    point_light.position.set( 100, 250, -100 );
@@ -73,11 +71,14 @@
 			{url:'assets/harvester.fbx', cb:onHarvesterLoad}
 		], ()=>{
 			lev.app.loader
-			.add('button', 'assets/button.png')		
-			.add('woodIcon', 'assets/wood_icon.png')
+			.add('cutBtn', 'assets/cut_button.png')		
+            .add('sellBtn', 'assets/sell_button.png')     
+            .add('playNowBtn', 'assets/play_now_button.png')     
+			.add('woodIcon', 'assets/wood_icon.png') 
+            .add('moneyIcon', 'assets/money_icon.png') 
             .add('logo', 'assets/logo.png')
             .add('man', 'assets/man.png')
-            .add('psBg', 'assets/ps_bg.jpg')            
+            .add('psBg', 'assets/ps_bg.jpg')
 			.load(startGame)			
 		})
 
@@ -239,7 +240,7 @@
 				globalTL.seek(0);				
 			});
 
-			globalTL.addPause(0.99);            
+			globalTL.addPause(0.99);
 			globalTL.addPause(2);
 			globalTL.play();
 
@@ -248,8 +249,13 @@
 			gsap.to(camera.position, {x:'-=2', y:'-=2', z:'-=2', duration:3, ease:'quad.inOut', yoyo:true, repeat:-1});			
 
 			lev.sprite(texture3d, {anchor:0.5, scale:2, add:game.main});	
-			var button = lev.sprite('button', {anchor:0.5, interactive:true, add:game.main});
-			button.on('pointerdown', downHandler);	
+			
+            var isSellPhase = false;
+
+            var cutBtn = lev.sprite('cutBtn', {anchor:0.5, interactive:true, add:game.main});
+			cutBtn.on('pointerdown', cutBtndownHandler);	
+
+            var sellBtn = lev.sprite('sellBtn', {anchor:0.5, interactive:true, visible:0, alpha:0, add:game.main});            
 
 			var woodUI = lev.container({x:12, y:12, add:game.ui});
             lev.shapeRoundRect(0x000000, [0,0,300,80,10], {alpha:0.7, add:woodUI});
@@ -257,28 +263,38 @@
 			woodUI.value = 0;
 			woodUI.txt = lev.text('0/1000', {x:110, y:20, add:woodUI, style:{fontFamily:'Pink Sans', fontSize:40, fill:0xffffff}});		
 			woodUI.txt.style.fontFamily = 'Pink Sans';
+
+            var moneyUI = lev.container({x:770, y:12, add:game.ui});
+            lev.shapeRoundRect(0x000000, [0,0,300,80,10], {alpha:0.7, add:moneyUI});
+            lev.sprite('moneyIcon', {x:15, y:13, scale:0.8, add:moneyUI});
+            moneyUI.value = 0;
+            moneyUI.txt = lev.text('0$', {x:125, y:20, add:moneyUI, style:{fontFamily:'Pink Sans', fontSize:40, fill:0xffffff}});     
+            moneyUI.txt.style.fontFamily = 'Pink Sans';
 			
 			lev.resize.start({
 				portrait: [
 					[game.main, {x:320, y:540}],
-					[button, {x:0, y:400}],					
+					[cutBtn, {x:0, y:400}],					
+                    [sellBtn, {x:0, y:400}],                 
 					[game.ps, {x:320, y:540}]
 				],
 				landscape: [
 					[game.main, {x:540, y:320}],
-					[button, {x:300, y:200}],					
+					[cutBtn, {x:300, y:200}],					
+                    [sellBtn, {x:300, y:200}],            
 					[game.ps, {x:540, y:320}]
 				]
 			});
 
-			function downHandler() {	
-				gsap.killTweensOf(button.scale);
-				button.scale.set(1);
-				gsap.to(button.scale, {x:0.95, y:0.95, duration:0.1, yoyo:true, repeat:1});
-				globalTL.play();				
+			function cutBtndownHandler() {	
+				cutBtn.interactive = false;
+				gsap.to(cutBtn.scale, {x:0.95, y:0.95, duration:0.1, yoyo:true, repeat:1, onComplete:()=>{
+                    cutBtn.interactive = true;
+                }});
+				globalTL.play();
 			}	
 
-            function addWood() {
+            function addWood() {                
                 gsap.to(woodUI, {value:'+=200', duration:0.5});
             }		
 
@@ -291,9 +307,13 @@
 				}
 
 				woodUI.txt.text = parseInt(woodUI.value) + '/1000';
-                if (woodUI.value >= 1000) {
-                    showPackshot();
-                    globalTL.pause();
+                moneyUI.txt.text = parseInt(moneyUI.value) + '$';
+                if (!isSellPhase && woodUI.value >= 1000) {
+                    startSellWood();                    
+                }
+
+                if (isSellPhase && woodUI.value <= 0) {                    
+                    setTimeout(showPackshot, 500);
                     return;
                 }
 
@@ -302,6 +322,29 @@
 				requestAnimationFrame(animate);
 			}
 			animate();
+
+            function startSellWood() {
+                isSellPhase = true;
+
+                gsap.to(cutBtn, {alpha:0, duration:0.5});
+                cutBtn.off('pointerdown');  
+
+                sellBtn.visible = true;
+                gsap.to(sellBtn, {alpha:1, delay:0.5, duration:0.5});
+                sellBtn.on('pointerdown', sellDownHandler);                 
+            }
+
+            function sellDownHandler() {              
+                sellBtn.interactive = false;
+                gsap.to(sellBtn.scale, {x:0.95, y:0.95, duration:0.1, yoyo:true, repeat:1, onComplete:()=>{
+                    sellBtn.interactive = true;
+                }});
+
+                gsap.to(moneyUI, {value:'+=10000', duration:0.2});
+                gsap.to(woodUI, {value:'-=200', duration:0.2});
+            }
+
+            //setTimeout(showPackshot, 500);
 		}
 
 		
@@ -309,14 +352,18 @@
             let bg = lev.sprite('psBg', {anchor:0.5, add:game.ps});
             let man = lev.sprite('man', {anchor:0.5, add:game.ps});
             let logo = lev.sprite('logo', {anchor:0.5, add:game.ps});          
+            let playBtn = lev.sprite('playNowBtn', {anchor:0.5, add:game.ps});          
 
             lev.resize.add(bg, {x:-220, y:0}, {x:0, y:-220});
-            lev.resize.add(man, {x:40, y:150}, {x:270, y:55});
-            lev.resize.add(logo, {x:0, y:-340}, {x:-240, y:-140});
+            lev.resize.add(man, {x:10, y:30}, {x:270, y:55});
+            lev.resize.add(logo, {x:0, y:-400}, {x:-240, y:-140});
+            lev.resize.add(playBtn, {x:0, y:400}, {x:-240, y:130});
 
             gsap.from(bg, {alpha:0, duration:0.5});
             gsap.from(man, {alpha:0, x:'+=50', duration:0.5, delay:0.25, ease:'quad.out'});            
             gsap.from(logo.scale, {x:0, y:0, duration:0.5, delay:0.25, ease:'quad.out'});
+            gsap.from(playBtn, {alpha:0, duration:0.5, delay:0.25, ease:'quad.out'});
+            gsap.from(playBtn.scale, {x:0.9, y:0.9, duration:1, delay:0.75, yoyo:true, repeat:-1, ease:'quad.inOut'});
             
 			stage.on('click', adClickHandler);
 			stage.on('tap', adClickHandler);			
