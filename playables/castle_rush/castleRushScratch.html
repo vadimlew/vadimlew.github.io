@@ -139,7 +139,8 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 				gsap.to([girl, age, text, text2, logo], {alpha:0, duration:0.5, onComplete:()=>{
 					let merge_port = lev.sprite('merge_port', {y:676, in:stage});
 					let merge_land = lev.sprite('merge_land', {y:350, in:stage});
-					let play_now = lev.sprite('play_now', {dev:true, anchor:0.5, in:stage});
+					let play_now = lev.container({in:stage});
+					play_now.image = lev.sprite('play_now', {anchor:0.5, in:play_now});
 
 					lev.resize.remove(logo);
 
@@ -151,7 +152,8 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 					gsap.to(logo, {alpha:1, duration:0.5});
 					gsap.from(merge_port, {y:'+=284', duration:0.5, ease:'cubic.out'});
 					gsap.from(merge_land, {y:'+=192', duration:0.5, ease:'cubic.out'});
-					gsap.from(play_now.scale, {x:0, y:0, duration:0.5, ease:'cubic.out'});					
+					gsap.from(play_now.image.scale, {x:0, y:0, duration:0.5, ease:'cubic.out'});					
+					gsap.to(play_now.image.scale, {x:0.9, y:0.9, delay:0.5, duration:1, ease:'cubic.inOut', yoyo:true, repeat:-1});					
 				}});				
 			}
 
