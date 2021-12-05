@@ -343,8 +343,10 @@
                 cutBtn.off('pointerdown');  
 
                 sellBtn.visible = true;
-                gsap.to(sellBtn, {alpha:1, delay:0.5, duration:0.5});
-                sellBtn.on('pointerdown', sellDownHandler);                 
+                gsap.to(sellBtn, {alpha:1, delay:0.5, duration:0.5, onComplete:()=>{
+                    sellBtn.on('pointerdown', sellDownHandler);
+                }});
+                                 
             }
 
             function sellDownHandler() {              
