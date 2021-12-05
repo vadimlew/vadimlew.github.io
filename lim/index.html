@@ -22,7 +22,9 @@
 <script type="text/javascript">
 (function() {
 	'use strict'
-	window.onload = function init() {		
+	window.onload = async function init() {
+        await document.fonts.ready;               
+
 		var lev = new LEV(640, 1080);
 		document.body.appendChild(lev.app.view);
 
@@ -79,6 +81,7 @@
             .add('logo', 'assets/logo.png')
             .add('man', 'assets/man.png')
             .add('psBg', 'assets/ps_bg.jpg')
+            .add('hand', 'assets/hand.png')
 			.load(startGame)			
 		})
 
@@ -227,10 +230,10 @@
 			tl.to(harvester.saw.rotation, {z:3.14*8, duration:2, ease:'linear'}, 0);
 			tl.to(harvester.wheels1.rotation, {z:3.14*2, duration:2, ease:'linear'}, 0);
 			tl.to(harvester.wheels2.rotation, {z:3.14*2, duration:2, ease:'linear'}, 0);
-			tl.to(harvester.stick.position, {x:-20, duration:0.25, ease:'quad.inOut'}, 1);			
-			tl.to(harvester.saw.position, {x:-20, duration:0.25, ease:'quad.inOut'}, 1);
-			tl.to(harvester.stick.position, {x:18, duration:0.25, ease:'quad.inOut'}, 1.75);
-			tl.to(harvester.saw.position, {x:18, duration:0.25, ease:'quad.inOut'}, 1.75);
+            tl.to(harvester.stick.position, {x:-20, duration:0.25, ease:'quad.inOut'}, 0);          
+            tl.to(harvester.saw.position, {x:-20, duration:0.25, ease:'quad.inOut'}, 0);			
+			tl.to(harvester.stick.position, {x:18, duration:0.25, ease:'quad.inOut'}, 1);
+			tl.to(harvester.saw.position, {x:18, duration:0.25, ease:'quad.inOut'}, 1);
 
 			globalTL.add(tl, 0);
 		}		
@@ -240,11 +243,12 @@
 				globalTL.seek(0);				
 			});
 
-			globalTL.addPause(0.99);
-			globalTL.addPause(2);
-			globalTL.play();
+            globalTL.add(addWood, 0.1);
+            globalTL.add(addWood, 1.1);
 
-            globalTL.add(addWood, 1);
+			globalTL.addPause(0.01);            
+            globalTL.addPause(0.99);            
+			globalTL.play();            
 			
 			gsap.to(camera.position, {x:'-=2', y:'-=2', z:'-=2', duration:3, ease:'quad.inOut', yoyo:true, repeat:-1});			
 
@@ -271,6 +275,13 @@
             moneyUI.txt = lev.text('0$', {x:125, y:20, add:moneyUI, style:{fontFamily:'Pink Sans', fontSize:40, fill:0xffffff}});     
             moneyUI.txt.style.fontFamily = 'Pink Sans';
 			
+            var hand = lev.sprite('hand', {scale:0.9, x:45, y:40, anchor:0.5, add:cutBtn, dev:true});
+            var tutorial = gsap.timeline({repeat: -1, duration:3});
+            tutorial.from(hand, {x:100, y:220, alpha:1, duration:0.5, ease:'quad.out'});
+            tutorial.to(hand, {angle:-10, yoyo:true, repeat:1, duration:0.2, ease:'quad.inOut'});
+            tutorial.to(cutBtn.scale, {x:0.95, y:0.95, yoyo:true, repeat:1, duration:0.2, ease:'quad.inOut', delay:-0.4});
+            tutorial.to(hand, {x:100, y:220, alpha:1, duration:0.4, ease:'quad.in'});
+
 			lev.resize.start({
 				portrait: [
 					[game.main, {x:320, y:540}],
@@ -292,10 +303,12 @@
                     cutBtn.interactive = true;
                 }});
 				globalTL.play();
+                tutorial.seek(0);
+                tutorial.pause();
 			}	
 
             function addWood() {                
-                gsap.to(woodUI, {value:'+=200', duration:0.5});
+                gsap.to(woodUI, {value:'+=100', duration:0.5});
             }		
 
 			function animate() {
@@ -306,9 +319,9 @@
 					}
 				}
 
-				woodUI.txt.text = parseInt(woodUI.value) + '/1000';
+				woodUI.txt.text = parseInt(woodUI.value) + '/500';
                 moneyUI.txt.text = parseInt(moneyUI.value) + '$';
-                if (!isSellPhase && woodUI.value >= 1000) {
+                if (!isSellPhase && woodUI.value >= 500) {
                     startSellWood();                    
                 }
 
@@ -341,7 +354,7 @@
                 }});
 
                 gsap.to(moneyUI, {value:'+=10000', duration:0.2});
-                gsap.to(woodUI, {value:'-=200', duration:0.2});
+                gsap.to(woodUI, {value:'-=100', duration:0.2});
             }
 
             //setTimeout(showPackshot, 500);
