@@ -248,7 +248,7 @@
 
 			globalTL.addPause(0.01);            
             globalTL.addPause(0.99);            
-			globalTL.play();            
+			globalTL.play(); 
 			
 			gsap.to(camera.position, {x:'-=2', y:'-=2', z:'-=2', duration:3, ease:'quad.inOut', yoyo:true, repeat:-1});			
 
@@ -275,12 +275,19 @@
             moneyUI.txt = lev.text('0$', {x:125, y:20, add:moneyUI, style:{fontFamily:'Pink Sans', fontSize:40, fill:0xffffff}});     
             moneyUI.txt.style.fontFamily = 'Pink Sans';
 			
-            var hand = lev.sprite('hand', {scale:0.9, x:45, y:40, anchor:0.5, add:cutBtn, dev:true});
-            var tutorial = gsap.timeline({repeat: -1, duration:3});
+            var hand = lev.sprite('hand', {scale:0.9, x:45, y:40, anchor:0.5, add:cutBtn});
+            var tutorial = gsap.timeline({repeat: -1, duration:4});
             tutorial.from(hand, {x:100, y:220, alpha:1, duration:0.5, ease:'quad.out'});
             tutorial.to(hand, {angle:-10, yoyo:true, repeat:1, duration:0.2, ease:'quad.inOut'});
             tutorial.to(cutBtn.scale, {x:0.95, y:0.95, yoyo:true, repeat:1, duration:0.2, ease:'quad.inOut', delay:-0.4});
             tutorial.to(hand, {x:100, y:220, alpha:1, duration:0.4, ease:'quad.in'});
+
+            var hand2 = lev.sprite('hand', {scale:0.9, x:45, y:40, anchor:0.5, add:sellBtn});
+            var tutorial2 = gsap.timeline({repeat: -1, duration:4, paused:true});
+            tutorial2.from(hand2, {x:100, y:220, alpha:1, duration:0.5, ease:'quad.out'});
+            tutorial2.to(hand2, {angle:-10, yoyo:true, repeat:1, duration:0.2, ease:'quad.inOut'});
+            tutorial2.to(sellBtn.scale, {x:0.95, y:0.95, yoyo:true, repeat:1, duration:0.2, ease:'quad.inOut', delay:-0.4});
+            tutorial2.to(hand2, {x:100, y:220, alpha:1, duration:0.4, ease:'quad.in'});
 
 			lev.resize.start({
 				portrait: [
@@ -297,6 +304,8 @@
 				]
 			});
 
+            gsap.delayedCall(0.25, ()=>{globalTL.play()});
+
 			function cutBtndownHandler() {	
 				cutBtn.interactive = false;
 				gsap.to(cutBtn.scale, {x:0.95, y:0.95, duration:0.1, yoyo:true, repeat:1, onComplete:()=>{
@@ -304,7 +313,7 @@
                 }});
 				globalTL.play();
                 tutorial.seek(0);
-                tutorial.pause();
+                //tutorial.pause();
 			}	
 
             function addWood() {                
@@ -327,6 +336,8 @@
 
                 if (isSellPhase && woodUI.value <= 0) {                    
                     setTimeout(showPackshot, 500);
+                    tutorial2.seek(0);
+                    tutorial2.pause();      
                     return;
                 }
 
@@ -338,6 +349,9 @@
 
             function startSellWood() {
                 isSellPhase = true;
+                tutorial.seek(0);
+                tutorial.pause();                
+                tutorial2.play();
 
                 gsap.to(cutBtn, {alpha:0, duration:0.5});
                 cutBtn.off('pointerdown');  
@@ -346,7 +360,6 @@
                 gsap.to(sellBtn, {alpha:1, delay:0.5, duration:0.5, onComplete:()=>{
                     sellBtn.on('pointerdown', sellDownHandler);
                 }});
-                                 
             }
 
             function sellDownHandler() {              
@@ -354,6 +367,8 @@
                 gsap.to(sellBtn.scale, {x:0.95, y:0.95, duration:0.1, yoyo:true, repeat:1, onComplete:()=>{
                     sellBtn.interactive = true;
                 }});
+
+                tutorial2.seek(0);
 
                 gsap.to(moneyUI, {value:'+=10000', duration:0.2});
                 gsap.to(woodUI, {value:'-=100', duration:0.2});
