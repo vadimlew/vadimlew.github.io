@@ -249,6 +249,18 @@
 			globalTL.addPause(0.01);            
             globalTL.addPause(0.99);            
 			globalTL.play(); 
+
+            var music = new Howl({
+                src: ['assets/music.mp3'],
+                volume: 0.5,
+                autoplay: true,
+                loop: true
+            });     
+
+            var money = new Howl({
+                src: ['assets/buy coins.mp3'],
+                volume: 0.5                
+            });    
 			
 			gsap.to(camera.position, {x:'-=2', y:'-=2', z:'-=2', duration:3, ease:'quad.inOut', yoyo:true, repeat:-1});			
 
@@ -312,8 +324,7 @@
                     cutBtn.interactive = true;
                 }});
 				globalTL.play();
-                tutorial.seek(0);
-                //tutorial.pause();
+                tutorial.seek(0);                
 			}	
 
             function addWood() {                
@@ -334,10 +345,11 @@
                     startSellWood();                    
                 }
 
-                if (isSellPhase && woodUI.value <= 0) {                    
+                if (isSellPhase && woodUI.value <= 0) {
                     setTimeout(showPackshot, 500);
                     tutorial2.seek(0);
-                    tutorial2.pause();      
+                    tutorial2.pause();  
+                    sellBtn.off('pointerdown', sellDownHandler);
                     return;
                 }
 
@@ -372,11 +384,12 @@
 
                 gsap.to(moneyUI, {value:'+=10000', duration:0.2});
                 gsap.to(woodUI, {value:'-=100', duration:0.2});
+
+                money.play();
             }
 
             //setTimeout(showPackshot, 500);
 		}
-
 		
 		function showPackshot() {           
             let bg = lev.sprite('psBg', {anchor:0.5, add:game.ps});
