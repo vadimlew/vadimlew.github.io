@@ -6,7 +6,7 @@
     const urlParams = new URLSearchParams(queryString);
     const code = urlParams.get('code');
 
-    window.postMessage(code);
+    window.postMessage(code, "*");
   </script>
 </head>
 <body>
