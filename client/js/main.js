@@ -74,12 +74,13 @@ class Main {
             groundDown.position.copyFrom(body.position);       
             groundDown.rotation = body.angle;               
 
-            let groundDown2 = PIXI.Sprite.from('assets/images/ground/down.png');           
-            groundDown2.anchor.set(0.5, -0.1);
+            let groundDown2 = PIXI.Sprite.from('assets/images/ground/down.png');  
+            groundDown2.scale.x = 1.05;  
+            groundDown2.anchor.set(0.5, 0);
             groundDown2.position.copyFrom(body.position);
             groundDown2.rotation = body.angle;     
             groundDown2.x += 100 * Math.cos(body.angle);
-            groundDown2.y += 100 * Math.sin(body.angle);
+            groundDown2.y += 80 * Math.sin(body.angle);
 
             ground.addChild(
                 groundDown2,
