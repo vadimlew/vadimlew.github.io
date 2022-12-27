@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Получение ключа доступа</title>
+    <script>
+        function onPressGetCode() {
+            var getCodeURL = 'https://oauth.vk.com/authorize?' +
+                'client_id=' + 6285986 +
+                '&display=' + 'page' +
+                '&redirect_uri=' + 'http://tnt-design.tnt-online.ru/vk_server' +
+                '&scope=' + 'offline,wall,photos' +
+                '&response_type=' + 'code' +
+                '&v=' + '5.69' +
+                '&state=' + 'tnt'
+            window.open(getCodeURL);
+        }
+
+        function checkGetCode() {
+            var code = getQueryParams('code');
+            if (code == null) return;
+            var getTokenURL = 'https://oauth.vk.com/access_token?' +
+                'client_id=' + 6285986 +
+                '&client_secret=' + 'udUJIlV6IhMC622jd1A3' +
+                '&redirect_uri=' + 'http://tnt-design.tnt-online.ru/vk_server' +
+                '&code=' + code
+            window.open(getTokenURL);
+        }
+
+        function getQueryParams(name, url) {
+            if (!url) url = location.href;
+            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+            var regexS = "[\\?&]" + name + "=([^&#]*)";
+            var regex = new RegExp(regexS);
+            var results = regex.exec(url);
+            return results == null ? null : results[1];
+        }
+    </script>
+</head>
+
+<body onload="checkGetCode()">
+    <button onclick="onPressGetCode()"> Получить Token </button>
+</body>
+
+</html>>
