@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>MotoRace</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport"
+        content="initial-scale=1, width=device-width, height=device-height, viewport-fit=cover, user-scalable=no">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+
+    <script src="libs/pixi.js"></script>
+    <script src="libs/matter.js"></script>
+    <script src="js/Main.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/ResizeManager.js"></script>
+    <script src="js/ControlManager.js"></script>
+    <script src="js/Level.js"></script>
+    <script src="js/LevelData.js"></script>
+    <script src="js/LevelData2.js"></script>
+    <script src="js/Utility.js"></script>
+    <script src="js/Debug.js"></script>
+    <script src="js/ChoiceLevel.js"></script>   
+    <script src="js/LevelCreator.js"></script>
+    <script src="js/GameLoop.js"></script>
+    <script src="js/Dust.js"></script>
+
+    <script>
+		let main = new Main();
+		window.addEventListener('DOMContentLoaded', ()=>main.loadAssets());
+
+        function log() {
+            console.log( ...arguments );
+        }        
+    </script>
+</head>
+
+<body>
+    <canvas id="game"></canvas>    
+</body>
+
+</html>
