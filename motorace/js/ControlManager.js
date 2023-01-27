@@ -9,10 +9,9 @@ class ControllManager {
     constructor() {
         if (this.isMobile()) {
             this.initScreenButtons();
-        } else {
+        } //else {
             this.initKeyboard();
-        }
-        
+        //}        
     }
 
     initScreenButtons() {

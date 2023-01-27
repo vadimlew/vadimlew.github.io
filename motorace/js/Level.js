@@ -25,7 +25,7 @@ class Level {
             let part = Matter.Bodies.fromVertices(
                 partData.position.x * scale - 800, partData.position.y * scale + 1200,
                 partData.shape,
-                {isStatic: true}
+                {isStatic: true, friction: 1}
             )   
             parts.push(part); 
         }        
@@ -190,19 +190,19 @@ class Level {
     }
 
 
-    resizeHandler() {        
-        this.display.ground.scale.set(1/devicePixelRatio * 0.8);        
-
-        this.display.sky.position.set(window.innerWidth * 0.5, window.innerHeight * 0.5);   
-        this.display.mounth.y = window.innerHeight;
-
+    resizeHandler() {    
         let scaleFactor = Math.max(
             window.innerWidth / 2560,
             window.innerHeight / 2560
         );
 
-        this.display.sky.scale.set(scaleFactor);
-        this.display.mounth.scale.set(scaleFactor);
+        this.display.ground.scale.set(1/devicePixelRatio * 0.8); 
+        
+        this.display.mounth.y = window.innerHeight; 
+        this.display.mounth.scale.set(scaleFactor);      
+
+        this.display.sky.position.set(window.innerWidth * 0.5, window.innerHeight * 0.5);  
+        this.display.sky.scale.set(scaleFactor);        
     }
 
 
@@ -216,8 +216,10 @@ class Level {
 
         let player = main.player.display;
 
-        this.display.ground.x = -player.corps.position.x * this.display.ground.scale.x + main.pixi.screen.width * 0.25;
-        this.display.ground.y = -player.corps.position.y * this.display.ground.scale.y + main.pixi.screen.height * 0.65;
+        this.display.ground.x = -player.corps.position.x * this.display.ground.scale.x + window.innerWidth * 0.25;
+        this.display.ground.y = -player.corps.position.y * this.display.ground.scale.y + window.innerHeight * 0.65;
         this.display.mounth.x = -player.corps.position.x / 20;
+
+        //this.display.ground.scale.set(1/devicePixelRatio * 0.8 * (1 - main.player.phys.corps.speed/100)); 
     }
 }

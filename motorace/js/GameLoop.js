@@ -6,7 +6,7 @@ class GameLoop {
 
     constructor({fps = 30}={}) {
         this.timeStep = 1000 / fps;
-        this.prevTimeStamp = Date.now();       
+        this.prevTimeStamp = performance.now();       
         this.update();
     }
 
@@ -20,6 +20,17 @@ class GameLoop {
     }
 
     update = () => {        
+        this.timeStamp = performance.now();        
+        
+        while (this.timeStamp - this.prevTimeStamp >= this.timeStep) {
+            this.prevTimeStamp = this.timeStamp;
+            this.stack.forEach(update => update());
+        }
+
+        requestAnimationFrame(this.update);
+    }
+
+    /*update = () => {        
         this.timeStamp = Date.now();
         this.deltaTime += this.timeStamp - this.prevTimeStamp;
         this.prevTimeStamp = this.timeStamp;
@@ -31,5 +42,5 @@ class GameLoop {
         }        
 
         requestAnimationFrame(this.update);
-    }
+    }*/
 }

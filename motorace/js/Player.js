@@ -9,6 +9,8 @@ class Player {
     wheelForce = 0.05;
     leanForce = 0.002;
 
+    leanAngle = 0;
+
 
     constructor() {
         this.initPhysics();
@@ -49,15 +51,13 @@ class Player {
         let wheelFront = Matter.Bodies.circle(wxA, wyA, wheelSize, {
             collisionFilter: { group: group },
             friction: 1,
-            frictionAir: 0,
-            //restitution: -5
+            frictionAir: 0           
         });
 
         let wheelBack = Matter.Bodies.circle(wxB, wyB, wheelSize, {
             collisionFilter: { group: group },
             friction: 1,
-            frictionAir: 0,
-            //restitution: -5
+            frictionAir: 0            
         });
 
         let driver = Matter.Bodies.rectangle(bx - 5, by - 75, 50, 115, {
@@ -118,7 +118,7 @@ class Player {
             axelFront2,
             axelBack2,
             axelBack,
-            axelDriver,
+            //axelDriver,
             axelDriver2
         ]);        
 
@@ -129,7 +129,8 @@ class Player {
             corps,
             wheelFront,
             wheelBack,
-            driver
+            driver,
+            axelDriver
         };
     }
 
@@ -153,18 +154,15 @@ class Player {
         wheelBack.anchor.set(0.5);
 
         let head = PIXI.Sprite.from('assets/images/driver/head.png');
-        head.pivot.set(24, 40);
-        //head.position.set(105, -35);
+        head.pivot.set(24, 40);        
         head.position.set(0, -16);
 
         let body = PIXI.Sprite.from('assets/images/driver/body.png');
-        body.anchor.set(0.72, 0.25);
-        //body.pivot.set(16, 56);
-        body.position.set(92, 19);
+        body.anchor.set(0.8, 0.25);        
+        //body.position.set(80, 19);
 
         let shoulder = PIXI.Sprite.from('assets/images/driver/shoulder.png');
-        shoulder.pivot.set(9, 7);
-        //shoulder.position.set(100, -23);
+        shoulder.pivot.set(9, 7);       
         shoulder.position.set(-5, 0);
 
         let forearm = PIXI.Sprite.from('assets/images/driver/forearm.png');
@@ -173,11 +171,11 @@ class Player {
 
         let hip = PIXI.Sprite.from('assets/images/driver/hip.png');
         hip.pivot.set(16, 4);
-        hip.position.set(92, 19);
+        hip.position.set(92+2, 19);
 
         let foot = PIXI.Sprite.from('assets/images/driver/foot.png');
-        foot.pivot.set(16, 4);
-        foot.position.set(115, 40);
+        foot.pivot.set(16, 4+70);
+        foot.position.set(115, 40+70);
 
         corps.addChild(
             hip,
@@ -273,15 +271,15 @@ class Player {
 
     leanForward() {
         let corps = this.phys.corps;
-        if (corps.angularVelocity > this.maxLeanVelocity) return;
-        Matter.Body.setAngularVelocity(corps, corps.angularVelocity + this.leanForce);
+        corps.angle += 0.007;
+        this.leanAngle += (0.9 - this.leanAngle)/10;        
     }
 
 
     leanBack() {
         let corps = this.phys.corps;
-        if (corps.angularVelocity < -this.maxLeanVelocity) return;
-        Matter.Body.setAngularVelocity(corps, corps.angularVelocity - this.leanForce);
+        corps.angle -= 0.007;
+        this.leanAngle += (-0.9 - this.leanAngle)/10;        
     }
 
 
@@ -320,8 +318,14 @@ class Player {
 
         this.display.body.position.copyFrom(this.phys.driver.position);
         this.display.body.rotation = this.phys.driver.angle;
-        this.display.head.rotation = this.display.corps.rotation - this.phys.driver.angle;
-        //log(this.display.debug1.position);
+        this.display.head.rotation = this.display.corps.rotation - this.phys.driver.angle;        
+
+        this.phys.driver.angle = corps.angle + this.leanAngle;
+        this.display.hip.x = 94 - this.leanAngle * 5;
+        this.display.hip.y = 19 - this.leanAngle * 10;
+        this.display.hip.rotation = this.leanAngle/2;
+
+        this.display.foot.angle = -this.leanAngle * 15;
 
         if (this.control.keys.up) {            
             this.moveForward();
@@ -338,6 +342,8 @@ class Player {
         if (this.control.keys.right) {
             this.leanForward();
         }       
+
+        if (!this.control.keys.left && !this.control.keys.right) this.leanAngle += -this.leanAngle/10;
 
         this.dust.update();
     }

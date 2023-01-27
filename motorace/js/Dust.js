@@ -2,13 +2,13 @@ class Dust {
     dustArr = [];
     dustPool = [];
 
-    max = 80;
+    max = 100;
     count = 0;
 
     add() {
         this.count++;
         
-        if (this.count < 5) return;
+        if (this.count < 3) return;
         if (this.dustArr.length > this.max) return;
 
         this.count = 0;
@@ -26,11 +26,13 @@ class Dust {
         
         dust.x = main.player.display.wheelBack.x;
         dust.y = main.player.display.wheelBack.y + 40;
+        dust.angle = 360 * Math.random();
 
-        dust.vx = -0.2 - 0.4*Math.random();
-        dust.vy = -0.2 - 0.4*Math.random();
+        dust.vx = -1 - 2*Math.random();
+        dust.vy = -1 - 1*Math.random();
         dust.vr = 1 + 3*Math.random();
-        dust.vs = 0.015 + 0.01 * Math.random();
+        dust.vs = 0.02 + 0.01 * Math.random();
+        dust.va = 0.008 + 0.008 * Math.random();
         dust.alpha = 0.5 + 0.3 * Math.random();
         dust.scale.set(0.1);
         
@@ -43,7 +45,7 @@ class Dust {
             dust.x += dust.vx;
             dust.y += dust.vy;
             dust.angle -= dust.vr;
-            dust.alpha -= 0.008;
+            dust.alpha -= dust.va;
             dust.scale.x += dust.vs;
             dust.scale.y += dust.vs;
 
