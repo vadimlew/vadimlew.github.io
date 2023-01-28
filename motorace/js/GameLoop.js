@@ -3,11 +3,27 @@ class GameLoop {
     timeStamp = 0;
     deltaTime = 0;
     stack = [];    
+    isPause = false;
 
-    constructor({fps = 30}={}) {
+    constructor({fps = 30}={}) {       
         this.timeStep = 1000 / fps;
-        this.prevTimeStamp = performance.now();       
+        this.prevTimeStamp = performance.now();
         this.update();
+        this.initFocusHandlers();
+    }
+
+    initFocusHandlers() {       
+	    window.addEventListener('blur', ()=>{
+            console.log('blur');
+            this.isPause = true;
+        });
+
+	    window.addEventListener('focus', ()=>{
+            console.log('focus');
+            this.isPause = false;
+            this.prevTimeStamp = performance.now();       
+            this.update();
+        });       
     }
 
     add(update) {
@@ -19,7 +35,9 @@ class GameLoop {
         if (id != -1) this.stack.splice(id, 1);       
     }    
 
-    update = () => {        
+    update = () => {     
+        if (this.isPause) return;
+          
         this.timeStamp = performance.now();
         this.deltaTime += this.timeStamp - this.prevTimeStamp;
         this.prevTimeStamp = this.timeStamp;
