@@ -103,7 +103,7 @@ class Level {
             ground.addChild(part);      
         });
 
-        this.phys.ground.bodies.forEach(body => {
+       /* this.phys.ground.bodies.forEach(body => {
             let part = new PIXI.Graphics();          
 
             part.lineStyle({width:45, color:0x89480c, alignment:0, cap:PIXI.LINE_CAP.ROUND});
@@ -117,7 +117,7 @@ class Level {
             //part.cacheAsBitmap = true;
 
             ground.addChild(part);      
-        });
+        });*/
         
         this.display.ground = ground;
         this.display.addChild(ground);
