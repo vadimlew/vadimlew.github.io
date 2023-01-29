@@ -6,7 +6,7 @@ class ChoiceLevel {
         let height = 250;
 
         let block = new PIXI.Container();        
-        main.pixi.stage.addChild(block);
+        app.pixi.stage.addChild(block);
 
         let back = new PIXI.Graphics();
         back.beginFill(0x000000);
@@ -30,7 +30,7 @@ class ChoiceLevel {
         button3.on('pointerup', this.clickHandler);
         block.addChild(button3);
 
-        main.resize.add(()=>{           
+        app.resize.add(()=>{           
             block.x = window.innerWidth * 0.5;
             block.y = window.innerHeight * 0.5;
         });

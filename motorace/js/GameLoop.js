@@ -4,26 +4,42 @@ class GameLoop {
     deltaTime = 0;
     stack = [];    
     isPause = false;
+    isBlur = false;
 
-    constructor({fps = 30}={}) {       
-        this.timeStep = 1000 / fps;
-        this.prevTimeStamp = performance.now();
-        this.update();
-        this.initFocusHandlers();
+    constructor({fps = 30, autoStart = true}) {       
+        this.timeStep = 1000 / fps;        
+        if (autoStart) this.start();
+        else this.isPause = true;
+        this.startFocusHandlers();
     }
 
-    initFocusHandlers() {       
-	    window.addEventListener('blur', ()=>{
-            console.log('blur');
-            this.isPause = true;
-        });
+    startFocusHandlers() {
+        let blurHandler = () => {
+            //console.log('blur');
+            this.isBlur = true;
+        }
 
-	    window.addEventListener('focus', ()=>{
-            console.log('focus');
-            this.isPause = false;
+        let focusHandler = () => {
+            //console.log('focus');      
+            this.isBlur = false;
             this.prevTimeStamp = performance.now();       
-            this.update();
-        });       
+            this.update();        
+        }
+
+        window.addEventListener('blur', blurHandler);
+	    window.addEventListener('focus', focusHandler);
+    }    
+
+    start = () => {
+        //console.log('start');
+        this.isPause = false;
+        this.prevTimeStamp = performance.now();
+        this.update();
+    }
+
+    stop = () => {
+        //console.log('stop');
+        this.isPause = true;        
     }
 
     add(update) {
@@ -36,18 +52,17 @@ class GameLoop {
     }    
 
     update = () => {     
-        if (this.isPause) return;
+        if (this.isPause || this.isBlur) return;
           
         this.timeStamp = performance.now();
         this.deltaTime += this.timeStamp - this.prevTimeStamp;
         this.prevTimeStamp = this.timeStamp;
         
         let numUpdateSteps = 0;
-        while (this.deltaTime >= this.timeStep) {
+        while (this.deltaTime >= this.timeStep) {            
+            if (++numUpdateSteps >= 120) break;
+            this.stack.forEach(update => update(this.timeStep));
             this.deltaTime -= this.timeStep;
-            if (++numUpdateSteps >= 240) break;
-
-            this.stack.forEach(update => update());
         }        
 
         requestAnimationFrame(this.update);

@@ -18,10 +18,10 @@ class ResizeManager {
         let newWidth = Math.ceil(this.logicalWidth * scaleFactor);
         let newHeight = Math.ceil(this.logicalHeight * scaleFactor);
 
-        main.pixi.view.style.width = `${newWidth}px`;
-        main.pixi.view.style.height = `${newHeight}px`;
+        app.pixi.view.style.width = `${newWidth}px`;
+        app.pixi.view.style.height = `${newHeight}px`;
 
-        main.pixi.renderer.resize(newWidth, newHeight);           
+        app.pixi.renderer.resize(newWidth, newHeight);           
 
         this.resizeFunctions.forEach(resize => {resize()});
     }

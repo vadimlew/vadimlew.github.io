@@ -19,27 +19,38 @@
         canvas {
             display: block;
         }
+
+        .center{
+            font-family: Verdana;
+            position:absolute;
+            width:120px;
+            height:60px;
+            left:50%;
+            top:50%;
+            margin-left:-60px;
+            margin-top:-30px;
+            color: aliceblue;
+        }
     </style>
 
     <script src="libs/pixi.js"></script>
     <script src="libs/matter.js"></script>
+    <script src="js/Assets.js"></script>
     <script src="js/Main.js"></script>
     <script src="js/Player.js"></script>
     <script src="js/ResizeManager.js"></script>
     <script src="js/ControlManager.js"></script>
     <script src="js/Level.js"></script>
-    <script src="js/LevelData.js"></script>
-    <script src="js/LevelData2.js"></script>
-    <script src="js/Utility.js"></script>
-    <script src="js/Debug.js"></script>
+    <script src="js/LevelData.js"></script> 
+    <script src="js/Utility.js"></script>   
     <script src="js/ChoiceLevel.js"></script>   
     <script src="js/LevelCreator.js"></script>
     <script src="js/GameLoop.js"></script>
     <script src="js/Dust.js"></script>
 
     <script>
-		let main = new Main();
-		window.addEventListener('DOMContentLoaded', ()=>main.loadAssets());
+		let app = new Main();
+		window.addEventListener('DOMContentLoaded', ()=>app.loadAssets());
 
         function log() {
             console.log( ...arguments );
@@ -47,8 +58,9 @@
     </script>
 </head>
 
-<body>
-    <canvas id="game"></canvas>    
+<body style="background-color: black;">
+    <canvas id="game"></canvas>
+    <p id="loader" class="center">Loading 0%</p>
 </body>
 
 </html>

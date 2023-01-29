@@ -2,13 +2,7 @@ let ground = new PIXI.Graphics();
 
 let points = [0,0,50,0,100,0,150,0,175,-17,250,0,300,0,333,-22,400,0,452,-1,514,-22,650,74,673,74,733,46,770,32,795,24,824,13,850,0,881,-16,897,10,981,-4,992,17,1001,4,1085,61,1200,0,1274,-62,1289,0,1319,-1,1457,73,1480,50,1503,50,1552,64,1620,2,1654,21,1719,-38,1765,-12,1838,-79,1908,-80,1974,-63,2009,-43,2033,-17,2050,0,2093,21,2150,0,2180,0,2233,33,2266,11,2299,33,2330,12,2358,34,2386,12,2416,34,2445,10,2476,30,2504,9,2571,9,2582,68,2594,12,2688,-27,2735,3,2781,-11,2799,-28,2815,25,2881,67,3006,-55,3081,-39,3148,-60,3177,-27,3201,-1,3234,0,3284,0,3334,0,3384,0,3446,-45,3501,1,3573,-24,3582,0,3629,-25,3669,-25,3682,13,3690,-17,3731,-15,3743,13,3932,0,3982,0,4032,0,4077,-127];
 
-function drawTestLevel() {
-    /***for (let i=0; i<20; i++) {
-        let x = i*50;
-        let y = 0;
-        points.push(x, y);
-    }*/
-    
+function drawTestLevel() {    
     ground.position.set(250, 600);
     ground.lineStyle(1, 0x555555);    
 
@@ -24,7 +18,7 @@ function drawTestLevel() {
     calculateLevel();    
     addDrag(ground);
     ground.scale.set(5);
-    main.pixi.stage.addChild(ground);
+    app.pixi.stage.addChild(ground);
 
     createButtons();
 }
@@ -49,7 +43,7 @@ function createButtons() {
         ground.bounds.drawRect(ground.hitArea.x, ground.hitArea.y, ground.hitArea.width, ground.hitArea.height);
     });
 
-    main.pixi.stage.addChild(addBtn);
+    app.pixi.stage.addChild(addBtn);
 
     let generateBtn = new PIXI.Graphics();
     generateBtn.beginFill(0x00aa00, 0.5);
@@ -62,7 +56,7 @@ function createButtons() {
         navigator.clipboard.writeText(points);
     });
 
-    main.pixi.stage.addChild(generateBtn);
+    app.pixi.stage.addChild(generateBtn);
 }
 
 
@@ -105,10 +99,7 @@ function calculateLevel() {
             ground.lineTo(bx2, by2);
             ground.lineTo(bx2, by + 10);
             ground.lineTo(bx1, by + 10);
-            ground.lineTo(bx1, by1);
-            
-            let dbx = bx2 - bx1;
-            let dby = by2 - by1;                
+            ground.lineTo(bx1, by1);                    
         }
     }   
 }
@@ -151,7 +142,7 @@ function createDragCircle(x, y, id, onDrag) {
     circle.hitArea = new PIXI.Rectangle(-5,-5,10,10);
     circle.on('pointerdown', pointerDownHandler);
     circle.on('pointerup', pointerUpHandler);
-    main.pixi.stage.on('pointermove', pointerMoveHandler);
+    app.pixi.stage.on('pointermove', pointerMoveHandler);
     circle.on('pointerover', pointerOverHandler);
     circle.on('pointerout', pointerOutHandler);
 

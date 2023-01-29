@@ -15,55 +15,41 @@ class ControllManager {
     }
 
     initScreenButtons() {
-        let moveforwardBtn = new PIXI.Graphics();
-        moveforwardBtn.beginFill(0xffffff, 0.5);
-        moveforwardBtn.drawCircle(0, 0, 35);
+        let moveforwardBtn = new PIXI.Sprite(app.assets.texture.control.arrowMove);
+        moveforwardBtn.anchor.set(0.5);
         moveforwardBtn.interactive = true;
-        moveforwardBtn.on('pointerdown', ()=>{
-            this.keys.up = true;
-        });
-        moveforwardBtn.on('pointerup', ()=>{
-            this.keys.up = false;
-        });
-        main.pixi.stage.addChild(moveforwardBtn);
+        app.pixi.stage.addChild(moveforwardBtn);
+        moveforwardBtn.on('pointerdown', ()=>{ this.keys.up = true });
+        moveforwardBtn.on('pointerup', ()=>{ this.keys.up = false });
+        moveforwardBtn.on('pointerupoutside', ()=>{ this.keys.up = false });       
 
-        let movebackBtn = new PIXI.Graphics();
-        movebackBtn.beginFill(0xffffff, 0.5);
-        movebackBtn.drawCircle(0, 0, 35);
+        let movebackBtn = new PIXI.Sprite(app.assets.texture.control.arrowMove);
+        movebackBtn.scale.x = -1;
+        movebackBtn.anchor.set(0.5);
         movebackBtn.interactive = true;
-        movebackBtn.on('pointerdown', ()=>{
-            this.keys.down = true;
-        });
-        movebackBtn.on('pointerup', ()=>{
-            this.keys.down = false;
-        });
-        main.pixi.stage.addChild(movebackBtn);
+        app.pixi.stage.addChild(movebackBtn);
+        movebackBtn.on('pointerdown', ()=>{ this.keys.down = true });
+        movebackBtn.on('pointerup', ()=>{ this.keys.down = false });
+        movebackBtn.on('pointerupoutside', ()=>{ this.keys.down = false });             
 
-        let leanForwardBtn = new PIXI.Graphics();
-        leanForwardBtn.beginFill(0xffffff, 0.5);
-        leanForwardBtn.drawCircle(0, 0, 35);
+        let leanForwardBtn = new PIXI.Sprite(app.assets.texture.control.arrowLean);
+        leanForwardBtn.anchor.set(0.5);
         leanForwardBtn.interactive = true;
-        leanForwardBtn.on('pointerdown', ()=>{
-            this.keys.right = true;
-        });
-        leanForwardBtn.on('pointerup', ()=>{
-            this.keys.right = false;
-        });
-        main.pixi.stage.addChild(leanForwardBtn);
-
-        let leanBackBtn = new PIXI.Graphics();
-        leanBackBtn.beginFill(0xffffff, 0.5);
-        leanBackBtn.drawCircle(0, 0, 35);
+        app.pixi.stage.addChild(leanForwardBtn);
+        leanForwardBtn.on('pointerdown', ()=>{ this.keys.right = true });
+        leanForwardBtn.on('pointerup', ()=>{ this.keys.right = false });
+        leanForwardBtn.on('pointerupoutside', ()=>{ this.keys.right = false });
+       
+        let leanBackBtn = new PIXI.Sprite(app.assets.texture.control.arrowLean);
+        leanBackBtn.scale.x = -1;
+        leanBackBtn.anchor.set(0.5);
         leanBackBtn.interactive = true;
-        leanBackBtn.on('pointerdown', ()=>{
-            this.keys.left = true;
-        });
-        leanBackBtn.on('pointerup', ()=>{
-            this.keys.left = false;
-        });
-        main.pixi.stage.addChild(leanBackBtn);
+        app.pixi.stage.addChild(leanBackBtn);
+        leanBackBtn.on('pointerdown', ()=>{ this.keys.left = true });
+        leanBackBtn.on('pointerup', ()=>{ this.keys.left = false });
+        leanBackBtn.on('pointerupoutside', ()=>{ this.keys.left = false });       
 
-        main.resize.add(()=>{
+        app.resize.add(()=>{
             moveforwardBtn.position.set(window.innerWidth - 60, window.innerHeight - 60);
             movebackBtn.position.set(window.innerWidth - 140, window.innerHeight - 60);
             leanForwardBtn.position.set(140, window.innerHeight - 60);

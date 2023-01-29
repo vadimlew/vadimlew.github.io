@@ -1,22 +1,30 @@
 class Main {
     fps = 60;
-    timeStep = 1000 / this.fps;
+    assets = {};
 
     constructor() {
-        this.loader = PIXI.Assets.loader;       
+       
     }
 
 
-    loadAssets() {
+    async loadAssets() {
+        let loaderText = document.getElementById('loader');
+        PIXI.Assets.init({manifest: assetsManifest});
+        this.assets.texture = await PIXI.Assets.loadBundle(['level', 'driver', 'moto', 'control'], (progress)=>{
+            loaderText.textContent = 'Loading ' + Math.ceil(progress*100) + '%';
+        });   
+        loaderText.hidden = true;
+        console.log(this.assets.texture);
+
         this.initialize();
     }
 
 
     initialize() {
         this.initPixi();
-        this.initPhysics();      
+        this.initPhysics();
 
-        this.loop = new GameLoop({fps: this.fps});
+        this.loop = new GameLoop({fps: this.fps, autoStart:false});
         this.loop.add( this.update );
 
         this.resize = new ResizeManager({ width: 1280, height: 720 });        
@@ -26,14 +34,15 @@ class Main {
     }  
     
 
-    initLevel(difficulty) { 
+    initLevel(difficulty) { 3
+        console.log('initLevel');
         this.level = new Level(difficulty);
-        this.player = new Player();        
+        this.player = new Player();      
+        this.loop.start();  
 
         let resetBtn = new PIXI.Graphics();
         resetBtn.beginFill(0x222222, 0.5);
-        resetBtn.drawRoundedRect(-125, -50, 250, 100, 20);
-        //resetBtn.position.set(150, 150);
+        resetBtn.drawRoundedRect(-125, -50, 250, 100, 20);        
 
         let text = new PIXI.Text('RESET', {
             fontFamily: 'IMPACT',
@@ -54,8 +63,7 @@ class Main {
             resetBtn.position.set(window.innerWidth / 2, window.innerHeight - 100/devicePixelRatio);
         });
 
-        main.pixi.stage.addChild(resetBtn);
-
+        this.pixi.stage.addChild(resetBtn);
         this.resetBtn = resetBtn;
     }
 
@@ -74,14 +82,10 @@ class Main {
         let matter = Matter.Engine.create({
             gravity: {x:0, y:1, scale:0.001}
         });
-
-        /*let runner = Matter.Runner.create();
-        Matter.Runner.run(runner, matter);*/
-
         this.matter = matter;
     }  
     
-    update = () => {
-        Matter.Engine.update(this.matter, this.timeStep);
+    update = (timeStep) => {       
+        Matter.Engine.update(this.matter, timeStep);
     }
 }

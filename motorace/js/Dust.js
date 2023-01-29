@@ -21,11 +21,11 @@ class Dust {
         } else {
             dust = PIXI.Sprite.from('assets/images/dust.png');
             dust.anchor.set(0.5);
-            main.level.display.ground.addChild(dust);
+            app.level.display.ground.addChild(dust);
         }
         
-        dust.x = main.player.display.wheelBack.x;
-        dust.y = main.player.display.wheelBack.y + 40;
+        dust.x = app.player.display.wheelBack.x;
+        dust.y = app.player.display.wheelBack.y + 40;
         dust.angle = 360 * Math.random();
 
         dust.vx = -1 - 2*Math.random();

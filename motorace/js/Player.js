@@ -10,6 +10,7 @@ class Player {
     leanForce = 0.002;
 
     leanAngle = 0;
+    leanValue = 0;
 
 
     constructor() {
@@ -19,7 +20,7 @@ class Player {
         this.dust = new Dust();
         this.control = new ControllManager();
 
-        main.loop.add( this.update );
+        app.loop.add( this.update );
     }
 
 
@@ -122,7 +123,7 @@ class Player {
             axelDriver2
         ]);        
 
-        Matter.Composite.add(main.matter.world, moto);
+        Matter.Composite.add(app.matter.world, moto);
 
         this.phys = {
             moto,
@@ -135,45 +136,44 @@ class Player {
     }
 
 
-    initDisplay() {
+    initDisplay() {        
         let display = new PIXI.Container();
 
-        let corps = PIXI.Sprite.from('assets/images/body.png');
+        let corps = new PIXI.Sprite(app.assets.texture.moto.corps);
         corps.pivot.set(110, 56);
 
-        let ressorFront = PIXI.Sprite.from('assets/images/ressor_front.png');
+        let ressorFront = new PIXI.Sprite(app.assets.texture.moto.ressorFront);
         ressorFront.pivot.set(22, 40);
 
-        let ressorBack = PIXI.Sprite.from('assets/images/ressor_back.png');
+        let ressorBack = new PIXI.Sprite(app.assets.texture.moto.ressorBack);
         ressorBack.pivot.set(65, 3);
 
-        let wheelFront = PIXI.Sprite.from('assets/images/wheel.png');
+        let wheelFront = new PIXI.Sprite(app.assets.texture.moto.wheel);
         wheelFront.anchor.set(0.5);
 
-        let wheelBack = PIXI.Sprite.from('assets/images/wheel.png');
+        let wheelBack = new PIXI.Sprite(app.assets.texture.moto.wheel);
         wheelBack.anchor.set(0.5);
 
-        let head = PIXI.Sprite.from('assets/images/driver/head.png');
+        let head = new PIXI.Sprite(app.assets.texture.driver.head);
         head.pivot.set(24, 40);        
         head.position.set(0, -16);
 
-        let body = PIXI.Sprite.from('assets/images/driver/body.png');
+        let body = new PIXI.Sprite(app.assets.texture.driver.body);
         body.anchor.set(0.8, 0.25);        
-        //body.position.set(80, 19);
 
-        let shoulder = PIXI.Sprite.from('assets/images/driver/shoulder.png');
+        let shoulder = new PIXI.Sprite(app.assets.texture.driver.shoulder);
         shoulder.pivot.set(9, 7);       
         shoulder.position.set(-5, 0);
 
-        let forearm = PIXI.Sprite.from('assets/images/driver/forearm.png');
+        let forearm = new PIXI.Sprite(app.assets.texture.driver.forearm);
         forearm.pivot.set(7, 10);
         forearm.position.set(105, 7);
 
-        let hip = PIXI.Sprite.from('assets/images/driver/hip.png');
+        let hip = new PIXI.Sprite(app.assets.texture.driver.hip);
         hip.pivot.set(16, 4);
         hip.position.set(92+2, 19);
 
-        let foot = PIXI.Sprite.from('assets/images/driver/foot.png');
+        let foot = new PIXI.Sprite(app.assets.texture.driver.foot);
         foot.pivot.set(16, 4+70);
         foot.position.set(115, 40+70);
 
@@ -211,20 +211,10 @@ class Player {
             body
         );
 
-        main.level.display.ground.addChild(this.display);
+        app.level.display.ground.addChild(this.display);
         //this.display.debug1 = Debug.drawPhysBody(this.phys.driver, display, 30);
-    }
-
+    }   
     
-    addDust() {
-        let dust = PIXI.Sprite.from('assets/images/dust.png');
-        dust.x = this.display.wheelBack.x;
-        dust.y = this.display.wheelBack.y + 40;
-
-        dust 
-        main.level.display.ground.addChild(dust);
-    }
-
 
     reset() {
         Matter.Body.setPosition(this.phys.corps, {x:this.startX, y:this.startY});
@@ -272,14 +262,14 @@ class Player {
     leanForward() {
         let corps = this.phys.corps;
         corps.angle += 0.007;
-        this.leanAngle += (0.9 - this.leanAngle)/10;        
+        if (this.leanValue < 1) this.leanValue += 0.04; 
     }
 
 
     leanBack() {
         let corps = this.phys.corps;
         corps.angle -= 0.007;
-        this.leanAngle += (-0.9 - this.leanAngle)/10;        
+        if (this.leanValue > -1) this.leanValue -= 0.04; 
     }
 
 
@@ -312,6 +302,8 @@ class Player {
         let scale = len / this.ressorLen;
         let rotation = Math.atan2(dy, dx);
 
+        this.leanAngle = this.leanValue > 0? Utility.bezier3(this.leanValue, 0, 0.2, 0.7, 0.9) : -Utility.bezier3(-this.leanValue, 0, 0.2, 0.7, 0.9);
+
         this.display.ressorBack.position.set(lx, ly);
         this.display.ressorBack.rotation = rotation + 0.27;
         this.display.ressorBack.scale.x = scale;
@@ -343,7 +335,7 @@ class Player {
             this.leanForward();
         }       
 
-        if (!this.control.keys.left && !this.control.keys.right) this.leanAngle += -this.leanAngle/10;
+        if (!this.control.keys.left && !this.control.keys.right) this.leanValue += -this.leanValue/10;
 
         this.dust.update();
     }
