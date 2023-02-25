@@ -8,7 +8,7 @@ class ClientManager {
 
     async initClient() {
         //this.client = new Colyseus.Client("ws://localhost:2567");   
-        this.client = new Colyseus.Client("ws://2e4f-171-6-241-47.ngrok.io");   
+        this.client = new Colyseus.Client("wss://2e4f-171-6-241-47.ngrok.io");   
         this.room = await this.client.joinOrCreate(this.room_name, { code: "one" });        
         this.addListeners(this.room);       
     }
