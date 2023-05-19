@@ -100,7 +100,7 @@ function foo(a = 'b', b = a) {
     console.log(b);
 }
 
-foo('c', 'd');`
+foo('c');`
 
 let answers8 = ["c", "b", "a", "d"]; // 0
 
