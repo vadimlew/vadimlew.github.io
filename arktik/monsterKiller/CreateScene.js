@@ -38,7 +38,7 @@ function initLights() {
 
 	let lightDirectional = new THREE.DirectionalLight(0xffffff, 0.4); //0x664F00 //0.3
 	lightDirectional.position.set(-5, 30, -10);
-	//lightDirectional.castShadow = true;
+	lightDirectional.castShadow = true;
 	app.obj3d.lightDirectional = lightDirectional;
 	app.obj3d.main.add(lightDirectional);
 
