@@ -153,6 +153,25 @@ class VerletPhysics {
         return body;
     }
 
+    removeBody( body ) {        
+        let index = this.bodies.indexOf( body );        
+        if ( index != -1 ) {
+           
+            let body = this.bodies.splice( index, 1 )[0];
+            if ( body.debugModel ) {
+                app.obj3d.main.remove( body.debugModel );
+            }
+        }
+    }
+
+    getBodyByModel( model ) {
+        for ( let body of this.bodies ) {
+            if ( model == body.model ) return body;
+        }
+
+        return null;
+    }
+
     #addDebugModel(body) {
         if ( !this.#isDebug ) return;
 
@@ -174,13 +193,13 @@ class VerletPhysics {
 
                 if ( body1.shape.id === CircleShape.id && body2.shape.id === CircleShape.id ) {
                     let isCollide = this.testCircleToCirlce( body1, body2 );
-                    if ( isCollide ) this.emitCollideEvents( body1, body2 );
+                    if ( isCollide ) this.#emitCollideEvents( body1, body2 );
                     continue;
                 }
 
                 if ( body1.shape.id === RectangleShape.id && body2.shape.id === RectangleShape.id ) {
                     let isCollide = this.testRectToRect( body1, body2 );                    
-                    if ( isCollide ) this.emitCollideEvents( body1, body2 );
+                    if ( isCollide ) this.#emitCollideEvents( body1, body2 );
                     continue;
                 }
 
@@ -190,7 +209,7 @@ class VerletPhysics {
                     if ( body2.shape.rotation == 0) isCollide = this.testCircleToRect( body1, body2 )
                     else isCollide = this.testCircleToRect2( body1, body2 );
 
-                    if ( isCollide ) this.emitCollideEvents( body1, body2 );
+                    if ( isCollide ) this.#emitCollideEvents( body1, body2 );
                     continue;
                 }
 
@@ -200,13 +219,13 @@ class VerletPhysics {
                     if ( body1.shape.rotation == 0) isCollide = this.testCircleToRect( body2, body1 )
                     else isCollide = this.testCircleToRect2( body2, body1 );
                 
-                    if ( isCollide ) this.emitCollideEvents( body1, body2 );
+                    if ( isCollide ) this.#emitCollideEvents( body1, body2 );
                     continue;
                 }
 
                 if ( body1.shape.id === Ray.id && body2.shape.id === CircleShape.id ) {
                     let isCollide = this.testRayToCircle( body1, body2 );
-                    if ( isCollide ) this.emitCollideEvents( body1, body2 );
+                    if ( isCollide ) this.#emitCollideEvents( body1, body2 );
                     continue;
                 }
 
@@ -230,7 +249,7 @@ class VerletPhysics {
         }
     }
 
-    emitCollideEvents( body1, body2 ) {
+    #emitCollideEvents( body1, body2 ) {
         body1.events.emit( VerletBody.EVENT_COLLIDE, body2 );
         body2.events.emit( VerletBody.EVENT_COLLIDE, body1 );
     }
@@ -471,25 +490,7 @@ class VerletPhysics {
         }  
         
         return false;
-    }
-
-    removeBody( body ) {
-        let index = this.bodies.indexOf( body );
-        if ( index != -1 ) {
-            let body = this.bodies.splice( index, 1 )[0];
-            if ( body.debugModel ) {
-                app.obj3d.main.remove( body.debugModel );
-            }
-        }
-    }
-
-    getBodyByModel( model ) {
-        for ( let body of this.bodies ) {
-            if ( model == body.model ) return body;
-        }
-
-        return null;
-    }
+    }    
 
     #addDebugCircle( body ) {
         let bounds = new THREE.Box3().setFromObject( body.model );

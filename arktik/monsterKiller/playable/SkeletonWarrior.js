@@ -5,6 +5,7 @@ class SkeletonWarior {
 
     speed = 0;
     maxSpeed = 0.15;
+    life = 100;
 
     constructor() {
         this.#initModel();
@@ -29,38 +30,40 @@ class SkeletonWarior {
             map: assets.textures.three['skeletonWarrior']
         });
 
-        let swordMaterial = new THREE.MeshLambertMaterial({
+        let swordShildMaterial = new THREE.MeshLambertMaterial({
             map: assets.textures.three['shield']
         });
 
         this.model.getObjectByName('SkeletonWarrior').material = skeletonWariorMaterial;
-        this.model.getObjectByName('Sword').material = swordMaterial;
+        this.model.getObjectByName('Sword').material = swordShildMaterial;
+        this.model.getObjectByName('Shield').material = swordShildMaterial;
 
         addAnimationMixer( this.model, assets.models.skeletonWarior.v_data.animations );
         this.model.animation.set('Idle');
     }
 
     #initPhysBody() {
-        let circleShape = new CircleShape(1);
+        let circleShape = new CircleShape( 0.8 );
         this.body = app.physics.addModel( this.model, circleShape );
+        this.body.character = this;
 
         let sensorCircleShape = new CircleShape(14);
         this.sensor = app.physics.addModel( this.model, sensorCircleShape, false, true );
     }
 
-    #initStateMachine() {
-        let idleState = new EnemyIdleState( this, 'Idle' );
-        let followState = new FollowCharacterState( this, 'Run' );
-        let attackState = new EnemyAttackState( this, 'Attack' );
-       
-        let stateMachine = new StateMachine( idleState, followState, attackState );
-        stateMachine.set( EnemyIdleState );
+    #initStateMachine() {      
+        this.stateMachine = new StateMachine(
+            new EnemyIdleState( this, 'Idle' ),
+            new FollowCharacterState( this, 'Run' ),
+            new EnemyAttackState( this, 'Attack', 0.6 ),
+            new EnemyReactState( this, 'Hit' ),
+            new EnemyDeathState( this, 'Death' )
+         );
 
-        this.stateMachine = stateMachine;
+        this.stateMachine.set( EnemyIdleState );       
     }
 
     #update = () => {
         this.stateMachine.update();
     }
-
 }

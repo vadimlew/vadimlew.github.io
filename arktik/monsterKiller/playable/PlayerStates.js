@@ -11,7 +11,7 @@ class IdlePlayerState extends State {
     }
 
     enter() {        
-        this.character.model.animation.set( this.idleAnimationName );
+        //this.character.model.animation.set( this.idleAnimationName );
     }
 }
 

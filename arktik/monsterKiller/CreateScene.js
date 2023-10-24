@@ -15,8 +15,7 @@ function init3dScene() {
 	initMaterials();
 	initWorld();	
 	initPlayer();	
-	initEnemies();	
-	
+	initEnemies();		
 	
 	//new PlayableController();
 }
@@ -99,13 +98,25 @@ function initMaterials() {
 
 	app.materials.crate = new THREE.MeshLambertMaterial({
 		map: assets.textures.three['crate']		
-	});	
+	});		
 
 	app.materials.shine = new THREE.SpriteMaterial({ 
 		map: assets.textures.three['shine'],
 		opacity: 0.3,
 		blending: THREE.AdditiveBlending
 	});	
+
+	app.materials.bulletTrace = new THREE.MeshLambertMaterial({
+		map: assets.textures.three['bulletTrace'],
+		transparent: true,
+		blending: THREE.AdditiveBlending
+	});  
+	
+	app.materials.bulletShine = new THREE.MeshLambertMaterial({
+		map: assets.textures.three['bulletShine'],
+		transparent: true,
+		//blending: THREE.AdditiveBlending
+	});  
 }	
 
 
@@ -202,18 +213,20 @@ function initWorld() {
 		}
 
 		if ( obj.name.includes('LampLight') ) {
-			let pointLight = new THREE.PointLight( 0xff4F00, 3, 20 );
+			let spotLight = new THREE.SpotLight( 0xff4F00, 5, 15, Math.PI/2, 0.5 );
+			spotLight.castShadow = false;
+			spotLight.position.copy(obj.position);
+			spotLight.target.position.set(obj.position.x, obj.position.y - 10, obj.position.z)
 
-			pointLight.castShadow = false;
-			//pointLight.shadow.near = 10000;
-			//pointLight.shadow.far = 100000;
-			//pointLight.shadow.radius = 4;
-			//pointLight.shadow.mapSize.width = 0;
-			//pointLight.shadow.mapSize.height = 0; 
-
-			//obj.add(pointLight);			
+			app.obj3d.main.add(spotLight);
+			app.obj3d.main.add(spotLight.target);
+			
+			//const spotLightHelper = new THREE.SpotLightHelper( spotLight );
+			//app.obj3d.main.add( spotLightHelper );		
 
 			let shine = new THREE.Sprite( app.materials.shine );
+			shine.castShadow = false;
+			shine.receiveShadow = false;
 			shine.scale.setScalar(5);
 			obj.add(shine);
 
@@ -224,13 +237,6 @@ function initWorld() {
 			gsap.to( obj.rotation, 9, {z: -2*Math.PI, ease: 'none', repeat: -1});
 		}
 	})	
-}
-
-
-function setMaterial( material, receiveShadow = true, obj ) {		
-	obj.castShadow = true;
-	obj.receiveShadow = receiveShadow;
-	obj.material = material;		
 }
 
 
@@ -246,7 +252,14 @@ function initPlayer() {
 function initEnemies() {	
 	for ( let i=0; i < 4; i++ ) {
 		let enemy = new SkeletonWarior();
+		enemy.model.getObjectByName('Shield').visible = false;
 		enemy.model.position.set(-2 + i, 0, -16);
+		app.obj3d.main.add( enemy.model );
+	}
+
+	for ( let i=0; i < 6; i++ ) {
+		let enemy = new SkeletonWarior();		
+		enemy.model.position.set( -1.5 + i%3, 0, -32 + Math.floor(i/3) * 1.5 );
 		app.obj3d.main.add( enemy.model );
 	}	
 }

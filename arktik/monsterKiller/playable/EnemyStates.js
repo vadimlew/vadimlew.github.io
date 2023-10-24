@@ -73,24 +73,38 @@ class FollowCharacterState extends State {
 
 class EnemyAttackState extends State {
     character;
-    attackAnimationName;    
+    hitTime;
+    attackAnimationName;  
+    attacked; 
+    isHit = false; 
     
-    constructor(character, attackAnimationName) {
+    constructor(character, attackAnimationName, hitTime) {
         super();
         this.character = character;
         this.attackAnimationName = attackAnimationName;
+        this.hitTime = hitTime;
         
         this.character.model.animation.action[attackAnimationName].setLoop( THREE.LoopOnce );
     }
 
     enter( attacked ) {
+        this.isHit = false;
+        this.attacked = attacked;
         this.character.model.animation.set( this.attackAnimationName );
         this.character.model.animation.mixer.addEventListener( 'finished', this.onAnimationFinshed );
 
-        gsap.delayedCall( 0.4, ()=>this.pushBack(attacked) );
+        //gsap.delayedCall( 0.4, ()=>this.pushBack(attacked) );
+    }
+
+    update() {        
+        if( !this.isHit && this.character.model.animation.action[this.attackAnimationName].time >= this.hitTime ) {
+            this.pushBack( this.attacked );
+        }
     }
 
     pushBack( attacked ) {
+        this.isHit = true;
+
         let dx = attacked.model.position.x - this.character.model.position.x;
         let dz = attacked.model.position.z - this.character.model.position.z;
         let distance = Math.sqrt(dx**2 + dz**2);
@@ -109,4 +123,60 @@ class EnemyAttackState extends State {
     exit() {
         this.character.model.animation.mixer.removeEventListener( 'finished', this.onAnimationFinshed );
     }
+}
+
+
+class EnemyReactState extends State {
+    character;
+    reactAnimationName;
+    isReact = false;
+    
+    constructor(character, reactAnimationName) {
+        super();
+        this.character = character;
+        this.reactAnimationName = reactAnimationName;
+
+        this.character.model.animation.action[reactAnimationName].setLoop( THREE.LoopOnce );
+    }
+
+    enter() {
+        if ( this.isReact ) return;
+        this.isReact = true;
+
+        this.character.model.animation.set( this.reactAnimationName );
+        this.character.model.animation.mixer.addEventListener( 'finished', this.onAnimationFinshed );
+    }    
+
+    onAnimationFinshed = () => {
+        this.stateMachine.set( EnemyIdleState );
+    }
+
+    exit() {
+        this.isReact = false;
+        this.character.model.animation.mixer.removeEventListener( 'finished', this.onAnimationFinshed );
+    }
+}
+
+
+class EnemyDeathState extends State {
+    character;
+    deathAnimationName;
+    isDeath = false;
+    
+    constructor(character, deathAnimationName) {
+        super();
+        this.character = character;
+        this.deathAnimationName = deathAnimationName;
+
+        this.character.model.animation.action[deathAnimationName].setLoop( THREE.LoopOnce );
+    }
+
+    enter() {
+        if ( this.isDeath ) return;
+        this.isDeath = true;
+        this.character.model.animation.set( this.deathAnimationName );
+        app.physics.removeBody( this.character.body );
+
+        gsap.to( this.character.model.position, 1, {y: '-=2', ease: 'sine.in', delay: 1} );
+    }   
 }
