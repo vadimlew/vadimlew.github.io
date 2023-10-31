@@ -6,8 +6,6 @@ function createScene() {
 function init3dScene() {
 	app.obj3d.main = new THREE.Group();
 	app.scene3d.add(app.obj3d.main);	
-
-	app.scene3d.fog = new THREE.FogExp2( 0xa200ff, 0.03 );
 	app.physics = new VerletPhysics( {isDebug: false} );
 	
 	initCamera();
@@ -31,6 +29,8 @@ function initCamera() {
 
 
 function initLights() {
+	app.scene3d.fog = new THREE.FogExp2( 0x00BFFF, 0.03 );
+	
 	let lightAmbient = new THREE.AmbientLight(0xffffff, 0.4); //0.3
 	app.obj3d.lightAmbient = lightAmbient;
 	app.obj3d.main.add(lightAmbient);
@@ -92,6 +92,10 @@ function initMaterials() {
 		map: assets.textures.three['lampPost']		
 	});	
 
+	app.materials.lamp = new THREE.MeshBasicMaterial({
+		map: assets.textures.three['lamp']		
+	});	
+
 	app.materials.barrel = new THREE.MeshLambertMaterial({
 		map: assets.textures.three['barrel']		
 	});	
@@ -101,7 +105,7 @@ function initMaterials() {
 	});		
 
 	app.materials.shine = new THREE.SpriteMaterial({ 
-		map: assets.textures.three['shine'],
+		map: assets.textures.three['shine2'],
 		opacity: 0.3,
 		blending: THREE.AdditiveBlending
 	});	
@@ -185,6 +189,10 @@ function initWorld() {
 			body.isStatic = true;
         	app.physics.addBody( body );
 		}
+
+		if ( obj.name.includes('Lamp') ) {
+			obj.material = app.materials.lamp;			
+		}
 		
 		if ( obj.name.includes('LampPoll') ) {
 			obj.material = app.materials.lampPost;
@@ -193,7 +201,7 @@ function initWorld() {
 			let body = new VerletBody( obj, rectShape );
 			body.isStatic = true;
         	app.physics.addBody( body );
-		}
+		}		
 
 		if ( obj.name.includes('Barrel') ) {
 			obj.material = app.materials.barrel;
@@ -213,7 +221,7 @@ function initWorld() {
 		}
 
 		if ( obj.name.includes('LampLight') ) {
-			let spotLight = new THREE.SpotLight( 0xff4F00, 5, 15, Math.PI/2, 0.5 );
+			let spotLight = new THREE.SpotLight( 0x00BFFF, 5, 15, Math.PI/2, 0.5 );
 			spotLight.castShadow = false;
 			spotLight.position.copy(obj.position);
 			spotLight.target.position.set(obj.position.x, obj.position.y - 10, obj.position.z)

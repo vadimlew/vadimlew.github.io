@@ -26,11 +26,11 @@ class SkeletonWarior {
             obj.receiveShadow = true;
         });
 
-        let skeletonWariorMaterial = new THREE.MeshLambertMaterial({
+        let skeletonWariorMaterial = new THREE.MeshBasicMaterial({
             map: assets.textures.three['skeletonWarrior']
         });
 
-        let swordShildMaterial = new THREE.MeshLambertMaterial({
+        let swordShildMaterial = new THREE.MeshBasicMaterial({
             map: assets.textures.three['shield']
         });
 
@@ -43,7 +43,7 @@ class SkeletonWarior {
     }
 
     #initPhysBody() {
-        let circleShape = new CircleShape( 0.8 );
+        let circleShape = new CircleShape( 0.9 );
         this.body = app.physics.addModel( this.model, circleShape );
         this.body.character = this;
 
