@@ -4,7 +4,7 @@ class SkeletonWarior {
     sensor;
 
     speed = 0;
-    maxSpeed = 0.15;
+    maxSpeed = 0.13;
     life = 100;
 
     constructor() {

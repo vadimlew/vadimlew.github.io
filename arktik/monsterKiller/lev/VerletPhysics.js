@@ -75,10 +75,12 @@ class Ray {
     
     length;
     rotation;   
+    thickness;
 
-    constructor( length, rotation=0 ) {        
+    constructor( length, rotation=0, thickness = 0 ) {        
         this.length = length;
         this.rotation = rotation;
+        this.thickness = thickness;
     }
 }
 
@@ -260,15 +262,15 @@ class VerletPhysics {
         let distanceSq = distanceX**2 + distanceZ**2;
         let distance = Math.sqrt( distanceSq );
 
-        let rayX = body1.shape.length * Math.cos( 2*Math.PI - body1.model.rotation.y );
-        let rayZ = body1.shape.length * Math.sin( 2*Math.PI - body1.model.rotation.y );
+        let rayX = body1.shape.length * Math.cos( 2*Math.PI - body1.model.rotation.y + body1.shape.rotation );
+        let rayZ = body1.shape.length * Math.sin( 2*Math.PI - body1.model.rotation.y + body1.shape.rotation );
 
         let crossProduct = rayX * distanceZ - rayZ * distanceX;
         let height = Math.abs( crossProduct / body1.shape.length );
 
         let dotProduct = rayX * distanceX + rayZ * distanceZ;
 
-        let isCollide = height <= body2.shape.radius && dotProduct > 0 && distance < body1.shape.length + body2.shape.radius;
+        let isCollide = height <= body2.shape.radius + body1.shape.thickness && dotProduct > 0 && distance < body1.shape.length + body2.shape.radius;
 
         if ( this.#isDebug ) {
             if ( isCollide ) {
@@ -535,5 +537,6 @@ class VerletPhysics {
 
         let geometry = new THREE.BufferGeometry().setFromPoints( points );
         body.debugModel = new THREE.Line( geometry, material );
+        body.debugModel.rotation.y = body.shape.rotation;
     }
 }

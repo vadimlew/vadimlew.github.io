@@ -67,25 +67,20 @@ class Player {
         this.body.drag = 0.6;
         this.body.character = this;
 
-        let ray = new Ray(8);
-        let circleSensorShape = new CircleShape(8);
+        let ray = new Ray( 8, 0, 0.4 );
         this.sensor = app.physics.addModel( this.model, ray, false, true );
+        this.sensor.events.on( VerletBody.EVENT_COLLIDE, this.onSensorCollide );
+    }
 
-        this.sensor.events.on( VerletBody.EVENT_COLLIDE, (body)=>{
-            if ( body.character && body.character instanceof SkeletonWarior ) {
-                //let oldY = this.model.rotation.y;
-                let dx = body.model.position.x - this.model.position.x;
-                let dz = body.model.position.z - this.model.position.z;
-                let angle = Math.atan2(dx, dz) - Math.PI/2;
+    onSensorCollide = (body) => {
+        if ( body.character && body.character instanceof SkeletonWarior ) {           
+            let dx = body.model.position.x - this.model.position.x;
+            let dz = body.model.position.z - this.model.position.z;
+            let angle = Math.atan2(dx, dz) - Math.PI/2;
 
-                //if ( Math.abs(angle - this.model.rotation.y) > 0.5 ) return; 
-
-                // this.model.getObjectByName('Van_Helsing_Armature').rotation.y = angle - this.model.rotation.y;                
-                this.model.rotation.y = angle;                
-                this.shoot();
-                //this.model.rotation.y = oldY;
-            }
-        });
+            this.model.rotation.y = angle;                
+            this.shoot();            
+        }
     }
 
     #initStateMachine() {
