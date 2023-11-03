@@ -55,7 +55,8 @@ class PlayerJoystickController {
             this.joystickBar.x = dist * Math.cos(angle);
             this.joystickBar.y = dist * Math.sin(angle);
             
-            this.player.model.rotation.y = -angle;
+            // this.player.model.rotation.y = -angle;
+            this.player.toRotate = -angle;
             this.player.speed = this.player.maxSpeed * dist / this.limit;
         }
     }

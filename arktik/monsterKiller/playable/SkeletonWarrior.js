@@ -23,31 +23,35 @@ class SkeletonWarior {
             if (obj.type == 'Bone') return;
 
             obj.castShadow = true;
-            obj.receiveShadow = true;
+           // obj.receiveShadow = true;
         });
 
-        let skeletonWariorMaterial = new THREE.MeshBasicMaterial({
-            map: assets.textures.three['skeletonWarrior']
-        });
+        // let skeletonWariorMaterial = new THREE.MeshPhongMaterial({
+        //     map: assets.textures.three['skeletonWarrior2'],
+        //     shininess: 100,
+        //     emissive: 0x552020
+        // });
 
-        let swordShildMaterial = new THREE.MeshBasicMaterial({
-            map: assets.textures.three['shield']
-        });
+        // let swordShildMaterial = new THREE.MeshPhongMaterial({
+        //     map: assets.textures.three['shield'],
+        //     shininess: 80,
+        //     emissive: 0x552020
+        // });
 
-        this.model.getObjectByName('SkeletonWarrior').material = skeletonWariorMaterial;
-        this.model.getObjectByName('Sword').material = swordShildMaterial;
-        this.model.getObjectByName('Shield').material = swordShildMaterial;
+        this.model.getObjectByName('SkeletonWarrior').material = app.materials.skeletonWarior;
+        this.model.getObjectByName('Sword').material = app.materials.swordShild;
+        this.model.getObjectByName('Shield').material = app.materials.swordShild;
 
         addAnimationMixer( this.model, assets.models.skeletonWarior.v_data.animations );
         this.model.animation.set('Idle');
     }
 
     #initPhysBody() {
-        let circleShape = new CircleShape( 0.9 );
+        let circleShape = new CircleShape( 0.8 );
         this.body = app.physics.addModel( this.model, circleShape );
         this.body.character = this;
 
-        let sensorCircleShape = new CircleShape(14);
+        let sensorCircleShape = new CircleShape(12);
         this.sensor = app.physics.addModel( this.model, sensorCircleShape, false, true );
     }
 

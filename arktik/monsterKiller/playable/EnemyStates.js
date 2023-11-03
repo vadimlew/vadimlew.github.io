@@ -40,8 +40,10 @@ class FollowCharacterState extends State {
         //playSound( 'step_1', true );
         this.targetCharacter = targetCharacter;
         this.character.model.animation.set( this.runAnimationName );
+        this.character.model.animation.action[this.runAnimationName].time = Math.random() * 0.3;
 
-        this.character.body.events.on( VerletBody.EVENT_COLLIDE, this.onCollide );
+        this.character.body.events.on( VerletBody.EVENT_COLLIDE, this.onBodyCollide );
+        this.character.sensor.events.on( VerletBody.EVENT_COLLIDE, this.onSensorCollide );
     }
 
     update() {
@@ -58,15 +60,22 @@ class FollowCharacterState extends State {
         this.character.model.position.z += vz;
     }
 
-    onCollide = (body)=>{
+    onBodyCollide = (body)=>{
         if ( body.character instanceof Player ) {
             this.stateMachine.set( EnemyAttackState, body.character );
         }
     }
 
+    onSensorCollide = (body)=>{
+        if ( body.character instanceof SkeletonWarior && body.character.stateMachine.current instanceof EnemyIdleState ) {
+            body.character.stateMachine.set( FollowCharacterState, this.targetCharacter );
+        }
+    }
+
     exit() {
         //stopSound( 'step_1' );
-        this.character.body.events.off( VerletBody.EVENT_COLLIDE, this.onCollide );
+        this.character.body.events.off( VerletBody.EVENT_COLLIDE, this.onBodyCollide );
+        this.character.sensor.events.off( VerletBody.EVENT_COLLIDE, this.onSensorCollide );
     }   
 }
 
@@ -92,6 +101,7 @@ class EnemyAttackState extends State {
         this.attacked = attacked;
         this.character.model.animation.set( this.attackAnimationName );
         this.character.model.animation.mixer.addEventListener( 'finished', this.onAnimationFinshed );
+        this.character.model.animation.action[this.attackAnimationName].time = Math.random() * 0.5;
 
         //gsap.delayedCall( 0.4, ()=>this.pushBack(attacked) );
     }
@@ -114,6 +124,8 @@ class EnemyAttackState extends State {
 
         attacked.model.position.x += nx * 0.25;
         attacked.model.position.z += nz * 0.25;
+
+        attacked.setDamage(5);
     }
 
     onAnimationFinshed = () => {
@@ -144,7 +156,7 @@ class EnemyReactState extends State {
         this.isReact = true;
 
         this.character.model.animation.set( this.reactAnimationName );
-        this.character.model.animation.mixer.addEventListener( 'finished', this.onAnimationFinshed );
+        this.character.model.animation.mixer.addEventListener( 'finished', this.onAnimationFinshed );        
     }    
 
     onAnimationFinshed = () => {
@@ -168,7 +180,7 @@ class EnemyDeathState extends State {
         this.character = character;
         this.deathAnimationName = deathAnimationName;
 
-        this.character.model.animation.action[deathAnimationName].setLoop( THREE.LoopOnce );
+        this.character.model.animation.action[deathAnimationName].setLoop( THREE.LoopOnce );        
     }
 
     enter() {
@@ -177,6 +189,6 @@ class EnemyDeathState extends State {
         this.character.model.animation.set( this.deathAnimationName );
         app.physics.removeBody( this.character.body );
 
-        gsap.to( this.character.model.position, 1, {y: '-=2', ease: 'sine.in', delay: 1} );
+        gsap.to( this.character.model.position, 1, {y: '-=2', ease: 'sine.in', delay: 1} );        
     }   
 }

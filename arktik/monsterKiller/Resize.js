@@ -72,5 +72,5 @@ app.resize = function(e) {
 	app.obj2d.soundBtn.onResize( leftUI, downUI );
 	app.obj2d.fsCTA.onResize( leftUI, rightUI, upUI, downUI );
 	
-	//app.obj2d.tutorialHand.onResize( {leftUI, rightUI, upUI, downUI, orientation} );
+	app.obj2d.tutorialHand.onResize( {leftUI, rightUI, upUI, downUI, orientation} );
 }

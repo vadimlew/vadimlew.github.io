@@ -12,7 +12,7 @@ class IdlePlayerState extends State {
     }
 
     enter() {        
-        //this.character.model.animation.set( this.idleAnimationName );
+        this.character.model.animation.set( this.idleAnimationName );
     }
 }
 
@@ -32,12 +32,14 @@ class WalkPlayerState extends State {
 
     enter() {
         //playSound( 'step_1', true );
-        //this.character.model.animation.set( this.runAnimationName );
+        this.character.model.animation.set( this.runAnimationName );
     }
 
     update() {
-        let vx = this.character.speed * Math.cos(this.character.model.rotation.y);
-        let vz = -this.character.speed * Math.sin(this.character.model.rotation.y);       
+        this.character.model.rotation.y = this.character.toRotate;
+
+        let vx = this.character.speed * Math.cos( this.character.toRotate );
+        let vz = -this.character.speed * Math.sin( this.character.toRotate );       
 
         this.character.model.position.x += vx;
         this.character.model.position.z += vz;

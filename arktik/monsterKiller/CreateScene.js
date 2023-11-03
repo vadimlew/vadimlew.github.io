@@ -7,6 +7,12 @@ function init3dScene() {
 	app.obj3d.main = new THREE.Group();
 	app.scene3d.add(app.obj3d.main);	
 	app.physics = new VerletPhysics( {isDebug: false} );
+
+	app.obj2d.ui = new PIXI.Container();
+	app.scene2d.addChild(app.obj2d.ui);
+
+	app.bloodEmitter = new ParticleEmitter( Blood );
+	app.boneEmitter = new ParticleEmitter( Bone );
 	
 	initCamera();
 	initLights();
@@ -31,7 +37,7 @@ function initCamera() {
 function initLights() {
 	app.scene3d.fog = new THREE.FogExp2( 0x00BFFF, 0.03 );
 	
-	let lightAmbient = new THREE.AmbientLight(0xffffff, 0.4); //0.3
+	let lightAmbient = new THREE.AmbientLight(0xffffff, 0.6); //0.3
 	app.obj3d.lightAmbient = lightAmbient;
 	app.obj3d.main.add(lightAmbient);
 
@@ -121,6 +127,24 @@ function initMaterials() {
 		transparent: true,
 		//blending: THREE.AdditiveBlending
 	});  
+
+	app.materials.skeletonWarior = new THREE.MeshPhongMaterial({
+		map: assets.textures.three['skeletonWarrior2'],
+		shininess: 100,
+		emissive: 0x552020
+	});
+
+	app.materials.swordShild = new THREE.MeshPhongMaterial({
+		map: assets.textures.three['shield'],
+		shininess: 80,
+		emissive: 0x552020
+	});
+
+	app.materials.skeletonMage = new THREE.MeshPhongMaterial({
+		map: assets.textures.three['skeletonMage'],
+		shininess: 100,
+		emissive: 0x552020
+	});
 }	
 
 
@@ -250,42 +274,57 @@ function initWorld() {
 
 function initPlayer() {
 	let player = new Player();
+	player.model.position.set(0,0,4);
 	app.obj3d.player = player;
 	app.obj3d.main.add( player.model );	
 
-	app.obj3d.followCamera = new FollowCameraHelper( app.camera3d, player.model, [0, 12, 4], [0, 0, -5] );
+	app.obj3d.followCamera = new FollowCameraHelper( app.camera3d, player.model, [0, 12, 4], [0, 0, -4.5] );
 }
 
 
 function initEnemies() {	
-	for ( let i=0; i < 4; i++ ) {
+	for ( let i=0; i < 12; i++ ) {
 		let enemy = new SkeletonWarior();
 		enemy.model.getObjectByName('Shield').visible = false;
-		enemy.model.position.set(-2 + i, 0, -16);
+		enemy.model.position.set(-2 + i%4, 0, -9 - Math.floor(i/4) * 1.6 );
 		app.obj3d.main.add( enemy.model );
 	}
 
-	for ( let i=0; i < 6; i++ ) {
+	for ( let i=0; i < 16; i++ ) {
 		let enemy = new SkeletonWarior();		
-		enemy.model.position.set( -1.5 + i%3, 0, -32 + Math.floor(i/3) * 1.5 );
+		enemy.model.position.set( -2 + i%4, 0, -29 + Math.floor(i/4) * 1.6 );
 		app.obj3d.main.add( enemy.model );
 	}	
+
+	let mage = new SkeletonMage();
+	mage.model.position.set( 1.0, 0, -45 );
+	app.obj3d.main.add( mage.model );
+
+
+	// for ( let i=0; i < 4; i++ ) {
+	// 	let enemy = new SkeletonWarior();
+	// 	enemy.model.getObjectByName('Shield').visible = false;
+	// 	enemy.model.position.set(-2 + i, 0, -9);
+	// 	app.obj3d.main.add( enemy.model );
+	// }
+
+	// for ( let i=0; i < 6; i++ ) {
+	// 	let enemy = new SkeletonWarior();		
+	// 	enemy.model.position.set( -1.5 + i%3, 0, -32 + Math.floor(i/3) * 1.5 );
+	// 	app.obj3d.main.add( enemy.model );
+	// }	
 }
 
 
-function init2dScene() {
-	app.obj2d.ui = new PIXI.Container();
-	app.scene2d.addChild(app.obj2d.ui);
-	
+function init2dScene() {	
 	app.obj2d.fsCTA = new FullScreenCTA( clickAd );
 	app.obj2d.soundBtn = new SoundButton();	
 	app.obj2d.joystick = new PlayerJoystickController( app.obj3d.player );	
-	//app.obj2d.tutorialHand = new TutorialJoystick();	
-
-	//let vectorTest = new VectorWorkTest();
+	app.obj2d.tutorialHand = new TutorialHand();
 
 	app.obj2d.ui.addChild(
-		//app.obj2d.tutorialHand.display,			
+		app.obj3d.player.lifeBar,
+		app.obj2d.tutorialHand.display,
 		app.obj2d.soundBtn.display,
 		app.obj2d.joystick.display,		
 		app.obj2d.fsCTA.display		

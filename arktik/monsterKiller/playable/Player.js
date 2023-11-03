@@ -5,12 +5,17 @@ class Player {
     stateMachine;
     muzzleR;
     muzzleL;
+    lifeBar;
 
     speed = 0;
     maxSpeed = 0.085;
     bullets = [];
     shootReloadTime = 10;
     currentReloadTime = 0;
+    toRotate = 0;
+
+    maxLife = 100;
+    life = this.maxLife;
 
     bullets = [];
 
@@ -24,7 +29,8 @@ class Player {
 
     #initModel() {
         this.model = assets.models.player;
-        this.model.rotation.y = Math.PI/2;   
+        this.toRotate = Math.PI/2;
+        this.model.rotation.y = this.toRotate;
         this.model.scale.setScalar(1.3);     
         this.model.name = 'player';
 
@@ -59,6 +65,11 @@ class Player {
 
         addAnimationMixer( this.model );
         this.model.animation.set( 'Run' );
+
+        this.lifeBarPlacer = new THREE.Object3D();
+        this.lifeBarPlacer.position.y = 3.5;
+        this.model.add( this.lifeBarPlacer );
+        this.lifeBar = new LifeBar( this );
     }
 
     #initPhysBody() {
@@ -67,7 +78,7 @@ class Player {
         this.body.drag = 0.6;
         this.body.character = this;
 
-        let ray = new Ray( 8, 0, 0.4 );
+        let ray = new Ray( 8, 0, 0.7 );
         this.sensor = app.physics.addModel( this.model, ray, false, true );
         this.sensor.events.on( VerletBody.EVENT_COLLIDE, this.onSensorCollide );
     }
@@ -95,6 +106,7 @@ class Player {
     #update = () => {
         this.stateMachine.update();
         if ( this.currentReloadTime > 0 ) this.currentReloadTime--;
+        position3dTo2d( this.lifeBarPlacer, this.lifeBar );
     }
 
     shoot() {        
@@ -123,6 +135,14 @@ class Player {
         app.obj3d.main.add( bullet.model );
         bullet.start();
     }
+
+    setDamage( damage ) {
+        this.life -= damage;
+        this.lifeBar.update();
+        if ( this.life <= 0 ) {
+            this.life = 0;
+        }
+    }
 }
 
 
@@ -146,11 +166,13 @@ class Bullet {
 
     onCollide = (body) => {
         if (body.character && body.character instanceof SkeletonWarior ) {     
-            body.character.life -= 25;
+            body.character.life -= 35;
             if ( body.character.life <= 0 ) {
                 body.character.stateMachine.set( EnemyDeathState );
+                app.boneEmitter.add( body.model.position, randomInteger(2, 4) );
             } else {
                 body.character.stateMachine.set( EnemyReactState );
+                app.bloodEmitter.add( body.model.position, randomInteger(3, 6) );
             }
         }
     }
