@@ -23,7 +23,7 @@ function stageDown(e) {
 		}	
 
 		playSound("music", true);
-		fadeSound("music", 0, 0.3, 1000);
+		fadeSound("music", 0, 1.0, 1000);
 	}	
 }
 
