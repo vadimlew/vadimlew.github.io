@@ -300,7 +300,6 @@ function initEnemies() {
 	mage.model.position.set( 1.0, 0, -45 );
 	app.obj3d.main.add( mage.model );
 
-
 	// for ( let i=0; i < 4; i++ ) {
 	// 	let enemy = new SkeletonWarior();
 	// 	enemy.model.getObjectByName('Shield').visible = false;
@@ -321,12 +320,16 @@ function init2dScene() {
 	app.obj2d.soundBtn = new SoundButton();	
 	app.obj2d.joystick = new PlayerJoystickController( app.obj3d.player );	
 	app.obj2d.tutorialHand = new TutorialHand();
+	app.obj2d.looseScreen = new LooseScreen();
+
+	// setTimeout( ()=>app.obj2d.looseScreen.show(), 1000);
 
 	app.obj2d.ui.addChild(
 		app.obj3d.player.lifeBar,
-		app.obj2d.tutorialHand.display,
+		app.obj2d.tutorialHand.display,		
+		app.obj2d.joystick.display,
 		app.obj2d.soundBtn.display,
-		app.obj2d.joystick.display,		
+		app.obj2d.looseScreen,		
 		app.obj2d.fsCTA.display		
 	);	
 }

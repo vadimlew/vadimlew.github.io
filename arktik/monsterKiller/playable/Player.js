@@ -13,6 +13,7 @@ class Player {
     shootReloadTime = 10;
     currentReloadTime = 0;
     toRotate = 0;
+    events = new PIXI.utils.EventEmitter();
 
     maxLife = 100;
     life = this.maxLife;
@@ -66,6 +67,9 @@ class Player {
         addAnimationMixer( this.model );
         this.model.animation.set( 'Run' );
 
+        this.model.animation.action['Death'].setLoop( THREE.LoopOnce );
+        this.model.animation.action['Shoot'].setLoop( THREE.LoopOnce );
+
         this.lifeBarPlacer = new THREE.Object3D();
         this.lifeBarPlacer.position.y = 3.5;
         this.model.add( this.lifeBarPlacer );
@@ -84,7 +88,7 @@ class Player {
     }
 
     onSensorCollide = (body) => {
-        if ( body.character && body.character instanceof SkeletonWarior ) {           
+        if ( body.character && (body.character instanceof SkeletonWarior || body.character instanceof SkeletonMage) ) {           
             let dx = body.model.position.x - this.model.position.x;
             let dz = body.model.position.z - this.model.position.z;
             let angle = Math.atan2(dx, dz) - Math.PI/2;
@@ -97,7 +101,8 @@ class Player {
     #initStateMachine() {
         this.stateMachine = new StateMachine(
             new IdlePlayerState( this, 'Idle' ),
-            new WalkPlayerState( this, 'Run' )            
+            new WalkPlayerState( this, 'Run' ),
+            new PlayerDeathState( this, 'Death' )
         )
        
         this.stateMachine.set( IdlePlayerState );
@@ -110,9 +115,11 @@ class Player {
     }
 
     shoot() {        
-        if ( this.currentReloadTime <= 0 ) {
+        if ( this.currentReloadTime <= 0 ) {            
             this.#shoot( this.muzzleR );
             this.#shoot( this.muzzleL );
+
+            playSound( 'shootC_' + randomInteger(0, 2), false );            
 
             this.currentReloadTime = this.shootReloadTime;
         }
@@ -123,7 +130,7 @@ class Player {
 
         bullet.onComplete = () => {
             this.bullets.push( bullet );
-        }
+        }        
 
         bullet.model.position.set(0, 0, 0);
         muzzle.localToWorld( bullet.model.position );        
@@ -141,6 +148,7 @@ class Player {
         this.lifeBar.update();
         if ( this.life <= 0 ) {
             this.life = 0;
+            this.stateMachine.set( PlayerDeathState )
         }
     }
 }
@@ -165,14 +173,17 @@ class Bullet {
     }
 
     onCollide = (body) => {
-        if (body.character && body.character instanceof SkeletonWarior ) {     
+        if (body.character && (body.character instanceof SkeletonWarior || body.character instanceof SkeletonMage) ) {     
             body.character.life -= 35;
+            
+            if (body.character instanceof SkeletonMage) playSound( 'bulletImpact_' + randomInteger(0, 2), false );
+
             if ( body.character.life <= 0 ) {
                 body.character.stateMachine.set( EnemyDeathState );
-                app.boneEmitter.add( body.model.position, randomInteger(2, 4) );
+                app.boneEmitter.add( this.body.model.position, randomInteger(2, 4) );
             } else {
                 body.character.stateMachine.set( EnemyReactState );
-                app.bloodEmitter.add( body.model.position, randomInteger(3, 6) );
+                app.bloodEmitter.add( this.body.model.position, randomInteger(3, 4) );
             }
         }
     }

@@ -29,6 +29,7 @@ class FollowCharacterState extends State {
     character;
     targetCharacter;
     runAnimationName;
+    stepTimer = 0;
 
     constructor(character, runAnimationName) {
         super();
@@ -44,6 +45,12 @@ class FollowCharacterState extends State {
 
         this.character.body.events.on( VerletBody.EVENT_COLLIDE, this.onBodyCollide );
         this.character.sensor.events.on( VerletBody.EVENT_COLLIDE, this.onSensorCollide );
+
+        this.targetCharacter.events.on( 'death', this.onPlayerDeath );
+    }
+
+    onPlayerDeath = () => {
+        this.stateMachine.set( EnemyIdleState );
     }
 
     update() {
@@ -58,6 +65,12 @@ class FollowCharacterState extends State {
 
         this.character.model.position.x += vx;
         this.character.model.position.z += vz;
+
+        this.stepTimer--;
+        if ( this.stepTimer <= 0 ) {
+            this.stepTimer = randomInteger(10, 14);
+            playSound( 'step_' + randomInteger(0, 2), false, 0.5 );            
+        }
     }
 
     onBodyCollide = (body)=>{
@@ -73,7 +86,7 @@ class FollowCharacterState extends State {
     }
 
     exit() {
-        //stopSound( 'step_1' );
+        this.targetCharacter.events.off( 'death', this.onPlayerDeath );
         this.character.body.events.off( VerletBody.EVENT_COLLIDE, this.onBodyCollide );
         this.character.sensor.events.off( VerletBody.EVENT_COLLIDE, this.onSensorCollide );
     }   
@@ -126,6 +139,8 @@ class EnemyAttackState extends State {
         attacked.model.position.z += nz * 0.25;
 
         attacked.setDamage(5);
+
+        playSound( 'hitC_' + randomInteger(0, 2), false );
     }
 
     onAnimationFinshed = () => {
@@ -157,6 +172,8 @@ class EnemyReactState extends State {
 
         this.character.model.animation.set( this.reactAnimationName );
         this.character.model.animation.mixer.addEventListener( 'finished', this.onAnimationFinshed );        
+
+        playSound( 'dead_' + randomInteger(0, 2), false );
     }    
 
     onAnimationFinshed = () => {

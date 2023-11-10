@@ -31,6 +31,16 @@ class ParticleEmitter {
 }
 
 
+class Particle {
+    emitter;
+    model;
+    velocity = new THREE.Vector3();
+
+    reset(){};
+    update(){};
+}
+
+
 class Blood {
     emitter;
     model;

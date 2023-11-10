@@ -20,6 +20,7 @@ class IdlePlayerState extends State {
 class WalkPlayerState extends State {
     character;
     runAnimationName;
+    stepTimer = 0;
 
     constructor(character, runAnimationName) {
         super();
@@ -31,7 +32,7 @@ class WalkPlayerState extends State {
     }
 
     enter() {
-        //playSound( 'step_1', true );
+        this.stepTimer = 0;
         this.character.model.animation.set( this.runAnimationName );
     }
 
@@ -43,11 +44,17 @@ class WalkPlayerState extends State {
 
         this.character.model.position.x += vx;
         this.character.model.position.z += vz;
+
+        this.stepTimer--;
+        if ( this.stepTimer <= 0 ) {
+            this.stepTimer = 14;
+            playSound( 'step_' + randomInteger(0, 2), false );
+        }        
     }
 
-    exit() {
-        //stopSound( 'step_1' );
-    }
+    // exit() {
+    //     stopSound( 'step_0' );
+    // }
 }
 
 
@@ -61,21 +68,42 @@ class AttackPlayerState extends State {
         this.attackAnimationName = attackAnimationName;        
     }
 
-    enter() {        
-        //this.character.model.animation.set( this.attackAnimationName );
+    enter() {                
         this.character.shoot();
         this.stateMachine.set( IdlePlayerState );
-    }
-
-    update() {
-        
-    }
-
-    exit() {
-        
-    }
+    }   
 }
 
+
+class PlayerDeathState extends State {
+    character;
+    deathAnimationName;
+
+    constructor(character, deathAnimationName) {
+        super();
+        this.character = character;
+        this.deathAnimationName = deathAnimationName;        
+    }
+
+    enter() {        
+        this.character.model.animation.set( this.deathAnimationName );
+        app.obj2d.joystick.stop();
+        gsap.to( app.obj3d.player.lifeBar, 0.5, { alpha: 0 } );
+
+        gsap.delayedCall( 1, ()=>{
+            app.obj2d.looseScreen.show();
+            appEndGame();
+        });	    
+       
+        app.physics.removeBody( this.character.body );
+        app.physics.removeBody( this.character.sensor );      
+        
+        this.character.events.emit('death');
+
+        fadeSound("music", 0.3, 0.0, 1000);
+        playSound('death');
+    }   
+}
 
 class IdlePlayerPredicate extends Predicate {
     character;

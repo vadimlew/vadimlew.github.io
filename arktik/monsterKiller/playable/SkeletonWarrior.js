@@ -2,6 +2,7 @@ class SkeletonWarior {
     model;
     body;
     sensor;
+    stateMachine;
 
     speed = 0;
     maxSpeed = 0.13;
@@ -12,7 +13,7 @@ class SkeletonWarior {
         this.#initPhysBody();
         this.#initStateMachine();
 
-        app.update.add(this.#update);
+        app.update.add(this.#update);        
     }
 
     #initModel() {
@@ -64,7 +65,7 @@ class SkeletonWarior {
             new EnemyDeathState( this, 'Death' )
          );
 
-        this.stateMachine.set( EnemyIdleState );       
+        this.stateMachine.set( EnemyIdleState );
     }
 
     #update = () => {
