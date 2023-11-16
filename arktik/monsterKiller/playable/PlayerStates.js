@@ -37,7 +37,8 @@ class WalkPlayerState extends State {
     }
 
     update() {
-        this.character.model.rotation.y = this.character.toRotate;
+        // this.character.moveRotation = this.character.toRotate;
+        this.character.model.rotation.y = this.character.moveRotation;
 
         let vx = this.character.speed * Math.cos( this.character.toRotate );
         let vz = -this.character.speed * Math.sin( this.character.toRotate );       

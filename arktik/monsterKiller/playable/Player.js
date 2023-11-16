@@ -6,9 +6,11 @@ class Player {
     muzzleR;
     muzzleL;
     lifeBar;
+    circle;
 
     speed = 0;
     maxSpeed = 0.085;
+    moveRotation = 0;
     bullets = [];
     shootReloadTime = 10;
     currentReloadTime = 0;
@@ -31,8 +33,9 @@ class Player {
     #initModel() {
         this.model = assets.models.player;
         this.toRotate = Math.PI/2;
+        this.moveRotation = this.toRotate;
         this.model.rotation.y = this.toRotate;
-        this.model.scale.setScalar(1.3);     
+        this.model.scale.setScalar(1.3);
         this.model.name = 'player';
 
         this.model.traverse( obj => {
@@ -74,6 +77,17 @@ class Player {
         this.lifeBarPlacer.position.y = 3.5;
         this.model.add( this.lifeBarPlacer );
         this.lifeBar = new LifeBar( this );
+
+        let circleMaterial = new THREE.MeshBasicMaterial({
+            color: 0xcccccc
+        })
+        let circleGeometry = new THREE.RingGeometry( 6.08, 6.15, 64 ); 
+        circleGeometry.rotateX( -Math.PI / 2 );
+        let circle = new THREE.Mesh( circleGeometry, circleMaterial );        
+        circle.position.y = 0.1;
+        
+        this.circle = circle;
+        this.model.add( circle );
     }
 
     #initPhysBody() {
@@ -82,8 +96,10 @@ class Player {
         this.body.drag = 0.6;
         this.body.character = this;
 
-        let ray = new Ray( 8, 0, 0.7 );
-        this.sensor = app.physics.addModel( this.model, ray, false, true );
+        // let ray = new Ray( 8, 0, 0.7 );
+        let circleSensorShape = new CircleShape(8);
+
+        this.sensor = app.physics.addModel( this.model, circleSensorShape, false, true );
         this.sensor.events.on( VerletBody.EVENT_COLLIDE, this.onSensorCollide );
     }
 
@@ -93,8 +109,11 @@ class Player {
             let dz = body.model.position.z - this.model.position.z;
             let angle = Math.atan2(dx, dz) - Math.PI/2;
 
-            this.model.rotation.y = angle;                
+            this.moveRotation = angle;     
+            this.model.rotation.y = this.moveRotation;           
             this.shoot();            
+
+            this.circle.material.color.setHex(0xcc0000);
         }
     }
 
@@ -110,7 +129,12 @@ class Player {
 
     #update = () => {
         this.stateMachine.update();
-        if ( this.currentReloadTime > 0 ) this.currentReloadTime--;
+        if ( this.currentReloadTime > 0 ) {
+            this.currentReloadTime--;            
+        } else {
+            this.circle.material.color.setHex(0xcccccc);
+            this.moveRotation = this.toRotate;            
+        }
         position3dTo2d( this.lifeBarPlacer, this.lifeBar );
     }
 

@@ -19,9 +19,7 @@ function init3dScene() {
 	initMaterials();
 	initWorld();	
 	initPlayer();	
-	initEnemies();		
-	
-	//new PlayableController();
+	initEnemies();	
 }
 
 
