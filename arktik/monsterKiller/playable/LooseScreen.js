@@ -44,23 +44,23 @@ class LooseScreen extends PIXI.Container {
         this.pistolLeft.x = -50;
         this.pistolLeft.y = 25;
 
-        // this.logoText = new PIXI.Sprite( assets.textures.pixi.logoText );
-        // this.logoText.anchor.set(0.5);
-        // this.logoText.y = 25;
+        this.logoText = new PIXI.Sprite( assets.textures.pixi.logoText );
+        this.logoText.anchor.set(0.5);
+        this.logoText.y = 15;
 
         this.shine = new PIXI.Sprite( assets.textures.pixi.shine );
         this.shine.anchor.set(0.5);
         this.shine.angle = 55;
         this.shine.x = -500;
 
-        // let mask = new PIXI.Sprite( assets.textures.pixi.logoText );       
-        // mask.y = 25;
-        // mask.anchor.set(0.5);
-        // this.shine.mask = mask;
+        let mask = new PIXI.Sprite( assets.textures.pixi.logoText );       
+        mask.y = 16;
+        mask.anchor.set(0.5);
+        this.shine.mask = mask;
 
-        // this.logoText.addChild( this.shine );
+        this.logoText.addChild( this.shine );
 
-        this.logo.addChild( this.logoBg, this.pistolRight, this.pistolLeft, /*this.logoText, mask*/ );        
+        this.logo.addChild( this.logoBg, this.pistolRight, this.pistolLeft, this.logoText, mask );        
     }    
 
     show() {
@@ -75,9 +75,9 @@ class LooseScreen extends PIXI.Container {
         gsap.from( this.pistolLeft, 0.5, { x: -150.0, y: 100.0, alpha: 0, ease: 'back.out', delay: delay+0.2 } );
         gsap.from( this.pistolRight, 0.5, { x: 150.0, y: 100.0, alpha: 0, ease: 'back.out', delay: delay+0.3 } );
 
-        // gsap.from( this.logoText, 0.5, { alpha: 0, delay: delay+0.5 } );
-        // gsap.from( this.logoText.scale, 0.5, { x: 2.0, y: 2.0, ease: 'back.out', delay: delay+0.5 } );
-        // gsap.to( this.shine, 1.5, { x: 550, repeat: -1, repeatDelay: 0.5, delay: delay+1.0 } );
+        gsap.from( this.logoText, 0.5, { alpha: 0, delay: delay+0.5 } );
+        gsap.from( this.logoText.scale, 0.5, { x: 2.0, y: 2.0, ease: 'back.out', delay: delay+0.5 } );
+        gsap.to( this.shine, 1.5, { x: 550, repeat: -1, repeatDelay: 0.5, delay: delay+1.0 } );
 
         gsap.from( this.defeatTxt, 1.0, { alpha: 0, delay: 0.0 } );
 
