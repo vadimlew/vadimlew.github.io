@@ -553,6 +553,8 @@ function createFinish() {
 	let downloadBtn = new PIXI.Sprite(assets.textures.pixi.playMore);
 	finish.addChild(downloadBtn);
 	downloadBtn.anchor.set(0.5, 0.5);	
+	downloadBtn.interactive = true;
+	downloadBtn.on( 'pointertap', clickAd );
 
 	let packshotDad = new PIXI.Container();
 	finish.addChild(packshotDad);
