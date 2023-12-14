@@ -21,17 +21,14 @@ function init2dScene() {
 
 	app.emitter = new ParticleEmitter( Drop );
 
-	let boom = createAnimSprite( assets.textures.pixi['boom'], boomSheetData, 'blast' );
-	// boom.scale.set( 2.5 );
-	boom.anchor.set(0.5);
-	app.obj2d.boom = boom;
+	app.obj2d.boom = createAnimSprite( assets.textures.pixi['boom'], boomSheetData, 'blast' );	
+	app.obj2d.boom.anchor.set(0.5);	
 	
 	app.obj2d.main.addChild(		
 		app.obj2d.gameScene,		
 		app.obj2d.finish,
 		app.obj2d.fsCTA,
-		app.obj2d.soundBtn,
-		boom
+		app.obj2d.soundBtn		
 	);
 };
 
@@ -108,7 +105,8 @@ function createBoard() {
 	let startY = -(boardRow-1) * 0.5 * tileSize;
 
 	let moveSteps = 0;
-	let isDynamit = false;
+	let dynamitCount = 0;
+	let isDynamitTutor = false;
 
 	let board = new PIXI.Container();
 	board.interactive = true;
@@ -254,6 +252,8 @@ function createBoard() {
 	function bigBadaBoom(tile) {
 		let boom = app.obj2d.boom;
 
+		tile.parent.addChild( boom );
+
 		boom.x = tile.x;
 		boom.y = tile.y;
 		boom.play();
@@ -266,12 +266,14 @@ function createBoard() {
 		board.off("pointerup", pointerUpHander);
 		board.off("pointermove", pointerMoveHander);
 
+		app.handTimeline.pause(0);
+
 		gsap.delayedCall( 0.3, () => {
 			for ( let tile of tiles ) {
 				let dx = tile.x - boom.x;
 				let dy = tile.y - boom.y;
 				let distance = Math.sqrt(dx * dx + dy * dy);
-				let delay = Math.max( distance / 1000 - 0.2, 0 );				
+				let delay = Math.max( distance / 1000 - 0.2, 0 );
 	
 				gsap.to( tile, 0.25, {alpha: 0, delay});
 				gsap.to( tile.scale, 0.25, {x: 2.5, y: 2.0, ease: 'sine.in', delay, onComplete: ()=>{
@@ -350,6 +352,31 @@ function createBoard() {
 				if ( spriteName === 'dinamit' ) {
 					gsap.to( tile.scale, 0.3, {x: 0.9, y: 0.9, ease: 'quad.inOut', yoyo: true, repeat: -1});
 					gsap.to( tile, 0.25, {angle: -10, ease: 'quad.inOut', yoyo: true, repeat: -1});
+
+					if ( !isDynamitTutor ) {
+						isDynamitTutor = true;						
+						
+						let hand = new PIXI.Container();
+						let handSprite = new PIXI.Sprite( assets.textures.pixi.hand );						
+						handSprite.anchor.set(0.44, 0.1);
+						hand.addChild(handSprite);
+						app.obj2d.main.addChild(hand);
+						
+						hand.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
+
+						var tl = gsap.timeline({repeat: -1, repeatDelay: 1, delay: 2.5});
+						tl.from(handSprite, 0.4, {alpha: 0});
+						tl.to(handSprite.scale, 0.25, {x: 0.8, y: 0.8, ease: 'quad.inOut' });	
+						tl.to(handSprite, 0.5, {x: 64, ease: 'sine.inOut' });	
+						tl.to(handSprite.scale, 0.25, {x: 1.0, y: 1.0, ease: 'quad.inOut' });						
+						tl.to(handSprite, 0.5, {alpha: 0});
+
+						app.handTimeline = tl;
+
+						gsap.ticker.add(() => {
+							app.obj2d.main.toLocal( tile.position, boardBg, hand.position );
+						});
+					}
 				}
 
 				tile.x = startX + column * tileSize;
@@ -382,8 +409,8 @@ function createBoard() {
 		let sprites = ["cheese", "tomato", "carrot", "baklagani", "pappier", "water"];
 		let randomIndex = Math.floor( sprites.length * Math.random() );
 		
-		if ( !isDynamit && moveSteps >= 4 && Math.random() > 0.5 ) {
-			isDynamit = true;
+		if ( dynamitCount < 3 && moveSteps >= 5 && Math.random() > 0.5 ) {
+			dynamitCount += 1;			
 			return "dinamit";
 		}
 
@@ -403,7 +430,7 @@ function createBoard() {
 			for ( let index = startIndex; index < endIndex; index++ ) {
 				let tile = tiles[ index ];
 				
-				if ( tile === null ) {
+				if ( tile === null || tile.name === 'dinamit' ) {
 					if ( same.length >= 3 ) {
 						isCombination = true;
 						finded( same );
@@ -439,7 +466,7 @@ function createBoard() {
 			for ( let index = startIndex; index < endIndex; index += boardCol ) {
 				let tile = tiles[ index ];
 				
-				if ( tile === null ) {
+				if ( tile === null || tile.name === 'dinamit' ) {
 					if ( same.length >= 3 ) {
 						isCombination = true;
 						finded( same );											
@@ -575,7 +602,7 @@ function createTutor () {
 	var tl = gsap.timeline({repeat: -1, repeatDelay: 1, paused: true, delay: 0.5});
 	tl.from(hand, 0.4, {alpha: 0});
 	tl.to(hand, 0.5, {x: -25});	
-	tl.to(hand, 0.5, {alpha: 0});	
+	tl.to(hand, 0.5, {alpha: 0});
 
 	tutor.show = function() {
 		tutor.visible = true;
