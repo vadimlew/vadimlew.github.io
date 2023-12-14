@@ -382,7 +382,7 @@ function createBoard() {
 		let sprites = ["cheese", "tomato", "carrot", "baklagani", "pappier", "water"];
 		let randomIndex = Math.floor( sprites.length * Math.random() );
 		
-		if ( !isDynamit && moveSteps >= 1 && Math.random() > 0.5 ) {
+		if ( !isDynamit && moveSteps >= 4 && Math.random() > 0.5 ) {
 			isDynamit = true;
 			return "dinamit";
 		}
