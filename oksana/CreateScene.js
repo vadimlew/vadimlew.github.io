@@ -20,12 +20,18 @@ function init2dScene() {
 	app.obj2d.soundBtn = app.template.soundButton();
 
 	app.emitter = new ParticleEmitter( Drop );
+
+	let boom = createAnimSprite( assets.textures.pixi['boom'], boomSheetData, 'blast' );
+	// boom.scale.set( 2.5 );
+	boom.anchor.set(0.5);
+	app.obj2d.boom = boom;
 	
 	app.obj2d.main.addChild(		
 		app.obj2d.gameScene,		
 		app.obj2d.finish,
 		app.obj2d.fsCTA,
-		app.obj2d.soundBtn
+		app.obj2d.soundBtn,
+		boom
 	);
 };
 
@@ -102,6 +108,7 @@ function createBoard() {
 	let startY = -(boardRow-1) * 0.5 * tileSize;
 
 	let moveSteps = 0;
+	let isDynamit = false;
 
 	let board = new PIXI.Container();
 	board.interactive = true;
@@ -206,6 +213,17 @@ function createBoard() {
 
 			gsap.to( tile1, swapTime, { x: tile2.x, y: tile2.y, ease: 'back.inOut' });
 			gsap.to( tile2, swapTime, { x: tile1.x, y: tile1.y, ease: 'back.inOut', onComplete: ()=>{
+
+				if ( tile1.name === 'dinamit' ) {
+					bigBadaBoom( tile1 );
+					return;
+				} 
+
+				if ( tile2.name === 'dinamit' ) {
+					bigBadaBoom( tile2 ); 
+					return;
+				}
+
 				let isCombination = findCombinations();
 
 				if ( !isCombination ) {		
@@ -224,13 +242,53 @@ function createBoard() {
 
 				} else {
 
-					isSwapped = false;					
+					// isSwapped = false;
 					moveSteps++;
 
 				}
 			}});
 		}
 	};
+
+
+	function bigBadaBoom(tile) {
+		let boom = app.obj2d.boom;
+
+		boom.x = tile.x;
+		boom.y = tile.y;
+		boom.play();
+		gsap.to( boom.scale, 0.5, { x: 3.0, y: 3.0, ease: 'sine.in' });		
+
+		gsap.to( board, 0.05, {x: '+= 15', ease: 'quad.inOut', yoyo: true, repeat: 6, delay: 0.25 });
+		gsap.to( board, 0.07, {y: '+= 15', ease: 'cubic.inOut', yoyo: true, repeat: 6, delay: 0.25 });
+
+		board.off("pointerdown", pointerDownHander);
+		board.off("pointerup", pointerUpHander);
+		board.off("pointermove", pointerMoveHander);
+
+		gsap.delayedCall( 0.3, () => {
+			for ( let tile of tiles ) {
+				let dx = tile.x - boom.x;
+				let dy = tile.y - boom.y;
+				let distance = Math.sqrt(dx * dx + dy * dy);
+				let delay = Math.max( distance / 1000 - 0.2, 0 );				
+	
+				gsap.to( tile, 0.25, {alpha: 0, delay});
+				gsap.to( tile.scale, 0.25, {x: 2.5, y: 2.0, ease: 'sine.in', delay, onComplete: ()=>{
+					if (tile.name != 'dinamit') app.emitter.add( tile.x, tile.y, getColorByName(tile.name), 2 );
+					tile.visible = false;					
+				}});
+			}
+		})
+
+		gsap.delayedCall( 1.0, () => {
+			app.obj2d.gameScene.hide();
+			app.obj2d.finish.show();
+		})		
+
+		playSound('dynamit');
+	}
+
 
 	function fallTiles() {
 		for ( let colCount=0; colCount < boardCol; colCount++ ) {
@@ -287,7 +345,12 @@ function createBoard() {
 				let tile = new PIXI.Sprite( assets.textures.pixi[spriteName] );
 				tile.interactive = true;
 				tile.anchor.set(0.5, 0.5);
-				tile.name = spriteName;				
+				tile.name = spriteName;
+				
+				if ( spriteName === 'dinamit' ) {
+					gsap.to( tile.scale, 0.3, {x: 0.9, y: 0.9, ease: 'quad.inOut', yoyo: true, repeat: -1});
+					gsap.to( tile, 0.25, {angle: -10, ease: 'quad.inOut', yoyo: true, repeat: -1});
+				}
 
 				tile.x = startX + column * tileSize;
 				tile.y = startY - tileSize * (empty.indexOf( index ) + 1);
@@ -300,16 +363,16 @@ function createBoard() {
 				
 				let dy = placeY - tile.y;
 				let time = Math.floor(dy / tileSize) * 0.2;
-				let delay = 0.25;
+				let delay = 0.26;
 
 				gsap.to( tile, time, { y: placeY, ease: "back.out(1.25)", delay } );
-				gsap.to( tile, 0.2, { alpha: 1, delay: 0.25 + empty.indexOf( index ) * 0.05 });
+				gsap.to( tile, 0.2, { alpha: 1, delay: 0.26 + empty.indexOf( index ) * 0.05 });
 
 				if ( time > maxFallTime ) maxFallTime = time;
 			}
 		}
 
-		if ( maxFallTime > 0 ) gsap.delayedCall( maxFallTime, ()=>{
+		if ( maxFallTime > 0 ) gsap.delayedCall( maxFallTime+0.01, ()=>{
 			if ( onComplete ) onComplete();
 		});
 	}
@@ -318,6 +381,12 @@ function createBoard() {
 	function getRandomSpriteName() {
 		let sprites = ["cheese", "tomato", "carrot", "baklagani", "pappier", "water"];
 		let randomIndex = Math.floor( sprites.length * Math.random() );
+		
+		if ( !isDynamit && moveSteps >= 1 && Math.random() > 0.5 ) {
+			isDynamit = true;
+			return "dinamit";
+		}
+
 		return sprites[ randomIndex ];
 	}	
 
@@ -411,14 +480,8 @@ function createBoard() {
 			fallTiles();
 			fillEmptyTiles( findCombinations );
 		} else {
-			if ( moveSteps >= 5 ) {
-				board.off ("pointerdown", pointerDownHander);
-				board.off ("pointerup", pointerUpHander);
-				board.off ("pointermove", pointerMoveHander);	
-
-				app.obj2d.gameScene.hide();
-				app.obj2d.finish.show();
-			}
+			isSwapped = false;
+			// moveSteps++;
 		}
 
 		return isCombination;
@@ -428,14 +491,13 @@ function createBoard() {
 		for ( let tile of same ) {
 			let index = tiles.indexOf( tile );
 			if ( index !== -1 ) tiles[index] = null;
-
-			app.emitter.add( tile.x, tile.y, getColorByName(tile.name), 2 );
-			// playSound('Match' + Math.floor( 1 + Math.random() * 2));
+			
 			playSound('Match1');
 
 			gsap.to( tile, 0.25, {alpha: 0});
 			gsap.to( tile.scale, 0.25, {x: 2.5, y: 2.0, ease: 'sine.in', onComplete: ()=>{
 				tile.visible = false;					
+				app.emitter.add( tile.x, tile.y, getColorByName(tile.name), 3 );
 			}});
 		}
 	}
@@ -669,11 +731,43 @@ class Drop extends Particle {
 		this.velocity.y += 1.0;
 
 		this.display.angle = -this.velocity.x * 4;
-		this.display.alpha -= 0.035;              
+		this.display.alpha -= 0.035;
 
         if ( this.display.alpha <= 0 ) {
             this.display.visible = false;
             this.emitter.onParticleComplete( this );
         }
     }
+}
+
+
+function createAnimSprite(texture, framesData, animName) {	
+	let sheetData = createSpriteSheet(animName, framesData[animName]);
+
+	let spriteSheet = new PIXI.Spritesheet(texture, sheetData);
+	spriteSheet.parse(()=>{});	
+	
+	let animSprite = new PIXI.AnimatedSprite(spriteSheet.animations[animName]);	
+	animSprite.animationSpeed = 0.35;
+	animSprite.loop = false;	
+	
+	return animSprite;
+}	
+
+function createSpriteSheet(animName, frames) {
+	let sheetData = {
+		frames,
+		animations: {
+			[animName] : []
+		}, 
+		meta: {
+			scale: 1
+		}
+	}
+
+	for (let frameName in frames) {
+		sheetData.animations[animName].push(frameName);
+	}
+
+	return sheetData;
 }
