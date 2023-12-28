@@ -57,7 +57,8 @@ class SelectScreen extends Screen {
         let filterOutline = new PIXI.filters.OutlineFilter( 4, 0xffffff);
         filterOutline.padding = 10;
 
-        
+        this.initContours();  
+        this.initCharactersPresentation();
 
         this.choiceCards = new PIXI.Container();
         this.display.addChild( this.choiceCards );
@@ -67,13 +68,10 @@ class SelectScreen extends Screen {
         cardsBackground.anchor.set( 0.5, 0.5 );
         cardsBackground.scale.x = 0.7;
         this.choiceCards.addChild( cardsBackground );
-
-        this.initCharactersPresentation();        
-        this.initFireAnim(); 
+                
         this.initCaptions();
-        this.initChoiceBanners();
-        
-        this.initContours();             
+        this.initChoiceBanners();         
+        this.initFireAnim();            
                 
         this.firstPlayerCard = new PIXI.Sprite( assets.textures.pixi.chrisCard );
         this.firstPlayerCard.anchor.set( 0.5, 0.5 );
@@ -288,6 +286,8 @@ class SelectScreen extends Screen {
             this.background.height = downUI - upUI;
             this.background.width = this.background.height;
 
+            this.choiceCards.scale.x = 1
+
             this.firstPlayerPresentation.x = 0;
             this.firstPlayerPresentation.y = -242;
             this.secondPlayerPresentation.x = 0;
@@ -333,6 +333,8 @@ class SelectScreen extends Screen {
         } else {
             this.background.width = rightUI - leftUI;
             this.background.height = this.background.width;
+
+            this.choiceCards.scale.x = 0.93
 
             this.firstPlayerPresentation.x = leftUI + app.canvasWidth/6;
             this.firstPlayerPresentation.y = downUI;
@@ -388,7 +390,7 @@ class SelectScreen extends Screen {
                 }});
                 this.fireAnimUp.visible = true;
                 this.fireAnimUp.play();
-                gsap.from( this.fireAnimUp, 0.7, {alpha: 0, repeat: 1, yoyo: true});                    
+                gsap.from( this.fireAnimUp, 0.5, {alpha: 0, repeat: 1, yoyo: true});                    
                 gsap.delayedCall( 0.5, () => {
                     this.firstPlayerPresentation.visible = true;
                     gsap.from( this.firstPlayerPresentation, 0.5, {alpha: 0});             
@@ -408,7 +410,7 @@ class SelectScreen extends Screen {
                 }});
                 this.fireAnimUp.visible = true;
                 this.fireAnimUp.play();
-                gsap.from( this.fireAnimUp, 0.7, {alpha: 0, repeat: 1, yoyo: true});                    
+                gsap.from( this.fireAnimUp, 0.5, {alpha: 0, repeat: 1, yoyo: true});                    
                 gsap.delayedCall( 0.5, () => {
                     this.secondPlayerPresentation.visible = true;
                     gsap.from( this.secondPlayerPresentation, 0.5, {alpha: 0});             
@@ -427,7 +429,7 @@ class SelectScreen extends Screen {
                 }});
                 this.fireAnimDown.visible = true;
                 this.fireAnimDown.play();               
-                gsap.from( this.fireAnimDown, 0.7, {alpha: 0, repeat: 1, yoyo: true}); 
+                gsap.from( this.fireAnimDown, 0.5, {alpha: 0, repeat: 1, yoyo: true}); 
                 gsap.delayedCall( 0.5, () => {
                     this.firstEnemyPresentation.visible = true;
                     this.showVersusCards();
