@@ -21,7 +21,7 @@ function init2dScene() {
 	app.obj2d.main.addChild(
 		app.obj2d.gameScene,		
 		app.obj2d.failEnd,
-		app.obj2d.firstScreen,		
+		app.obj2d.firstScreen,
 		app.obj2d.endScreen,
 		app.obj2d.fsCTA,
 		app.obj2d.soundBtn,
@@ -128,9 +128,11 @@ function createEndScreen () {
 	endScreen.show = function () { 
 		endScreen.visible = true;
 
-		gsap.from( endScreen, 1.0, { alpha: 0 });
-		// gsap.to (upgradeBrownBtn.scale, 0.75, { x: 0.95, y: 0.95, repeat: -1, yoyo: true, ease: 'sine.inOut'});		
-		
+		stopSound('music');
+		fadeSound('music', 0.5, 0, 1000);
+		playSound('win');
+
+		gsap.from( endScreen, 1.0, { alpha: 0 });		
 	};
 
 	return endScreen;
@@ -341,9 +343,9 @@ function createFail() {
 	failEnd.show = function () { 
 
 		failEnd.visible = true;
-		stopSound('InGameBG');
-		fadeSound('InGameBG', 0.5, 0, 1000);
-		playSound('sFail');
+		stopSound('music');
+		fadeSound('music', 0.5, 0, 1000);
+		playSound('fail');
 
 		gsap.from (worriedShef.scale, 0.75, { x: 0,y: 0,ease: "back.out" });
 		gsap.from (fail.scale, 0.5, { x: 0,y: 0,ease: "back.out" });
@@ -377,7 +379,7 @@ function createDynamit( sprite ) {
 	fire.scale.set(0.5);
 	fire.position.set(-60, -70);
 
-	gsap.to(sprite, 0.3, {angle: -5, ease: 'sine.inOut', yoyo: true, repeat: -1});
+	gsap.to(sprite, 0.2 + 0.05 * Math.random(), {angle: -5, ease: 'sine.inOut', yoyo: true, repeat: -1});
 	gsap.to(fire.scale, 0.1, {x: 0.6, y: 0.6, ease: 'quad.inOut', yoyo: true, repeat: -1});	
 
 	sprite.addChild(fire);
@@ -402,13 +404,27 @@ function createRocket( sprite ) {
 	fire.scale.set(0.5);
 	fire.position.set(-60, 70);
 
-	gsap.to(sprite, 0.3, {angle: -5, ease: 'sine.inOut', yoyo: true, repeat: -1});	
+	gsap.to(sprite, 0.2 + 0.05 * Math.random(), {angle: -5, ease: 'sine.inOut', yoyo: true, repeat: -1});	
 	gsap.to(fire.scale, 0.1, {x: 0.6, y: 0.6, ease: 'quad.inOut', yoyo: true, repeat: -1});	
 
 	sprite.addChild(fire);
 	rocket.addChild(sprite);
 
 	return rocket;
+}
+
+function createDiscoball( sprite ) {
+	let discoBall = new PIXI.Container();
+	
+	sprite.scale.set(0.35);
+	sprite.interactive = false;
+	
+	// gsap.to(sprite, 0.3, {angle: -5, ease: 'sine.inOut', yoyo: true, repeat: -1});
+	gsap.to(sprite, 7.0, {angle: 360, ease: 'linear', repeat: -1});		
+	
+	discoBall.addChild(sprite);
+
+	return discoBall;
 }
 
 function createExplosion(x, y) {

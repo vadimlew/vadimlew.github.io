@@ -84,6 +84,7 @@ function createBoard() {
 	let tiles = [];
 	let isDown = false;
 	let isSwapped = false;
+	let isDiscoball = false;
 	let mouse = {x:0, y:0};
 	let currentTileIndex;
 	let swapTime = 0.4;
@@ -111,6 +112,8 @@ function createBoard() {
 	let goodJob = new PIXI.Sprite(assets.textures.pixi.goodJob);
 	goodJob.anchor.set(0.5, 0.5);
 
+	let blowed = [];
+
 	let dropShadowFilter = new PIXI.filters.DropShadowFilter({		
         alpha: 0.6, 
         blur: 8 
@@ -125,17 +128,17 @@ function createBoard() {
 
 	// 8 to 11 
 	let data = [
-		"tomato", "cheese", "tomato", "carrot", "baklagani", "baklagani","pappier","baklagani",
-       "water", "tomato", "water", "tomato", "baklagani","cheese", "pappier","dynamit",
-       "pappier","cheese", "dynamit", "baklagani", "tomato","tomato", "water", "carrot",
-       "water", "cheese","water","tomato","baklagani", "dynamit","pappier","pappier",
-       "baklagani","water", "water", "dynamit", "water", "water","tomato", "baklagani",
-       "tomato", "baklagani", "tomato","baklagani","pappier", "pappier", "carrot", "dynamit",
-       "carrot", "dynamit", "pappier", "water", "pappier", "pappier", "water", "water",
-       "tomato", "tomato", "pappier", "water", "water","carrot", "rocket", "cheese",
-       "water","cheese", "water","tomato","baklagani", "rocket", "pappier", "pappier",
-       "baklagani","dynamit","water", "tomato", "tomato","water","tomato", "baklagani",
-       "rocket","cheese","tomato","cheese","cheese","carrot","carrot", "dynamit",
+		"dynamit", "cheese", "tomato", "carrot", "baklagani", "baklagani","pappier","dynamit",
+       "tomato", "tomato", "water", "tomato", "baklagani","cheese", "pappier","baklagani",
+       "pappier","cheese", "pappier", "baklagani", "tomato","tomato", "water", "carrot",
+       "water", "cheese","water","tomato","baklagani", "cheese","pappier","pappier",
+       "baklagani","water", "water", "baklagani", "water", "water","tomato", "baklagani",
+       "rocket", "baklagani", "tomato","cheese","pappier", "pappier", "carrot", "rocket",
+       "carrot", "tomato", "pappier", "water", "pappier", "pappier", "water", "water",
+       "tomato", "tomato", "pappier", "water", "water","carrot", "water", "cheese",
+       "water","cheese", "water","tomato","baklagani", "carrot", "pappier", "pappier",
+       "baklagani","baklagani","water", "tomato", "tomato","water","tomato", "baklagani",
+       "dynamit","cheese","tomato","cheese","cheese","carrot","carrot", "dynamit",
 	];
 
 
@@ -161,6 +164,12 @@ function createBoard() {
 				tile.interactive = true;
 				tile.name = spriteName;
 			} 
+
+			if ( tile.name == "discoBall" ) {
+				tile = createDiscoball(tile);
+				tile.interactive = true;
+				tile.name = spriteName;
+			} 
 	
 			tile.x = startX + column * tileSize;
 			tile.y = startY + row * tileSize;
@@ -181,19 +190,16 @@ function createBoard() {
 
 		let fireWork1 = createFireWorks(0.25 + 0.5 * Math.random() );
 		fireWork1.position.set(-300, -300);
-		playSound('fejerverk');
+		playSound('fireworks');
 
 		let fireWork2 = createFireWorks(0.25 + 0.5 * Math.random());
-		fireWork2.position.set(300, -300);
-		playSound('fejerverk');
+		fireWork2.position.set(300, -300);		
 
 		let fireWork3 = createFireWorks(0.25 + 0.5 * Math.random());
-		fireWork3.position.set(100, -400);
-		playSound('fejerverk');
+		fireWork3.position.set(100, -400);		
 
 		let fireWork4 = createFireWorks(0.25 + 0.5 * Math.random());
-		fireWork4.position.set(-100, -350);
-		playSound('fejerverk');
+		fireWork4.position.set(-100, -350);		
 
 		board.addChildAt( fireWork1, 0);
 		board.addChildAt( fireWork2, 0);
@@ -271,8 +277,17 @@ function createBoard() {
 
 			gsap.to( tile1, swapTime, { x: tile2.x, y: tile2.y, ease: 'back.inOut' });
 			gsap.to( tile2, swapTime, { x: tile1.x, y: tile1.y, ease: 'back.inOut', onComplete: ()=>{
-				if ( checkBoosters( tile1 ) ) return;
-				if ( checkBoosters( tile2 ) ) return;
+				if ( checkBoosters( tile1 ) ) {
+					blowTiles();
+					fallTiles( findCombinations );
+					return;
+				}
+
+				if ( checkBoosters( tile2 ) ) {
+					blowTiles();
+					fallTiles( findCombinations );
+					return;
+				}
 				
 				let isCombination = findCombinations();
 
@@ -295,7 +310,8 @@ function createBoard() {
 	};
 
 	function fallTiles(onComplete) {
-		let maxFallTime = 0;		
+		let maxFallTime = 0;
+		let delay = 0.5;
 
 		for ( let colCount=0; colCount < boardCol; colCount++ ) {
 			let empty = [];
@@ -320,10 +336,10 @@ function createBoard() {
 				let index = tiles.indexOf(tile);
 				let newY = startY + Math.floor( index / boardCol ) * tileSize;
 				let dy = newY - tile.y;
-				let time = Math.floor(dy / tileSize) * 0.2;				
-				gsap.to( tile, time, { y: newY, ease: 'back.out(1.25)', delay: 0.25 });	
+				let time = Math.floor(dy / tileSize) * 0.15;				
+				gsap.to( tile, time, { y: newY, ease: 'back.out(1.1)', delay });	
 				
-				if ( time > maxFallTime ) maxFallTime = time;
+				if ( time > maxFallTime ) maxFallTime = time + delay;
 			}
 		}	
 		
@@ -334,8 +350,7 @@ function createBoard() {
 
 
 	function findCombinations() {
-		let isCombination = false;	
-		let findedTiles = [];
+		let isCombination = false;
 
 		for ( let rowCount=0; rowCount < boardRow; rowCount++ ) {
 			let same = [];
@@ -411,12 +426,12 @@ function createBoard() {
 		
 		function finded( same ) {
 			for ( let tile of same ) {
-				let index = findedTiles.indexOf( tile );
-				if ( index === - 1 ) findedTiles.push( tile );
+				let index = blowed.indexOf( tile );
+				if ( index === - 1 ) blowed.push( tile );
 			}			
 		}
 
-		blowTiles( findedTiles );
+		blowTiles();
 
 		if (isCombination) {
 			fallTiles( findCombinations );
@@ -427,37 +442,65 @@ function createBoard() {
 		return isCombination;
 	}
 
-    function blowTiles(same) {
-        for (let tile of same) {
+    function blowTiles() {
+		playSound('match', false, 0.3);
+		
+        for (let tile of blowed) {
             let index = tiles.indexOf(tile);
             if (index !== -1) tiles[index] = null;
 
 			if (!tile || tile.isBlowed) continue;
 
 			tile.interactive = false;
-			tile.isBlowed = true;
-
-            playSound('match', false, 0.3);
+			tile.isBlowed = true;           
 
             gsap.to(tile, 0.25, { alpha: 0 });
-            gsap.to(tile.scale, 0.25, {
+            gsap.to(tile.scale, 0.2 + 0.05 * Math.random(), {
                 x: 2.5, 
 				y: 2.0, 
 				ease: 'sine.in', 
 				onComplete: () => {
-					let particleColor = getColorByName(tile.name);
-					if (particleColor) dropEmitter.add(tile.x, tile.y, getColorByName(tile.name), 3);
+					// playSound('match', false, 0.3);
+					let particleColor = getColorByName(tile.name);					
+					if (particleColor) dropEmitter.add(tile.x, tile.y, particleColor, 3);
 					tile.destroy();
                 }
             });
         }	
 
+		blowed.length = 0;
+
 		let count = 0;
 		for ( let tile of tiles ) {
 			if ( tile && !tile.isBlowed ) count++;
+		}		
+
+		if ( !isDiscoball && count <= 30 ) {			
+			isDiscoball = true;
+			
+			let index = 3;
+			let column = index%boardCol ;
+			let row = Math.floor(index/boardCol);			
+			
+			let discoBall = new PIXI.Sprite( assets.textures.pixi['discoBall'] );			
+			discoBall.anchor.set(0.5);
+			discoBall = createDiscoball(discoBall);
+			discoBall.interactive = true;
+			discoBall.name = 'discoBall';
+	
+			discoBall.x = startX + column * tileSize;
+			discoBall.y = startY + row * tileSize;
+			discoBall.scale.set(0);
+
+			gsap.to( discoBall.scale, 0.2, {x:1, y:1, ease: "sine.out"} );
+			boardBg.addChild(discoBall);
+
+			tiles[index] = discoBall;
+
+			fallTiles();
 		}
 		
-		if ( count < 16 && app.stateGame === 'game' ) {	
+		if ( count <= 0 && app.stateGame === 'game' ) {	
 			app.stateGame = 'final';
 
 			gsap.delayedCall( 1, () => {
@@ -473,8 +516,7 @@ function createBoard() {
 	function pointerDownHander(event) {
 		if ( isSwapped ) return;
 
-		let index = tiles.indexOf( event.target );
-		// console.log(index, event.target.name);
+		let index = tiles.indexOf( event.target );		
 		
 		if ( index != -1 ) {
 			isDown = true;
@@ -491,6 +533,8 @@ function createBoard() {
 
 		if ( !isSwapped && currentTileIndex ) {
 			checkBoosters( tiles[currentTileIndex] );
+			blowTiles();
+			fallTiles( findCombinations );
 		}
 
 		currentTileIndex = null;
@@ -509,21 +553,19 @@ function createBoard() {
 		};
 	};
 
-    function dynamitBoom(tile) {
-		// console.log('---- DYNAMITBOOM ----');
+    function dynamitBoom(tile) {		
 		isSwapped = true;
 
         let index = tiles.indexOf(tile);
 
         let tileX = index % boardCol;
-		let tileY = Math.floor( index / boardCol);		
+		let tileY = Math.floor( index / boardCol);
 
-		let radius = 2;
-		let blowed = [];
+		let radius = 3;
 
 		for ( let index = 0; index < tiles.length; index++ ) {
 			let tileX2 = index % boardCol;
-			let tileY2 = Math.floor( index / boardCol);			
+			let tileY2 = Math.floor( index / boardCol);
 
 			let dx = tileX2 - tileX;
 			let dy = tileY2 - tileY;
@@ -531,30 +573,17 @@ function createBoard() {
 
 			let tile = tiles[ index ];
 
-			if ( distance <= radius && tile && blowed.indexOf(tiles[index]) == -1 && tile && !tile.isBlowed ) {	
-				// console.log('blowed', tile.name);			
+			if ( distance <= radius && tile && blowed.indexOf(tile) == -1 && !tile.isBlowed ) {
 				blowed.push( tile );
+				checkBoosters( tile )
 			}
 		}
 
 		let explosion = createExplosion(tile.x, tile.y);
-		board.addChild(explosion);		
-        
-		blowTiles( blowed );
+		board.addChild(explosion);	
 
-		let isBooster = false;
-		for ( let blowTile of blowed ) {
-			if ( blowTile === tile ) continue;
-			if ( checkBoosters(blowTile) && !isBooster ) {
-				isBooster = true;
-			}
-		}
-
-		if (!isBooster) {
-			fallTiles( findCombinations );
-			playSound("zvukVzryva")
-			shakeBoard();
-		}
+		playSound("bomb");
+		shakeBoard();
     };
 
     function rocketBoom(tile) {
@@ -563,9 +592,7 @@ function createBoard() {
         let index = tiles.indexOf(tile);
 
         let tileX = index % boardCol;
-		let tileY = Math.floor( index / boardCol);
-		
-		let blowed = [];
+		let tileY = Math.floor( index / boardCol);		
 
 		for ( let index = 0; index < tiles.length; index++ ) {
 			let tileX2 = index % boardCol;
@@ -573,6 +600,7 @@ function createBoard() {
 
 			if ( (tileX2 === tileX || tileY2 === tileY) && tiles[index] && blowed.indexOf(tiles[index]) == -1 ) {
 				blowed.push( tiles[index] );
+				checkBoosters( tiles[index] );
 			}
 		}
 
@@ -586,22 +614,92 @@ function createBoard() {
 		board.addChild(rocket3);
 
 		let rocket4 = createFlyingRocket(tile.x, tile.y, 0, -1);
-		board.addChild(rocket4);
+		board.addChild(rocket4);		
 		
-		blowTiles( blowed );
+		playSound("rocket");
+    };
 
-		let isBooster = false;
-		for ( let blowTile of blowed ) {
-			if ( blowTile === tile ) continue;
-			if ( checkBoosters(blowTile) && !isBooster ) {
-				isBooster = true;
+	function discoBallBoom(tile) {
+		isSwapped = true; 
+		
+		let newAdded = [];
+
+		playSound('rainbowSpin', true);
+
+		for ( let index = 0; index < tiles.length; index++ ) {
+			let tile = tiles[index];
+
+			// if ( tile.name === 'dynamit' || tile.name === 'rocket' ) continue;
+
+			if ( tile && blowed.indexOf(tile) == -1 ) {
+				newAdded.push( tile );				
 			}
+		}	
+
+		newAdded.sort( ()=> Math.random() > 0.5? 1 : -1 );
+
+		let flash = new PIXI.Sprite( assets.textures.pixi.flash );
+		flash.anchor.set(0.5);
+		tile.addChildAt( flash, 0 );
+		tile.interactive = false;
+		tile.parent.setChildIndex( tile, tile.parent.children.length - 1 );
+
+		let deltaX = 3 + Math.floor( 2 * Math.random() );
+		let deltaY = 3 + Math.floor( 2 * Math.random() );
+
+		// gsap.killTweensOf( tile.children[1] );
+		gsap.from( flash.scale, 0.2, { x: 0, y: 0, ease: 'sine.inOut' });
+		gsap.to( tile.scale, 0.2, { x:'+=0.15', y:'+=0.15', ease: 'sine.inOut' });
+		gsap.to( tile, 0.05, { x:'-=' + deltaX, ease: 'sine.inOut' });
+		gsap.to( tile, 0.06, { y:'-=' + deltaY, ease: 'sine.inOut' });
+		gsap.to( tile, 0.1, { x:'+=' + deltaX, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.05 });
+		gsap.to( tile, 0.12, { y:'+=' + deltaY, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.06 });
+		
+		let outlineFilter = new PIXI.filters.OutlineFilter( 5, 0xffffff );
+		let glowFilter = new PIXI.filters.GlowFilter({ color: 0x99ff99, outerStrength: 5 });
+
+		for ( let index=0; index < newAdded.length; index++ ) {
+			let blowedTile = newAdded[ index ];
+			gsap.to( blowedTile.scale, 0.1, { x: '+=0.05', y: '+=0.05', ease: 'sine.out', delay: index * 0.05, 
+				onStart: ()=>{
+					playSound('rainbowTentacles');
+
+					blowedTile.filters = [outlineFilter];	
+					
+					let deltaX = blowedTile.x - tile.x;
+					let deltaY = blowedTile.y - tile.y;
+					let distance = Math.sqrt( deltaX**2 + deltaY**2 );
+					let normalX = deltaX / distance;
+					let normalY = deltaY / distance;
+					let radius = 30;
+					
+					let line = new PIXI.Graphics();
+					line.x = tile.x + normalX * radius;
+					line.y = tile.y + normalY * radius;
+					line.filters = [glowFilter];
+					line.alpha = 0.8;
+					
+					gsap.from( line, 0.1, {alpha: 0} );
+					gsap.to( line, 0.1, {alpha: 0, delay: 0.2} );
+
+					line.lineStyle( 7, 0xffffff );
+					line.lineTo( deltaX - normalX * radius, deltaY - normalY * radius );
+					board.addChild(line);
+				}
+			});
 		}
 
-		if (!isBooster) gsap.delayedCall( 0.25, ()=>fallTiles( findCombinations ) );
-		
-		playSound( "booster2")
+		gsap.delayedCall( 0.2 + newAdded.length * 0.05, ()=>{
+			stopSound('rainbowSpin');
+			gsap.killTweensOf( tile.children[1] );
+			gsap.killTweensOf( tile );
+			blowed.push( ...newAdded );
+			blowTiles();
+			shakeBoard();
+			fallTiles( findCombinations );
+		});		
     };
+
 
 	function checkBoosters( tile ) {		
 		let isBooster = false;
@@ -614,6 +712,11 @@ function createBoard() {
 
 			case 'rocket': 
 				rocketBoom(tile); 
+				isBooster = true;
+				break;
+
+			case 'discoBall': 
+				discoBallBoom(tile);
 				isBooster = true;
 				break;
 		}	

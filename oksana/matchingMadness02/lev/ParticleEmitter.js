@@ -21,6 +21,7 @@ class ParticleEmitter {
             } 
                        
             particle.reset( x, y, tint );
+            this.display.addChild( particle.display );
 
             this.particles.add( particle );
         }        

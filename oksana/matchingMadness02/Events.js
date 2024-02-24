@@ -31,8 +31,8 @@ function stageDown(e) {
 			Howler.mute(!app.isSounds);	
 		}
 
-		playSound('InGameBG', true);
-		fadeSound('InGameBG', 0, 0.5, 1000);		
+		playSound('music', true);
+		fadeSound('music', 0, 0.5, 1000);		
 
 		// app.obj2d.tutor.show();
 	};	
