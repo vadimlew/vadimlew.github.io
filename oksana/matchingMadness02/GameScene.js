@@ -87,10 +87,12 @@ function createBoard() {
 	let isDiscoball = false;
 	let mouse = {x:0, y:0};
 	let currentTileIndex;
+	let moveCount = 0;
 	let swapTime = 0.4;
 	let tileSize = 64;
 	let boardCol = 8;
 	let boardRow = 11;
+	let chance = 0;
 	let startX = -(boardCol-1) * 0.5 * tileSize;
 	let startY = -(boardRow-1) * 0.5 * tileSize;
 
@@ -128,17 +130,17 @@ function createBoard() {
 
 	// 8 to 11 
 	let data = [
-		"dynamit", "cheese", "tomato", "carrot", "baklagani", "baklagani","pappier","dynamit",
+		"cheese", "cheese", "tomato", "carrot", "baklagani", "baklagani","pappier","baklagani",
        "tomato", "tomato", "water", "tomato", "baklagani","cheese", "pappier","baklagani",
        "pappier","cheese", "pappier", "baklagani", "tomato","tomato", "water", "carrot",
        "water", "cheese","water","tomato","baklagani", "cheese","pappier","pappier",
        "baklagani","water", "water", "baklagani", "water", "water","tomato", "baklagani",
-       "rocket", "baklagani", "tomato","cheese","pappier", "pappier", "carrot", "rocket",
+       "tomato", "baklagani", "tomato","cheese","pappier", "pappier", "carrot", "cheese",
        "carrot", "tomato", "pappier", "water", "pappier", "pappier", "water", "water",
        "tomato", "tomato", "pappier", "water", "water","carrot", "water", "cheese",
        "water","cheese", "water","tomato","baklagani", "carrot", "pappier", "pappier",
        "baklagani","baklagani","water", "tomato", "tomato","water","tomato", "baklagani",
-       "dynamit","cheese","tomato","cheese","cheese","carrot","carrot", "dynamit",
+       "cheese","cheese","tomato","cheese","cheese","carrot","carrot", "tomato",
 	];
 
 
@@ -188,7 +190,7 @@ function createBoard() {
 		gsap.to( boardBg, 0.5, { alpha: 0 } );
 		gsap.to( restaurant, 0.5, { alpha: 1 } );
 
-		let fireWork1 = createFireWorks(0.25 + 0.5 * Math.random() );
+		let fireWork1 = createFireWorks(0.25 + 0.5 * Math.random());
 		fireWork1.position.set(-300, -300);
 		playSound('fireworks');
 
@@ -276,16 +278,20 @@ function createBoard() {
 			tiles[index2] = tile1;			
 
 			gsap.to( tile1, swapTime, { x: tile2.x, y: tile2.y, ease: 'back.inOut' });
-			gsap.to( tile2, swapTime, { x: tile1.x, y: tile1.y, ease: 'back.inOut', onComplete: ()=>{
+			gsap.to( tile2, swapTime, { x: tile1.x, y: tile1.y, ease: 'back.inOut', onComplete: async ()=>{
 				if ( checkBoosters( tile1 ) ) {
 					blowTiles();
-					fallTiles( findCombinations );
+					await await Promise.all([ fallTiles(), fillEmptyTiles() ]);
+					findCombinations();
+					moveCount++;
 					return;
 				}
 
 				if ( checkBoosters( tile2 ) ) {
 					blowTiles();
-					fallTiles( findCombinations );
+					await await Promise.all([ fallTiles(), fillEmptyTiles() ]);
+					findCombinations();
+					moveCount++;
 					return;
 				}
 				
@@ -304,12 +310,14 @@ function createBoard() {
 
 					tiles[index1] = tile2;
 					tiles[index2] = tile1;
+				} else {
+					moveCount++;
 				}
 			}});
 		}
 	};
 
-	function fallTiles(onComplete) {
+	function fallTiles() {
 		let maxFallTime = 0;
 		let delay = 0.5;
 
@@ -343,10 +351,112 @@ function createBoard() {
 			}
 		}	
 		
-		gsap.delayedCall( maxFallTime, ()=>{
-			if ( onComplete ) onComplete();
-		});
+		return new Promise( (resolve) => {
+			if ( maxFallTime > 0 ) {
+				gsap.delayedCall( maxFallTime, resolve );
+			} else {
+				resolve();
+			}
+		})
 	}
+
+
+	function fillEmptyTiles() {
+		let maxFallTime = 0;
+
+		for ( let colCount=0; colCount < boardCol; colCount++ ) {
+			let empty = [];
+			let startIndex = colCount;
+			let endIndex = startIndex + 88;
+
+			for ( let index = endIndex; index >= startIndex; index -= boardCol ) {
+				let tile = tiles[ index ];
+				
+				if ( tile === null ) {
+					empty.push( index );
+				}
+			}	
+			 
+			for ( let index of empty ) {
+				let column = index % boardCol ;
+				let row = Math.floor( index / boardCol );		
+
+				let spriteName = getRandomSpriteName();
+				let tile = new PIXI.Sprite( assets.textures.pixi[spriteName] );
+				tile.interactive = true;
+				tile.anchor.set(0.5, 0.5);
+				tile.name = spriteName;		
+				
+				if ( tile.name == "dynamit" ) {
+					tile = createDynamit(tile);
+					tile.interactive = true;
+					tile.name = spriteName;
+				} 
+		
+				if ( tile.name == "rocket" ) {
+					tile = createRocket(tile);
+					tile.interactive = true;
+					tile.name = spriteName;
+				} 
+
+				if ( tile.name == "discoBall" ) {
+					tile = createDiscoball(tile);
+					tile.interactive = true;
+					tile.name = spriteName;
+				}
+
+				tile.x = startX + column * tileSize;
+				tile.y = startY - tileSize * (empty.indexOf( index ) + 1);
+				tile.alpha = 0;
+
+				let placeY = startY + row * tileSize;				
+				
+				boardBg.addChild(tile);
+				tiles[index] = tile;
+				
+				let dy = placeY - tile.y;
+				let time = Math.floor(dy / tileSize) * 0.15;
+				let delay = 0.5;
+
+				gsap.to( tile, time, { y: placeY, ease: "back.out(1.1)", delay } );
+				gsap.to( tile, 0.15, { alpha: 1, delay: delay + empty.indexOf( index ) * 0.1 });
+
+				if ( time > maxFallTime ) maxFallTime = time;
+			}
+		}
+
+		return new Promise( (resolve) => {
+			if ( maxFallTime > 0 ) {
+				gsap.delayedCall( maxFallTime, resolve );
+			} else {
+				resolve();
+			}
+		})
+	}
+
+
+	function getRandomSpriteName() {
+		let itemNames = [ "cheese", "tomato", "carrot", "baklagani", "pappier", "water" ];	
+		let bonusesNames = [ "dynamit", "rocket" ];	
+		let name = getRandomItem( itemNames );
+
+		let random = Math.random();
+
+		if ( random < chance ) {
+			name = getRandomItem( bonusesNames );
+			chance = 0;
+		} else {
+			chance += 0.002;
+		}		
+		
+		if ( !isDiscoball && moveCount >= 5 && Math.random() > 0.5 ) {			
+			isDiscoball = true;	
+			chance = -1;
+			return "discoBall";
+		}
+
+		return name;
+	}	
 
 
 	function findCombinations() {
@@ -420,7 +530,7 @@ function createBoard() {
 
 			if ( same.length >= 3 ) {
 				isCombination = true;
-				finded( same );											
+				finded( same );
 			}
 		}
 		
@@ -434,9 +544,12 @@ function createBoard() {
 		blowTiles();
 
 		if (isCombination) {
-			fallTiles( findCombinations );
+			(async () => {
+				await Promise.all([ fallTiles(), fillEmptyTiles() ]);
+				findCombinations();
+			})();			
 		} else {
-			isSwapped = false;			
+			isSwapped = false;
 		}
 
 		return isCombination;
@@ -452,9 +565,9 @@ function createBoard() {
 			if (!tile || tile.isBlowed) continue;
 
 			tile.interactive = false;
-			tile.isBlowed = true;           
+			tile.isBlowed = true;
 
-            gsap.to(tile, 0.25, { alpha: 0 });
+            gsap.to(tile, 0.25, { alpha: 0 });			
             gsap.to(tile.scale, 0.2 + 0.05 * Math.random(), {
                 x: 2.5, 
 				y: 2.0, 
@@ -463,50 +576,51 @@ function createBoard() {
 					// playSound('match', false, 0.3);
 					let particleColor = getColorByName(tile.name);					
 					if (particleColor) dropEmitter.add(tile.x, tile.y, particleColor, 3);
-					tile.destroy();
+					// tile.destroy();
+					tile.visible = false;
                 }
             });
         }	
 
 		blowed.length = 0;
 
-		let count = 0;
-		for ( let tile of tiles ) {
-			if ( tile && !tile.isBlowed ) count++;
-		}		
+		// let count = 0;
+		// for ( let tile of tiles ) {
+		// 	if ( tile && !tile.isBlowed ) count++;
+		// }		
 
-		if ( !isDiscoball && count <= 30 ) {			
-			isDiscoball = true;
+		// if ( !isDiscoball && count <= 30 ) {			
+		// 	isDiscoball = true;
 			
-			let index = 3;
-			let column = index%boardCol ;
-			let row = Math.floor(index/boardCol);			
+		// 	let index = 3;
+		// 	let column = index%boardCol ;
+		// 	let row = Math.floor(index/boardCol);			
 			
-			let discoBall = new PIXI.Sprite( assets.textures.pixi['discoBall'] );			
-			discoBall.anchor.set(0.5);
-			discoBall = createDiscoball(discoBall);
-			discoBall.interactive = true;
-			discoBall.name = 'discoBall';
+		// 	let discoBall = new PIXI.Sprite( assets.textures.pixi['discoBall'] );			
+		// 	discoBall.anchor.set(0.5);
+		// 	discoBall = createDiscoball(discoBall);
+		// 	discoBall.interactive = true;
+		// 	discoBall.name = 'discoBall';
 	
-			discoBall.x = startX + column * tileSize;
-			discoBall.y = startY + row * tileSize;
-			discoBall.scale.set(0);
+		// 	discoBall.x = startX + column * tileSize;
+		// 	discoBall.y = startY + row * tileSize;
+		// 	discoBall.scale.set(0);
 
-			gsap.to( discoBall.scale, 0.2, {x:1, y:1, ease: "sine.out"} );
-			boardBg.addChild(discoBall);
+		// 	gsap.to( discoBall.scale, 0.2, {x:1, y:1, ease: "sine.out"} );
+		// 	boardBg.addChild(discoBall);
 
-			tiles[index] = discoBall;
+		// 	tiles[index] = discoBall;
 
-			fallTiles();
-		}
+		// 	fallTiles();
+		// }
 		
-		if ( count <= 0 && app.stateGame === 'game' ) {	
-			app.stateGame = 'final';
+		// if ( count <= 0 && app.stateGame === 'game' ) {	
+		// 	app.stateGame = 'final';
 
-			gsap.delayedCall( 1, () => {
-				board.showEnd();
-			})			
-		}
+		// 	gsap.delayedCall( 1, () => {
+		// 		board.showEnd();
+		// 	})			
+		// }
     };
 
 	board.on ("pointerdown", pointerDownHander);
@@ -528,13 +642,15 @@ function createBoard() {
 		}
 	};
 
-	function pointerUpHander(event) {
+	async function pointerUpHander(event) {
 		isDown = false;		
 
 		if ( !isSwapped && currentTileIndex ) {
 			checkBoosters( tiles[currentTileIndex] );
 			blowTiles();
-			fallTiles( findCombinations );
+			await Promise.all([ fallTiles(), fillEmptyTiles() ]);
+			findCombinations();
+			moveCount++;
 		}
 
 		currentTileIndex = null;
@@ -627,9 +743,7 @@ function createBoard() {
 		playSound('rainbowSpin', true);
 
 		for ( let index = 0; index < tiles.length; index++ ) {
-			let tile = tiles[index];
-
-			// if ( tile.name === 'dynamit' || tile.name === 'rocket' ) continue;
+			let tile = tiles[index];			
 
 			if ( tile && blowed.indexOf(tile) == -1 ) {
 				newAdded.push( tile );				
@@ -646,8 +760,7 @@ function createBoard() {
 
 		let deltaX = 3 + Math.floor( 2 * Math.random() );
 		let deltaY = 3 + Math.floor( 2 * Math.random() );
-
-		// gsap.killTweensOf( tile.children[1] );
+		
 		gsap.from( flash.scale, 0.2, { x: 0, y: 0, ease: 'sine.inOut' });
 		gsap.to( tile.scale, 0.2, { x:'+=0.15', y:'+=0.15', ease: 'sine.inOut' });
 		gsap.to( tile, 0.05, { x:'-=' + deltaX, ease: 'sine.inOut' });
@@ -689,15 +802,22 @@ function createBoard() {
 			});
 		}
 
-		gsap.delayedCall( 0.2 + newAdded.length * 0.05, ()=>{
+		gsap.delayedCall( 0.2 + newAdded.length * 0.05, complete );
+
+		async function complete() {
 			stopSound('rainbowSpin');
 			gsap.killTweensOf( tile.children[1] );
 			gsap.killTweensOf( tile );
 			blowed.push( ...newAdded );
 			blowTiles();
 			shakeBoard();
-			fallTiles( findCombinations );
-		});		
+			// fallTiles();
+			
+			app.stateGame = 'final';
+			gsap.delayedCall( 1, () => {
+				board.showEnd();
+			})			
+		}
     };
 
 
