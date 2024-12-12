@@ -246,11 +246,11 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 			board.on('match', matchHandler);
 			function matchHandler() {
 				matchCount++;
-				if (matchCount > 1) {					
+				if (matchCount >= 8) {					
 					board.interactiveChildren = false;	
 					board.off('match', matchHandler);
 					showPackshot();
-					adClickHandler();					
+					// adClickHandler();					
 				}
 			}
 

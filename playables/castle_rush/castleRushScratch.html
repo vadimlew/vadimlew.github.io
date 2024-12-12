@@ -50,7 +50,7 @@ var PIXI=function(t){"use strict";var e="undefined"!=typeof globalThis?globalThi
 			let maskTexture = PIXI.RenderTexture.create(280, 460);
 			let rect = lev.shape.rect(0xffffff, [0,0,280,460]);
 			let eraser = lev.shape.circle(0x000000, [0,0,20]);
-			lev.app.renderer.render(rect, maskTexture);				
+			lev.app.renderer.render(rect, maskTexture);
 
 			let mask = lev.sprite(maskTexture, {in:girl.scratch});			
 			girl.scratch.mask = mask;
