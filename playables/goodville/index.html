@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Totalgames Goodville</title> 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+   
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+   
+    #app-wrapper {     
+      border: 16px solid #000;
+      border-radius: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      overflow: hidden;
+      width: calc(600px * 16 / 9);
+      height: 600px;
+      transition: all 0.3s ease;
+    }
+   
+    #app-wrapper.mobile {
+      border: none;
+      border-radius: 0;
+      width: 100%;
+      height: 100%;
+    }
+   
+    #app-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>  
+  <div id="app-wrapper">
+    <iframe src="full.html"></iframe>
+  </div>
+  
+  <script>   
+    function isMobile() {
+      return /Mobi|Android/i.test(navigator.userAgent);
+    }    
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      var appWrapper = document.getElementById('app-wrapper');
+      if (isMobile()) {        
+        appWrapper.classList.add('mobile');       
+        document.body.style.justifyContent = 'initial';
+        document.body.style.alignItems = 'initial';
+      }     
+    });
+  </script>
+</body>
+</html>
