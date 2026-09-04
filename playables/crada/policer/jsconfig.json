@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "module": "none",        
+        "target": "es6",  
+        "checkJs": false,      
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+    },
+    "exclude": [
+        "assets"        
+    ]
+}
